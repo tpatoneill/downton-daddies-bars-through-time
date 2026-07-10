@@ -41,3 +41,17 @@ QA (`tools/qa-phase1.js`): boot→title→new game→opening→walk manor→bake
 →xp→save/load roundtrip→type-wheel + damage numeric checks. **10/10 pass.**
 Screenshots: `screenshots/p1-*.png`. dist/index.html builds at ~144 KB.
 
+
+## Phase 2 — Rome  ✔ (QA green)
+- Refactored the travel hub into a shared `travelChoose` (time machine + era "time rifts"),
+  fixed a Cutscene-singleton reentrancy bug (a choice callback starting an async scene was
+  being clobbered by `next()`), and moved ERAS/registerEra into the engine.
+- **Rome era** (`81-maps-rome.js`): Forum plaza (shop, senator love-poem sidequest, Scripted Order
+  goons, phonograph, mustache), Market Road (encounter grass + scripted Gerald battle),
+  Colosseum Kitchens (Herschel joins, sentient-stew medal sidequest), Arena.
+- **MC Maximvs** boss (FLEX): opens with 3 escalating FLEX self-buffs; on defeat retires, hands over
+  the Flux Gear, teaches Herschel BOTH HIPS, unlocks Dodge City. Party growth + level-ups proven.
+QA (`tools/qa-phase2.js`): travel via machine → forum → scripted battle grants XP → Herschel joins →
+stew sidequest → Maximvs defeated → Flux Gear + Both Hips + Dodge unlocked. **7/7 pass.** Also fixed
+the QA harness (added `face`/`interactAt`; taps don't turn the player — movement polls held state).
+Screenshots: `screenshots/p2-*.png`.

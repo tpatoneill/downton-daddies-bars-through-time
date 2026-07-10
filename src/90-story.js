@@ -1,9 +1,18 @@
 /* 90-story.js — Act 0 cutscenes + shared story helpers + the time-machine travel hub.
    Era-specific arrivals/bosses are registered from the per-era map modules. */
 
-/* eras registered here; each phase's map file pushes its destination. */
-var ERAS = []; /* {id, label, unlockFlag, warp:{to,tx,ty,dir}, arrive:fn} */
-function registerEra(def) { ERAS.push(def); }
+/* ERAS + registerEra live in 40-map.js so era modules can self-register at load. */
+
+/* ---- party growth helpers ---- */
+function addToParty(id, level) {
+  for (var i = 0; i < Game.party.length; i++) if (Game.party[i].id === id) return Game.party[i];
+  var f = makeFighter(id, level); Game.party.push(f); jingle('get'); return f;
+}
+function teachMove(id, moveId) {
+  for (var i = 0; i < Game.party.length; i++) { var f = Game.party[i];
+    if (f.id === id && f.moves.indexOf(moveId) < 0) { if (f.moves.length < 4) f.moves.push(moveId); else { f.moves.shift(); f.moves.push(moveId); } return; } }
+}
+function gainPart(name) { Game.parts++; jingle('get'); }
 
 /* ---- collectibles ---- */
 function collectMustache(o, flag) {
@@ -84,18 +93,15 @@ function tutorialCutscene() {
   Cutscene.play(steps, { onDone: function () { gotoWorld(); } });
 }
 
-/* ---- time machine + travel hub ---- */
-function timeMachineInteract() {
-  if (!hasFlag('act0_tutorial')) {
-    say([['NARRATOR', 'THE TIME ENGINE SPUTTERS WEAKLY.'],
-         ['BABBAGE', 'WARM UP AT THE THEATRE FIRST.']]);
-    return;
-  }
+/* ---- time machine + travel hub (shared by manor machine + era rifts) ---- */
+function travelChoose(bg) {
   var dests = [];
   for (var i = 0; i < ERAS.length; i++) { var e = ERAS[i]; if (!e.unlockFlag || hasFlag(e.unlockFlag)) dests.push(e); }
+  /* don't offer the era you're already in */
+  dests = dests.filter(function (e) { return e.warp.to !== Game.map; });
   if (dests.length === 0) { say([['NARRATOR', 'THE ENGINE HAS NOWHERE TO GO YET.']]); return; }
   var opts = []; for (i = 0; i < dests.length; i++) opts.push(dests[i].label);
-  opts.push('STAY HOME');
+  opts.push('STAY');
   Cutscene.play([{ choice: { who: 'BABBAGE', q: 'WHERE TO, MASTER SAMUEL?', opts: opts,
     cb: function (idx) {
       if (idx >= dests.length) { gotoWorld(); return; }
@@ -106,8 +112,18 @@ function timeMachineInteract() {
         if (e.arrive && !hasFlag(e.arrivedFlag)) { setFlag(e.arrivedFlag); e.arrive(); }
         else gotoWorld();
       });
-    } } }], { bg: 'manorbg' });
+    } } }], { bg: bg || 'manorbg' });
 }
+function timeMachineInteract() {
+  if (!hasFlag('act0_tutorial')) {
+    say([['NARRATOR', 'THE TIME ENGINE SPUTTERS WEAKLY.'],
+         ['BABBAGE', 'WARM UP AT THE THEATRE FIRST.']]);
+    return;
+  }
+  travelChoose('manorbg');
+}
+/* era "time rift" object opens the same hub from anywhere */
+function openRift() { travelChoose(BGS[curMap().riftBg] ? curMap().riftBg : 'black'); }
 
 /* ---- new game / continue ---- */
 function newGame() {

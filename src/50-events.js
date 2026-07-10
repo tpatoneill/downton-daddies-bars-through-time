@@ -56,7 +56,7 @@ var Cutscene = {
     else if (st.stop) { musicStop(); this.next(); }
     else if (st.sfx) { sfx(st.sfx); this.next(); }
     else if (st.wait) { this.mode = 'wait'; this.waitT = st.wait; }
-    else if (st.do) { st.do(); if (this.mode === 'idle') this.next(); }
+    else if (st.do) { st.do(); if (this.mode === 'idle' && scene === this) this.next(); }
     else if (st.battle) {
       var self = this, spec = (typeof st.battle === 'function') ? st.battle() : st.battle;
       this.mode = 'battle';
@@ -102,7 +102,7 @@ var Cutscene = {
       var c = this.choice;
       if (k === 'up') { c.idx = (c.idx + c.opts.length - 1) % c.opts.length; sfx('cursor'); }
       else if (k === 'down') { c.idx = (c.idx + 1) % c.opts.length; sfx('cursor'); }
-      else if (k === 'a') { sfx('select'); var cb = c.cb, idx = c.idx; this.choice = null; this.mode = 'idle'; cb(idx); if (this.mode === 'idle') this.next(); }
+      else if (k === 'a') { sfx('select'); var cb = c.cb, idx = c.idx; this.choice = null; this.mode = 'idle'; cb(idx); if (this.mode === 'idle' && scene === this) this.next(); }
       return;
     }
     if (this.mode !== 'dialogue') return;

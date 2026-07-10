@@ -25,6 +25,9 @@ function drawTrophy(x, y) { px(x + 5, y + 4, 6, 6, COL.gold); px(x + 6, y + 10, 
 /* ---- shop inventories ---- */
 var SHOP_LONDON = ['earlgrey', 'strongtea', 'lozenge', 'sparestache', 'drip:dapperhat', 'drip:goldchain'];
 
+/* HOME is a travel destination (registered once the engine can travel) */
+registerEra({ id: 'home', label: 'LONDON 1889 - HOME', warp: { to: 'manor', tx: 7, ty: 9, dir: 'up' } });
+
 /* ================= DADDY MANOR ================= */
 registerMap('manor', {
   banner: 'DADDY MANOR', music: 'manor',

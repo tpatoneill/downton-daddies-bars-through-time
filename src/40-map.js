@@ -17,6 +17,10 @@ var Game = {
   playtime: 0,
   started: false
 };
+/* era registry (populated by per-era map modules) for the time-machine travel hub */
+var ERAS = [];
+function registerEra(def) { ERAS.push(def); }
+
 function hasFlag(f) { return !!Game.flags[f]; }
 function setFlag(f, v) { Game.flags[f] = (v === undefined) ? true : v; }
 function giveItem(id, n) { Game.items[id] = (Game.items[id] || 0) + (n || 1); }

@@ -76,6 +76,26 @@ function walkStep(h, dir) {
   return G.Game.map !== beforeMap || G.Game.px !== bx || G.Game.py !== by || !isWorld(G);
 }
 
+/* turn to face a direction (bumps if solid ahead) without relying on a full move */
+function face(h, dir) {
+  const { G } = h;
+  G.press(dir);
+  let g = 0;
+  while (!G.World.moving && g++ < 4 && isWorld(G)) h.step(1, 16); // hold long enough to register a turn/bump
+  G.release(dir);
+  g = 0;
+  while (G.World.moving && g++ < 30) h.step(1, 16); // if it actually stepped, finish it
+  h.step(1, 16);
+}
+/* face a tile then press A to interact with whatever is there */
+function interactAt(h, tx, ty) {
+  const { G } = h;
+  const dx = tx - G.Game.px, dy = ty - G.Game.py;
+  const dir = dy < 0 ? 'up' : dy > 0 ? 'down' : dx < 0 ? 'left' : 'right';
+  face(h, dir);
+  h.tap('a'); h.step(3, 20);
+}
+
 /* walk to a target tile, auto-resolving any encounters along the way */
 function walkTo(h, tx, ty, onBattle) {
   const { G } = h;
@@ -139,4 +159,4 @@ function autoBattle(h, opts) {
   return { win: !isBattle(G) };
 }
 
-module.exports = { loadGame, sceneName, isBattle, isWorld, advanceUntil, findPath, walkTo, walkStep, autoBattle };
+module.exports = { loadGame, sceneName, isBattle, isWorld, advanceUntil, findPath, walkTo, walkStep, autoBattle, face, interactAt };

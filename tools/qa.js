@@ -159,4 +159,32 @@ function autoBattle(h, opts) {
   return { win: !isBattle(G) };
 }
 
-module.exports = { loadGame, sceneName, isBattle, isWorld, advanceUntil, findPath, walkTo, walkStep, autoBattle, face, interactAt };
+/* walk from the current map to the warp leading to targetMapId, resolving encounters */
+function walkToNextMap(h, targetMapId, onBattle) {
+  const { G } = h;
+  const w = G.curMap().warps.find(w => w.to === targetMapId);
+  if (!w) throw new Error('no warp to ' + targetMapId + ' on ' + G.Game.map);
+  walkTo(h, w.x, w.y, onBattle);
+  advanceUntil(h, g => isWorld(g) || isBattle(g), 4000, 'to ' + targetMapId);
+  if (isBattle(G)) { autoBattle(h, onBattle || {}); advanceUntil(h, isWorld, 5000); }
+  return G.Game.map === targetMapId;
+}
+/* advance any victory dialogue, then when the travelChoose hub appears pick the
+   option whose label includes `needle`; then ride the transition into the new map */
+function pickTravel(h, needle) {
+  const { G } = h;
+  let guard = 0;
+  while (guard++ < 200) {
+    const s = G.getScene();
+    if (s === G.Cutscene && s.mode === 'choice' && s.choice) {
+      const i = s.choice.opts.findIndex(o => o.indexOf(needle) >= 0);
+      if (i >= 0) { s.choice.idx = i; h.tap('a'); h.step(3, 25); return true; }
+      h.tap('a'); h.step(2, 25); continue;
+    }
+    if (s === G.Cutscene) { h.tap('a'); h.step(2, 25); continue; } // advance victory dialogue
+    h.step(2, 25);
+  }
+  return false;
+}
+
+module.exports = { loadGame, sceneName, isBattle, isWorld, advanceUntil, findPath, walkTo, walkStep, autoBattle, face, interactAt, walkToNextMap, pickTravel };

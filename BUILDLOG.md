@@ -55,3 +55,30 @@ QA (`tools/qa-phase2.js`): travel via machine → forum → scripted battle gran
 stew sidequest → Maximvs defeated → Flux Gear + Both Hips + Dodge unlocked. **7/7 pass.** Also fixed
 the QA harness (added `face`/`interactAt`; taps don't turn the player — movement polls held state).
 Screenshots: `screenshots/p2-*.png`.
+
+## Phase 3 — Dodge City + NYC  ✔ (QA green)
+Delegated the two era content files to Fable 5 subagents (per request), each mirroring the Rome
+template exactly; I integrated + QA'd both.
+- **Dodge City 1875** (`82-maps-dodge.js`, Fable 5): Main Street / Dusty Trail / Silver Mine / Saloon.
+  William joins on arrival ("I SMILED."), name-the-horse sidequest, Order printing-press battle,
+  RATTLESNAKE JAKE (ROAST) boss -> Chrono Coil + spoken-word epilogue -> NYC unlocked.
+- **New York 1977** (`83-maps-nyc.js`, Fable 5): Back Alley / Club Inferno (disco floors) / Boiler
+  Room / Rooftop. Rosalind joins ("BORROW IT. FOREVER."), disco-couple garbled-message sidequest,
+  Automatic-Playlist battle, DISCO REX (HEART, heals via crowd) -> Time Crystal + records the club
+  into the ball -> London unlocked.
+Both validated end-to-end (travel, joins, all maps, bosses, parts, unlocks). Added QA helpers
+`walkToNextMap`/`pickTravel`/`face`/`interactAt`. Screenshots: `screenshots/p3-*.png`.
+
+## Phase 4 — Finale + Birthday  ✔ (QA green)
+- **Finale** (`84-maps-finale.js`): occupied Theatre District (Editor gauntlet gating the stage door
+  via a warp `gate` flag), two-phase Snobbington. Phase 1: WORDPLAY elite + two Geralds. THE REVEAL
+  (verbatim: "WE KNEW, LASS. WE ALWAYS KNEW." / "IT WAS CROOKED EVERY SINGLE DAY."). Samuel's
+  **True Form** transform (mustache-free crowned sprite, stat jump, Mustache Twirl -> Hat Tip,
+  learns **NO MORE DISGUISE**), crowd slams to +100. Phase 2: THE FINAL DRAFT (loses the crowd each
+  turn). Post-credits Snobbington stinger.
+- **Birthday sequence**: credits + where-are-they-now montage -> curtain call with all four Daddies
+  bowing, Samuel (True Form) crowned, confetti, "HAPPY BIRTHDAY LANE ALLISON" + dedication.
+- **qa-full.js**: THE complete critical-path playthrough Act0->Rome->Dodge->NYC->Finale->Birthday,
+  every map walked, every mandatory battle fought via the real travel hub, save/load roundtrip.
+  All suites green: phase1 10, phase2 7, phase4 8, full 6.
+Screenshots: `screenshots/p4-*.png`.

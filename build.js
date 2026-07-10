@@ -21,8 +21,12 @@ function build() {
   const out = tpl.replace('/*__BUNDLE__*/', () => bundle);
   fs.mkdirSync(path.join(ROOT, 'dist'), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'dist', 'index.html'), out);
+  // also publish to docs/ for GitHub Pages (served at the repo's Pages URL root)
+  fs.mkdirSync(path.join(ROOT, 'docs'), { recursive: true });
+  fs.writeFileSync(path.join(ROOT, 'docs', 'index.html'), out);
+  fs.writeFileSync(path.join(ROOT, 'docs', '.nojekyll'), ''); // serve the file as-is
   const kb = (Buffer.byteLength(out) / 1024).toFixed(1);
-  console.log('built dist/index.html (' + kb + ' KB) from ' +
+  console.log('built dist/index.html + docs/index.html (' + kb + ' KB) from ' +
     fs.readdirSync(SRC).filter(f => f.endsWith('.js')).length + ' modules');
 }
 

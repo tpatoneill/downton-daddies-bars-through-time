@@ -4,7 +4,8 @@ const { makeCanvas } = require('./canvas.js');
 const { bundleOnly } = require('../build.js');
 
 function loadGame() {
-  const src = bundleOnly();
+  // the template defines these config globals outside the bundle; mirror them headless
+  const src = "var BIRTHDAY_NAME='LANE ALLISON';var DEDICATION='THE GREATEST DADDY OF ALL';\n" + bundleOnly();
   const cv = makeCanvas(240, 160);
   const clock = { ts: 0 };
   const store = {};

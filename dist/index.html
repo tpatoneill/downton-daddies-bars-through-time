@@ -1102,7 +1102,7 @@ var World = {
     var m = curMap();
     /* warp? */
     var w = warpAt(m, Game.px, Game.py);
-    if (w) { warpTo(w); return; }
+    if (w) { if (w.gate && !hasFlag(w.gate)) { if (w.blocked) w.blocked(); return; } warpTo(w); return; }
     /* encounter? */
     var tl = tileAt(m, Game.px, Game.py);
     if (tl.enc && m.enc) {
@@ -2271,7 +2271,7 @@ var BOSSES = {
     base: { HYPE: 210, FLOW: 33, POISE: 22, TEMPO: 20 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
   snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10,
     base: { HYPE: 240, FLOW: 36, POISE: 26, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
-  snob2: { name: 'SNOBBINGTON: FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
+  snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
     base: { HYPE: 300, FLOW: 44, POISE: 28, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
   understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0,
     base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
@@ -2636,6 +2636,720 @@ function romeVictory() {
 /* ---------------- register Rome as a travel destination ---------------- */
 registerEra({ id: 'rome', label: 'ROME 74 AD', unlockFlag: 'rome_unlocked',
   warp: { to: 'forum', tx: 8, ty: 9, dir: 'up' }, arrive: romeArrive, arrivedFlag: 'rome_arrived_seen' });
+
+
+/* ===== 82-maps-dodge.js ===== */
+/* 82-maps-dodge.js — DODGE CITY, 1875. Main Street, Dusty Trail, Silver Mine,
+   Saloon. William joins (sheriff in an hour); Rattlesnake Jake (ROAST) boss;
+   name-the-horse sidequest. */
+
+var SHOP_WEST = ['earlgrey', 'strongtea', 'crumpet', 'lozenge', 'sparestache', 'drip:swiftcane'];
+
+/* ---------------- MAIN STREET (town) ---------------- */
+registerMap('mainstreet', {
+  banner: 'MAIN STREET - DODGE CITY', music: 'west', riftBg: 'west',
+  grid: [
+    '#################',
+    '#sssssssssssssss#',
+    '#s|sssssssssss|s#',
+    '#sssssssssssssss#',
+    '#ppppppppppppppp#',
+    '#ppppppppppppppp#',
+    '#ppppppppppppppp#',
+    '#s|sssssssssss|s#',
+    '#sssssssssssssss#',
+    '#sssssssssssssss#',
+    '#################'
+  ],
+  warps: [ { x: 15, y: 5, to: 'dustytrail', tx: 2, ty: 4, dir: 'right' } ],
+  objs: [
+    { x: 8, y: 1, solid: true, draw: drawRift, onInteract: function () { openRift(); } },
+    { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
+    { x: 4, y: 3, solid: true, spr: 'villager', dir: 'down', onInteract: function () { setScene(makeShop(SHOP_WEST, World, 'GENERAL STORE')); } },
+    { x: 12, y: 3, solid: true, spr: 'cowboy', dir: 'down', onInteract: function () { horseQuest(); } },
+    { x: 8, y: 5, solid: true, spr: 'gerald', dir: 'down', onInteract: function () { say([['GERALD', 'WELCOME TO DODGE. HERE IS YOUR'], ['GERALD', 'DUEL DIALOGUE CARD. READ IT ALOUD.'], ['SAMUEL', 'IT JUST SAYS "OUCH."'], ['GERALD', 'THEN YOU LOSE THE DUEL. NEXT.']]); } },
+    { x: 6, y: 7, solid: true, spr: 'gerald', dir: 'up', onInteract: function () { say([['GERALD', 'THE ORDER FINDS COWBOYS TOO'], ['GERALD', 'SPONTANEOUS. EFFECTIVE TODAY, ALL'], ['GERALD', 'YEEHAWS MUST BE FILED IN ADVANCE.']]); } },
+    { x: 10, y: 8, solid: true, draw: drawSign, onInteract: function () { say([['NARRATOR', 'NOTICE: "ALL DUELS MUST USE'], ['NARRATOR', 'APPROVED DIALOGUE CARDS.'], ['NARRATOR', 'DRAW... FROM THE DECK."']]); } },
+    { x: 14, y: 9, mustache: true, flag: 'stache_dodge', onInteract: function (o) { collectMustache(o, 'stache_dodge'); } }
+  ],
+  onEnter: function () { if (!hasFlag('dodge_arrived_seen')) { setFlag('dodge_arrived_seen'); dodgeArrive(); } else if (hasFlag('dodge_done')) { musicStart('west'); } }
+});
+
+/* ---------------- DUSTY TRAIL (route) ---------------- */
+registerMap('dustytrail', {
+  banner: 'DUSTY TRAIL', music: 'west', encPool: 'west',
+  grid: [
+    '###################',
+    '#sssssssssssssssss#',
+    '#sttsssCsssssttsss#',
+    '#sttsssssssssttsss#',
+    '#sssssssssssssssss#',
+    '#sttsssssssCsttsss#',
+    '#sttsssssssssttsss#',
+    '#sssssssssssssssss#',
+    '###################'
+  ],
+  warps: [
+    { x: 1, y: 4, to: 'mainstreet', tx: 14, ty: 5, dir: 'left' },
+    { x: 17, y: 4, to: 'silvermine', tx: 2, ty: 9, dir: 'up' }
+  ],
+  objs: [
+    { x: 9, y: 4, solid: true, spr: 'gerald', dir: 'down', flag: 'dodge_gerald1',
+      onInteract: function (o) { dodgeGeraldBattle(o); } },
+    { x: 15, y: 1, mustache: true, flag: 'stache_dodge2', onInteract: function (o) { collectMustache(o, 'stache_dodge2'); } }
+  ]
+});
+
+/* ---------------- SILVER MINE (dungeon) ---------------- */
+registerMap('silvermine', {
+  banner: 'THE SILVER MINE', music: 'west',
+  grid: [
+    '###############',
+    '#....X...X....#',
+    '#.XX.......XX.#',
+    '#.............#',
+    '#...=======...#',
+    '#.............#',
+    '#.XX.....XX...#',
+    '#.............#',
+    '#.....===.....#',
+    '#.............#',
+    '###############'
+  ],
+  warps: [
+    { x: 1, y: 9, to: 'dustytrail', tx: 16, ty: 4, dir: 'left' },
+    { x: 13, y: 1, to: 'saloon', tx: 6, ty: 8, dir: 'up' }
+  ],
+  objs: [
+    { x: 7, y: 3, solid: true, draw: drawCase, flag: 'dodge_press',
+      onInteract: function (o) { pressBattle(o); } },
+    { x: 7, y: 5, solid: true, spr: 'gerald', dir: 'up', onInteract: function () { say([['GERALD', 'BEHOLD. THE PRESS PRINTS EVERY'], ['GERALD', 'DUEL IN ADVANCE. HIGH NOON, DAILY.'], ['GERALD', 'ALL DUELS ARE AT NOON. IT SCANS.']]); } },
+    { x: 11, y: 8, solid: true, spr: 'gerald', dir: 'left', onInteract: function () { say([['GERALD', 'CAREFUL. THESE CARDS ARE HOT'], ['GERALD', 'OFF THE PRESS. LEGALLY BINDING'], ['GERALD', 'AND ALSO QUITE WARM.']]); } },
+    { x: 13, y: 9, mustache: true, flag: 'stache_dodge3', onInteract: function (o) { collectMustache(o, 'stache_dodge3'); } }
+  ]
+});
+
+/* ---------------- SALOON (boss) ---------------- */
+registerMap('saloon', {
+  banner: 'THE SALOON', music: 'west',
+  grid: [
+    '#############',
+    '#...........#',
+    '#...........#',
+    '#...........#',
+    '#...........#',
+    '#...........#',
+    '#...........#',
+    '#...........#',
+    '#...........#',
+    '#...........#',
+    '#############'
+  ],
+  warps: [ { x: 1, y: 5, to: 'silvermine', tx: 12, ty: 1, dir: 'left' } ],
+  objs: [
+    { x: 10, y: 1, solid: true, draw: drawCounter, onInteract: function () { say([['NARRATOR', 'THE BAR. STICKY WITH'], ['NARRATOR', 'SARSAPARILLA AND REGRET.']]); } },
+    { x: 6, y: 2, solid: true, spr: null, draw: function (x, y) { if (!hasFlag('jake_beaten')) SPR.jake(x - 18, y - 8); }, onInteract: function () { if (!hasFlag('jake_beaten')) jakeFight(); } }
+  ],
+  onEnter: function () { if (!hasFlag('jake_beaten') && hasFlag('william_joined')) jakeFight(); }
+});
+
+/* ---------------- Dodge City story beats ---------------- */
+function dodgeArrive() {
+  Cutscene.play([
+    { bg: 'west' }, { music: 'west' },
+    { narr: 'DODGE CITY, 1875.' },
+    { say: ['NARRATOR', 'THE SCRIPTED ORDER IS PRINTING'] },
+    { say: ['NARRATOR', '"DUEL DIALOGUE" CARDS IN THE MINE.'] },
+    { say: ['GERALD', 'DRAW, PARDNER. YOUR LINE IS ON'] },
+    { say: ['GERALD', 'THE CARD. DO NOT AD-LIB.'] },
+    { say: ['WILLIAM', "SAMUEL! I'VE BEEN HERE AN HOUR"] },
+    { say: ['WILLIAM', "AND I'M ALREADY SHERIFF."] },
+    { say: ['SAMUEL', 'HOW?!'] },
+    { say: ['WILLIAM', 'I SMILED.'] },
+    { do: function () { addToParty('william', 6); setFlag('william_joined'); } },
+    { narr: 'WILLIAM JOINS THE PARTY!' },
+    { say: ['WILLIAM', 'THE MAN IN THE SALOON DOES NOT'] },
+    { say: ['WILLIAM', 'CARE FOR MY SMILE. AT ALL.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+function dodgeGeraldBattle(o) {
+  Cutscene.play([
+    { say: ['GERALD', 'HALT! THIS TRAIL REQUIRES A'] },
+    { say: ['GERALD', 'PERMIT TO MOSEY.'] },
+    { say: ['SAMUEL', 'I PREFER TO SAUNTER.'] },
+    { say: ['GERALD', 'SAUNTERING IS NOT IN THE SCRIPT!'] },
+    { battle: function () { return { enemies: [{ enemy: 'gerald', level: 6 }], music: 'battle', canFlee: false }; },
+      onResult: function (r) { if (r.win) { setFlag('dodge_gerald1'); } } },
+    { say: ['GERALD', 'FINE. MOSEY. SAUNTER. PRANCE.'] },
+    { say: ['GERALD', 'I NO LONGER CARE.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+function pressBattle(o) {
+  Cutscene.play([
+    { narr: 'A CRATE OF DUEL CARDS. THE PRESS OPERATORS OBJECT!' },
+    { battle: function () { return { enemies: [{ enemy: 'gerald', level: 7 }], music: 'battle', canFlee: false, bg: 'west' }; },
+      onResult: function (r) { if (r.win) { setFlag('dodge_press'); giveDrip('discogoggle'); } } },
+    { narr: 'THE PRESS GRINDS TO A HALT! GOT DISCO GOGGLES (DRIP)!' },
+    { say: ['SAMUEL', 'GOGGLES? IN 1875?'] },
+    { say: ['SAMUEL', 'THE RIFTS ARE LEAKING.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+function horseQuest() {
+  if (hasFlag('dodge_horse')) { say([['COWBOY', "OL' BRENDA AND ME ARE DOIN' FINE."], ['COWBOY', 'SHE ANSWERS TO NOTHING ELSE. // JOKE SLOT']]); return; }
+  Cutscene.play([{ choice: { who: 'COWBOY',
+    q: "HELP ME NAME MY HORSE! SHE'S PICKY.",
+    opts: ['THUNDERBOLT', 'HORSE', 'BRENDA'],
+    cb: function (idx) {
+      if (idx === 2) { setFlag('dodge_horse'); giveDrip('heartlocket'); say([['COWBOY', 'SHE... SHE NODDED. BRENDA IT IS.'], ['NARRATOR', 'GOT A HEART LOCKET (DRIP)!']]); }
+      else if (idx === 0) say([['COWBOY', 'SHE BUCKED ME INTO A TROUGH.'], ['COWBOY', 'TOO MUCH PRESSURE. TRY AGAIN.']]);
+      else say([['COWBOY', 'SHE STARED AT ME FOR A FULL'], ['COWBOY', 'MINUTE. I FELT JUDGED. AGAIN?']]);
+    } } }]);
+}
+function jakeFight() {
+  Cutscene.play([
+    { bg: 'west' }, { music: 'boss' },
+    { say: ['JAKE', 'WELL, WELL. THE SMILING SHERIFF'] },
+    { say: ['JAKE', 'AND HIS LITTLE CHOIR.'] },
+    { say: ['WILLIAM', 'I ADORE YOUR VOICE. VERY GRAVEL.'] },
+    { say: ['JAKE', "DON'T. I WAS A SINGER ONCE."] },
+    { say: ['JAKE', 'LOST MY VOICE IN A WEEK-LONG'] },
+    { say: ['JAKE', 'SHOUTING MATCH. OVER A HORSE.'] },
+    { say: ['SAMUEL', 'DID YOU AT LEAST GET THE HORSE?'] },
+    { say: ['JAKE', 'THE HORSE TESTIFIED AGAINST ME.'] },
+    { battle: function () { return { enemies: [{ boss: 'jake' }], music: 'boss', canFlee: false, bg: 'west' }; },
+      onResult: function (r) { if (r.win) dodgeRewards(); } }
+  ], { onDone: function () { if (hasFlag('jake_beaten')) dodgeVictory(); else gotoWorld(); } });
+}
+function dodgeRewards() {
+  setFlag('jake_beaten'); setFlag('dodge_done'); setFlag('nyc_unlocked'); gainPart('CHRONO COIL');
+}
+function dodgeVictory() {
+  Cutscene.play([
+    { say: ['JAKE', '...NOBODY BEAT ME SINCE THE HORSE.'] },
+    { say: ['WILLIAM', 'FRIEND, THAT GRAVEL IS A GIFT.'] },
+    { say: ['WILLIAM', 'HAVE YOU TRIED SPOKEN WORD?'] },
+    { say: ['JAKE', 'SPOKEN... WORD?'] },
+    { narr: 'JAKE CLEARS HIS THROAT. HIS FIRST POEM:' },
+    { say: ['JAKE', 'DUST. MORE DUST. A HORSE, GONE.'] },
+    { say: ['JAKE', '...THE END.'] },
+    { narr: 'IT IS TERRIBLE. THE WHOLE SALOON CRIES ANYWAY.' },
+    { say: ['JAKE', 'TAKE THE CHRONO COIL. I GOT'] },
+    { say: ['JAKE', 'FEELINGS TO WRANGLE.'] },
+    { narr: 'CHRONO COIL GET! ( 2 OF 4 )' },
+    { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH NEW YORK.'] },
+    { do: function () { healParty(); saveGame(false); } }
+  ], { onDone: function () { travelChoose('west'); } });
+}
+
+/* ---------------- register Dodge City as a travel destination ---------------- */
+registerEra({ id: 'dodge', label: 'DODGE CITY 1875', unlockFlag: 'dodge_unlocked',
+  warp: { to: 'mainstreet', tx: 8, ty: 9, dir: 'up' }, arrive: dodgeArrive, arrivedFlag: 'dodge_arrived_seen' });
+
+
+/* ===== 83-maps-nyc.js ===== */
+/* 83-maps-nyc.js — NEW YORK, 1977. Back Alley, Club Inferno dance floor,
+   Boiler Room, Rooftop. Rosalind joins; DISCO REX (HEART) boss; disco-couple
+   message-relay sidequest. The Order is replacing DJs with the Automatic Playlist. */
+
+var SHOP_NYC = ['earlgrey', 'strongtea', 'crumpet', 'lozenge', 'sparestache', 'drip:discogoggle'];
+
+function drawBall(x, y) {
+  var t = (performance.now() / 150) | 0;
+  px(x + 3, y + 9, 10, 6, COL.woodd); fillEll(x + 3, y, x + 12, y + 9, '#b8c8d8');
+  px(x + 4 + (t % 3) * 2, y + 2, 2, 2, COL.white); px(x + 8, y + 5, 2, 2, COL.white);
+}
+function drawPlaylist(x, y) {
+  px(x + 2, y - 2, 12, 16, '#3a3a4a'); px(x + 2, y - 2, 12, 2, '#5a5a6a');
+  var t = (performance.now() / 250) | 0;
+  px(x + 4, y + 2, 8, 4, (t % 2) ? COL.neon : COL.pink);
+  px(x + 4, y + 8, 8, 1, COL.white); px(x + 4, y + 10, 6, 1, COL.white);
+}
+function drawDumpster(x, y) { px(x + 1, y + 6, 14, 8, '#3a5a4a'); px(x + 1, y + 5, 14, 2, '#2a4a3a'); px(x + 3, y + 14, 2, 2, '#22222a'); px(x + 11, y + 14, 2, 2, '#22222a'); }
+
+/* ---------------- BACK ALLEY (arrival) ---------------- */
+registerMap('backalley', {
+  banner: 'BACK ALLEY - NEW YORK', music: 'disco',
+  grid: [
+    'bbbbbbbbbbbbb',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#p|ppppppp|p#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#############'
+  ],
+  warps: [ { x: 6, y: 1, to: 'clubinferno', tx: 8, ty: 12, dir: 'up' } ],
+  objs: [
+    { x: 6, y: 0, solid: true, draw: drawTheatreDoor, onInteract: function () { say([['NARRATOR', 'CLUB INFERNO. THE BASS IS'], ['NARRATOR', 'AUDIBLE THROUGH THE BRICKS.']]); } },
+    { x: 4, y: 3, solid: true, spr: 'villager', dir: 'down', onInteract: function () { say([['BOUNCER', 'DRESS CODE IS FUNKY.'], ['BOUNCER', 'THE MUSTACHES COUNT.'], ['BOUNCER', 'GO RIGHT IN, GENTLEMEN.']]); } },
+    { x: 10, y: 4, solid: true, draw: drawSign, onInteract: function () { say([['NARRATOR', 'SIGN: "TONIGHT: THE AUTOMATIC'], ['NARRATOR', 'PLAYLIST. NO DJ."'], ['NARRATOR', '"DO NOT ASK ABOUT THE DJ."']]); } },
+    { x: 11, y: 6, solid: true, draw: drawDumpster, onInteract: function () { say([['NARRATOR', 'A PERFECTLY GOOD DUMPSTER.'], ['NARRATOR', 'EMPTY. FOR NOW.']]); } },
+    { x: 2, y: 6, mustache: true, flag: 'stache_nyc', onInteract: function (o) { collectMustache(o, 'stache_nyc'); } }
+  ],
+  onEnter: function () { if (!hasFlag('nyc_arrived_seen')) { setFlag('nyc_arrived_seen'); nycArrive(); } else if (hasFlag('nyc_done')) { musicStart('disco'); } }
+});
+
+/* ---------------- CLUB INFERNO (town) ---------------- */
+registerMap('clubinferno', {
+  banner: 'CLUB INFERNO', music: 'disco', riftBg: 'disco',
+  grid: [
+    '#################',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#ffffffffffffffff',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '#fffffffffffffff#',
+    '########f########'
+  ],
+  warps: [
+    { x: 8, y: 13, to: 'backalley', tx: 6, ty: 2, dir: 'down' },
+    { x: 16, y: 6, to: 'boilerroom', tx: 2, ty: 5, dir: 'right' }
+  ],
+  objs: [
+    { x: 2, y: 1, solid: true, draw: drawRift, onInteract: function () { openRift(); } },
+    { x: 8, y: 1, solid: true, draw: drawCounter, onInteract: function () { say([['NARRATOR', 'THE DJ BOOTH. A NOTE READS:'], ['NARRATOR', '"OUT TO LUNCH. FOREVER."'], ['NARRATOR', '"- MANAGEMENT."']]); } },
+    { x: 14, y: 2, solid: true, spr: 'discoer', dir: 'left', onInteract: function () { coupleDonna(); } },
+    { x: 12, y: 3, solid: true, spr: 'gerald', dir: 'down', onInteract: function () { say([['GERALD', 'DANCING IS PERMITTED.'], ['GERALD', 'SPONTANEOUS DANCING IS NOT.'], ['GERALD', 'CONSULT THE APPROVED MOVES LIST.'], ['GERALD', '(THE LIST IS ONE MOVE.)']]); } },
+    { x: 5, y: 4, solid: true, spr: 'discoer', dir: 'down', onInteract: function () { say([['DANCER', "I'VE DONE THE HUSTLE SINCE"], ['DANCER', 'TUESDAY. IT IS NOW SATURDAY.'], ['DANCER', 'SOMEONE PLEASE CALL MY BOSS.']]); } },
+    { x: 8, y: 7, solid: true, spr: 'gerald', dir: 'down', onInteract: function () { say([['GERALD', 'THE AUTOMATIC PLAYLIST NEVER'], ['GERALD', 'TIRES. NEVER ERRS. NEVER PAYS.'], ['GERALD', 'NEVER GETS FUNKY.'], ['SAMUEL', 'YOU SAID THE QUIET PART LOUD.']]); } },
+    { x: 11, y: 9, solid: true, spr: 'villager2', dir: 'up', onInteract: function () { say([['REGULAR', 'MY PLATFORM SHOES ADD FOUR'], ['REGULAR', 'INCHES AND ONE PERSONALITY.'], ['REGULAR', '// JOKE SLOT']]); } },
+    { x: 3, y: 10, solid: true, spr: 'discoer', dir: 'down', onInteract: function () { setScene(makeShop(SHOP_NYC, World, 'CLUB MERCH TABLE')); } },
+    { x: 2, y: 11, solid: true, spr: 'villager2', dir: 'right', onInteract: function () { coupleVinnie(); } },
+    { x: 14, y: 11, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
+    { x: 1, y: 12, mustache: true, flag: 'stache_nyc3', onInteract: function (o) { collectMustache(o, 'stache_nyc3'); } }
+  ]
+});
+
+/* ---------------- BOILER ROOM (dungeon) ---------------- */
+registerMap('boilerroom', {
+  banner: 'THE BOILER ROOM', music: 'disco', encPool: 'disco',
+  grid: [
+    '###############',
+    '#....O....O...#',
+    '#.tt.......tt.#',
+    '#.tt.......tt.#',
+    '#.....OOO.....#',
+    '#.............#',
+    '#.tt.....O.tt.#',
+    '#.tt.......tt.#',
+    '#......O......#',
+    '#.............#',
+    '###############'
+  ],
+  warps: [
+    { x: 1, y: 5, to: 'clubinferno', tx: 15, ty: 6, dir: 'left' },
+    { x: 13, y: 1, to: 'rooftop', tx: 6, ty: 8, dir: 'up' }
+  ],
+  objs: [
+    { x: 7, y: 5, solid: true, spr: 'gerald', dir: 'down', flag: 'nyc_gerald1',
+      onInteract: function (o) { nycGeraldBattle(o); } },
+    { x: 7, y: 9, solid: true, draw: drawPlaylist, flag: 'nyc_playlist',
+      onInteract: function (o) { playlistBattle(o); } },
+    { x: 10, y: 2, solid: true, spr: 'gerald', dir: 'right', onInteract: function () { say([['GERALD', "REX IS ON THE ROOF. HE WON'T"], ['GERALD', 'SIGN THE PLAYLIST CONTRACT.'], ['GERALD', 'HE SAID, QUOTE, "NEVER."'], ['GERALD', 'IT WAS HONESTLY VERY COOL.']]); } },
+    { x: 13, y: 9, mustache: true, flag: 'stache_nyc2', onInteract: function (o) { collectMustache(o, 'stache_nyc2'); } }
+  ]
+});
+
+/* ---------------- ROOFTOP (boss) ---------------- */
+registerMap('rooftop', {
+  banner: 'THE ROOFTOP', music: 'disco',
+  grid: [
+    '#############',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#ppppppppppp#',
+    '#############'
+  ],
+  warps: [ { x: 6, y: 9, to: 'boilerroom', tx: 12, ty: 1, dir: 'down' } ],
+  objs: [
+    { x: 6, y: 2, solid: true, spr: null, draw: function (x, y) { if (!hasFlag('rex_beaten')) SPR.rex(x - 18, y - 8); }, onInteract: function () { if (!hasFlag('rex_beaten')) rexFight(); } },
+    { x: 10, y: 2, solid: true, draw: drawBall, onInteract: function () {
+        if (hasFlag('rex_beaten')) say([['NARRATOR', 'THE CRATE IS EMPTY. THE GOLDEN'], ['NARRATOR', 'AGE TRAVELS WITH THE DADDIES NOW.']]);
+        else say([['NARRATOR', 'THE MIRROR BALL, LOWERED FOR'], ['NARRATOR', 'MAINTENANCE. IT HOLDS EVERY'], ['NARRATOR', 'SATURDAY NIGHT THERE EVER WAS.']]); } }
+  ],
+  onEnter: function () { if (!hasFlag('rex_beaten') && hasFlag('rosalind_joined')) rexFight(); }
+});
+
+/* ---------------- NYC story beats ---------------- */
+function nycArrive() {
+  Cutscene.play([
+    { bg: 'disco' }, { music: 'disco' },
+    { narr: 'NEW YORK, 1977. CLUB INFERNO.' },
+    { say: ['NARRATOR', 'THE ORDER IS REPLACING THE DJS WITH A PRE-PROGRAMMED "AUTOMATIC PLAYLIST."'] },
+    { say: ['NARRATOR', 'THEY INVENTED THE ALGORITHM. THE MONSTERS.'] },
+    { say: ['ROSALIND', 'SAMUEL! OVER HERE! I REVERSE-'] },
+    { say: ['ROSALIND', 'ENGINEERED THE DJ BOOTH. TWICE.'] },
+    { say: ['ROSALIND', 'THE SECOND TIME WAS FOR FUN.'] },
+    { say: ['ROSALIND', 'SAMUEL! THIS DISCO BALL IS A'] },
+    { say: ['ROSALIND', 'PERFECT TEMPORAL LENS!'] },
+    { say: ['SAMUEL', 'CAN IT GET US HOME?'] },
+    { say: ['ROSALIND', 'YES. I JUST NEED TO BORROW IT.'] },
+    { say: ['ROSALIND', 'FOREVER.'] },
+    { do: function () { addToParty('rosalind', 9); setFlag('rosalind_joined'); } },
+    { narr: 'ROSALIND JOINS THE PARTY!' },
+    { say: ['ROSALIND', 'THE BALL BELONGS TO A MAN CALLED'] },
+    { say: ['ROSALIND', 'DISCO REX. HE SEEMS REASONABLE.'] },
+    { say: ['SAMUEL', 'FAMOUS LAST WORDS, PROFESSOR.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+function nycGeraldBattle(o) {
+  Cutscene.play([
+    { say: ['GERALD', 'HALT. THE BOILER ROOM IS FOR'] },
+    { say: ['GERALD', 'AUTHORIZED PERSONNEL AND VIBES.'] },
+    { say: ['SAMUEL', 'OUR VIBES ARE EXTREMELY'] },
+    { say: ['SAMUEL', 'AUTHORIZED.'] },
+    { battle: function () { return { enemies: [{ enemy: 'gerald', level: 9 }], music: 'battle', canFlee: false }; },
+      onResult: function (r) { if (r.win) { setFlag('nyc_gerald1'); } } },
+    { say: ['GERALD', 'FINE. BUT I AM TELLING GERALD.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+function playlistBattle(o) {
+  Cutscene.play([
+    { narr: 'THE AUTOMATIC PLAYLIST BOOTS UP.' },
+    { say: ['EDITOR', 'THIS MACHINE HOLDS EVERY SONG'] },
+    { say: ['EDITOR', 'YOU WILL EVER NEED. IN ORDER.'] },
+    { say: ['SAMUEL', 'THAT IS THE SADDEST SENTENCE'] },
+    { say: ['SAMUEL', 'I HAVE EVER HEARD.'] },
+    { battle: function () { return { enemies: [{ enemy: 'editor', level: 10 }], music: 'battle', canFlee: false, bg: 'disco' }; },
+      onResult: function (r) { if (r.win) { setFlag('nyc_playlist'); giveDrip('swiftcane'); } } },
+    { narr: 'THE PLAYLIST POWERS DOWN. GOT A SWIFT CANE (DRIP)!' },
+    { say: ['ROSALIND', 'FASCINATING WIRING. AWFUL TASTE.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+/* -- sidequest: relay messages across the loudest dance floor in history -- */
+function coupleVinnie() {
+  if (hasFlag('nyc_couple')) { say([['VINNIE', 'DONNA AND I ARE DANCING TONIGHT.'], ['VINNIE', 'THE APPROVED LIST HAS ONE MOVE.'], ['VINNIE', 'WE ARE DOING A DIFFERENT ONE.']]); return; }
+  if (!hasFlag('couple_step1')) {
+    Cutscene.play([
+      { say: ['VINNIE', 'SEE DONNA BY THE SPEAKERS?'] },
+      { say: ['VINNIE', 'I WROTE HER A LINE, BUT THE'] },
+      { say: ['VINNIE', 'FLOOR IS TOO LOUD TO CROSS.'] },
+      { say: ['VINNIE', 'TELL HER: YOUR EYES OUTSHINE'] },
+      { say: ['VINNIE', 'THE MIRROR BALL.'] },
+      { do: function () { setFlag('couple_step1'); } }
+    ], { onDone: function () { gotoWorld(); } });
+  } else if (!hasFlag('couple_step2')) {
+    say([['VINNIE', 'DID YOU TELL HER? WHY IS SHE'], ['VINNIE', 'LAUGHING? IS IT A GOOD LAUGH?']]);
+  } else {
+    Cutscene.play([{ choice: { who: 'SAMUEL',
+      q: "DONNA'S REPLY WAS... WHAT WAS IT?",
+      opts: ['SHE LIKED YOUR HAT SINCE APRIL', 'SHE HAS LIKED YOU SINCE THE HUSTLE', 'SHE LICENSED A HUSTLE'],
+      cb: function (idx) {
+        if (idx === 1) { setFlag('nyc_couple'); giveDrip('heartlocket'); say([['VINNIE', 'SINCE THE HUSTLE? THAT WAS THREE'], ['VINNIE', 'YEARS AGO. EXCUSE ME. I HAVE'], ['VINNIE', 'SOME DANCING TO CATCH UP ON.'], ['NARRATOR', 'GOT A HEART LOCKET (DRIP)!']]); }
+        else say([['VINNIE', '...THAT CANNOT BE RIGHT.'], ['VINNIE', 'ASK HER AGAIN. SHOUT POLITELY.']]);
+      } } }]);
+  }
+}
+function coupleDonna() {
+  if (hasFlag('nyc_couple')) { say([['DONNA', 'VINNIE IS TEACHING ME A MOVE'], ['DONNA', 'THAT IS NOT ON THE LIST.']]); return; }
+  if (!hasFlag('couple_step1')) { say([['DONNA', 'I COME FOR THE MUSIC. I STAY'], ['DONNA', "BECAUSE A BOY WON'T LOOK AT ME."]]); return; }
+  if (!hasFlag('couple_step2')) {
+    Cutscene.play([{ choice: { who: 'SAMUEL',
+      q: 'VINNIE SAYS... UM... IT WAS LOUD.',
+      opts: ['YOUR FRIES OUTSHINE THE BALL', 'YOUR EYES OUTSHINE THE MIRROR BALL', 'YOUR THIGHS FRIGHTEN THE BALL'],
+      cb: function (idx) {
+        if (idx === 1) { setFlag('couple_step2'); say([['DONNA', 'HE SAID THAT? ACROSS THIS NOISE?'], ['DONNA', 'TELL HIM: I HAVE LIKED HIM'], ['DONNA', 'SINCE THE HUSTLE.']]); }
+        else say([['DONNA', '...I DO NOT THINK THAT IS IT.'], ['DONNA', 'THE FLOOR IS LOUD. TRY AGAIN.']]);
+      } } }]);
+  } else say([['DONNA', 'WELL? WHAT DID HE SAY BACK?']]);
+}
+function rexFight() {
+  Cutscene.play([
+    { bg: 'disco' }, { music: 'boss' },
+    { say: ['REX', 'WELCOME TO MY ROOF, DADDIES.'] },
+    { say: ['REX', 'THE RADIO SAYS DISCO IS DYING.'] },
+    { say: ['REX', 'BUT UNDER THAT BALL, NOBODY'] },
+    { say: ['REX', 'DIES. UNDER THAT BALL, I AM'] },
+    { say: ['REX', 'ETERNAL.'] },
+    { say: ['ROSALIND', 'AND I NEED IT! ...FOREVER.'] },
+    { say: ['REX', 'THEN IT IS ON, LITTLE GENIUS.'] },
+    { say: ['REX', 'AND KNOW THIS: EVERY LINE I'] },
+    { say: ['REX', 'SPIT TONIGHT, I MEAN.'] },
+    { battle: function () { return { enemies: [{ boss: 'rex' }], music: 'boss', canFlee: false, bg: 'disco' }; },
+      onResult: function (r) { if (r.win) nycRewards(); } }
+  ], { onDone: function () { if (hasFlag('rex_beaten')) nycVictory(); else gotoWorld(); } });
+}
+function nycRewards() {
+  setFlag('rex_beaten'); setFlag('nyc_done'); setFlag('london_unlocked'); gainPart('TIME CRYSTAL');
+}
+function nycVictory() {
+  Cutscene.play([
+    { say: ['ROSALIND', 'REX. A TEMPORAL LENS DOES NOT'] },
+    { say: ['ROSALIND', 'JUST LOOK THROUGH TIME.'] },
+    { say: ['ROSALIND', 'IT CAN RECORD IT.'] },
+    { narr: 'ROSALIND ETCHES THE GOLDEN AGE OF CLUB INFERNO INTO EVERY FACET.' },
+    { say: ['REX', 'EVERY NIGHT WE EVER DANCED...'] },
+    { say: ['REX', 'IS IN THERE? FOREVER?'] },
+    { say: ['ROSALIND', 'FOREVER. THAT WAS THE POINT.'] },
+    { say: ['REX', 'TAKE IT. I AM NOT CRYING.'] },
+    { say: ['REX', 'THE GLITTER IS IN MY EYES.'] },
+    { narr: 'REX DONATES THE MIRROR BALL, WEEPING. MAGNIFICENT.' },
+    { narr: 'HIS BOUNCERS THROW THE AUTOMATIC PLAYLIST IN A DUMPSTER.' },
+    { narr: 'TIME CRYSTAL GET! ( 3 OF 4 )' },
+    { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH HOME.'] },
+    { say: ['BABBAGE', 'LONDON AWAITS.'] }
+  ], { onDone: function () { healParty(); saveGame(false); travelChoose('disco'); } });
+}
+
+/* ---------------- register NYC as a travel destination ---------------- */
+registerEra({ id: 'nyc', label: 'NEW YORK 1977', unlockFlag: 'nyc_unlocked',
+  warp: { to: 'backalley', tx: 6, ty: 5, dir: 'up' }, arrive: nycArrive, arrivedFlag: 'nyc_arrived_seen' });
+
+
+/* ===== 84-maps-finale.js ===== */
+/* 84-maps-finale.js — LONDON, 1889, ACT 3. The occupied theatre district, the
+   Order-elite gauntlet, and the two-phase Snobbington finale: the reveal, Samuel's
+   True Form transformation, NO MORE DISGUISE, then the birthday sequence + credits.
+   The reveal lines are SACRED — kept verbatim from DESIGN.md / v1. */
+
+var SHOP_FINALE = ['strongtea', 'crumpet', 'lozenge', 'sparestache', 'drip:heartlocket'];
+
+function drawBarricade(x, y) { px(x, y + 3, TS, 10, '#3a3244'); px(x, y + 3, TS, 2, '#4a4258');
+  px(x + 2, y + 6, 3, 6, COL.purple); px(x + 8, y + 6, 3, 6, COL.purple); px(x + 5, y, 2, TS, '#5a4a6a'); }
+function drawMarquee(x, y) { px(x, y, TS, 12, '#5a2038'); px(x + 1, y + 1, TS - 2, 8, COL.gold);
+  for (var i = 0; i < 4; i++) px(x + 2 + i * 3, y + 3, 2, 4, ((performance.now() / 200 | 0) + i) % 2 ? COL.red : COL.cream); }
+
+/* ================= THEATRE DISTRICT (occupied) ================= */
+registerMap('theatredistrict', {
+  banner: 'THEATRE DISTRICT', music: 'london', riftBg: 'london',
+  grid: [
+    '###################',
+    '#gggggggppgggggggg#',
+    '#gggggggppgggggggg#',
+    '#gggggggppgggggggg#',
+    '#ppppppppppppppppp#',
+    '#gggggggppgggggggg#',
+    '#ggTggggppggggTggg#',
+    '#gggggggppgggggggg#',
+    '#gggggggppgggggggg#',
+    '#gggggggppgggggggg#',
+    '###################'
+  ],
+  warps: [ { x: 9, y: 1, to: 'finalstage', tx: 7, ty: 11, dir: 'up', gate: 'lobby_clear',
+             blocked: function () { say([['NARRATOR', 'ORDER ELITES GUARD THE STAGE DOOR.'], ['NARRATOR', 'CLEAR BOTH EDITORS FIRST.']]); } } ],
+  objs: [
+    { x: 9, y: 0, solid: true, draw: drawMarquee, onInteract: function () { say([['NARRATOR', 'THE MARQUEE IS DARK. THE ORDER'], ['NARRATOR', "PAINTED OVER THE DADDIES' NAMES."]]); } },
+    { x: 8, y: 3, solid: true, spr: 'editor', dir: 'down', flag: 'editor1_beaten',
+      onInteract: function (o) { editorBattle(o, 'editor1_beaten'); } },
+    { x: 9, y: 3, solid: true, spr: 'editor', dir: 'down', flag: 'editor2_beaten',
+      onInteract: function (o) { editorBattle(o, 'editor2_beaten'); } },
+    { x: 3, y: 6, solid: true, draw: drawBarricade, onInteract: function () { say([['GERALD', 'THIS DISTRICT IS UNDER REVIEW.'], ['GERALD', 'ALL JOY MUST BE SUBMITTED IN WRITING.']]); } },
+    { x: 15, y: 6, solid: true, draw: drawBarricade, onInteract: function () { say([['GERALD', 'NO FREESTYLING PAST THIS POINT.'], ['GERALD', 'ORDER OF LORD SNOBBINGTON.']]); } },
+    { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
+    { x: 16, y: 9, solid: true, spr: 'babbage', dir: 'up', onInteract: function () { setScene(makeShop(SHOP_FINALE, World, "BABBAGE'S CART")); } },
+    { x: 5, y: 7, mustache: true, flag: 'stache_finale', onInteract: function (o) { collectMustache(o, 'stache_finale'); } }
+  ],
+  onStep: function () { if (hasFlag('editor1_beaten') && hasFlag('editor2_beaten')) setFlag('lobby_clear'); },
+  onEnter: function () { if (!hasFlag('finale_arrived')) { setFlag('finale_arrived'); finaleArrive(); } }
+});
+
+/* ================= FINAL STAGE ================= */
+registerMap('finalstage', {
+  banner: 'THE DOWNTON THEATRE', music: 'london',
+  grid: [
+    '###############',
+    '#mmmmmmmmmmmmm#',
+    '#mmmmmmmmmmmmm#',
+    '#mmmm=====mmmm#',
+    '#mmmmmmmmmmmmm#',
+    '#mmmmmmmmmmmmm#',
+    '#.###.###.###.#',
+    '#.###.###.###.#',
+    '#.###.###.###.#',
+    '#.............#',
+    '#.....===.....#',
+    '#.............#',
+    '######..#######'
+  ],
+  warps: [ { x: 6, y: 12, to: 'theatredistrict', tx: 9, ty: 5, dir: 'down' },
+           { x: 7, y: 12, to: 'theatredistrict', tx: 9, ty: 5, dir: 'down' } ],
+  objs: [],
+  onEnter: function () { if (!hasFlag('finale_done')) snobbingtonFight(); }
+});
+
+/* ================= FINALE STORY ================= */
+function finaleArrive() {
+  Cutscene.play([
+    { bg: 'london' }, { music: 'london' },
+    { narr: 'LONDON, 1889. HOME AT LAST.' },
+    { narr: 'BUT THE THEATRE DISTRICT IS UNDER SCRIPTED ORDER OCCUPATION.' },
+    { say: ['HERSCHEL', 'THEY PAINTED OVER OUR NAMES.'] },
+    { say: ['WILLIAM', 'THEN WE SHALL SIMPLY REPAINT THEM.'] },
+    { say: ['ROSALIND', 'IN A COLOR HE CANNOT APPROVE.'] },
+    { say: ['SAMUEL', 'CLEAR THE EDITORS. TAKE BACK THE STAGE.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+function editorBattle(o, flag, who) {
+  Cutscene.play([
+    { say: ['EDITOR', 'HALT. YOUR VERSE IS UNAPPROVED.'] },
+    { say: ['SAMUEL', 'GOOD. THE APPROVED ONES ARE BORING.'] },
+    { battle: function () { return { enemies: [{ enemy: 'editor', level: 12 }], music: 'boss', canFlee: false, bg: 'london' }; },
+      onResult: function (r) { if (r.win) setFlag(flag); } }
+  ], { onDone: function () { if (hasFlag(flag)) { if (hasFlag('editor1_beaten') && hasFlag('editor2_beaten')) setFlag('lobby_clear'); } gotoWorld(); } });
+}
+
+/* two-phase Snobbington finale */
+function snobbingtonFight() {
+  Cutscene.play([
+    { bg: 'stage' }, { music: 'boss' },
+    { say: ['SNOBBINGTON', 'WELL, WELL. THE DOWNTON DADDIES.'] },
+    { say: ['SNOBBINGTON', 'I HAVE PURCHASED YOUR THEATRE.'] },
+    { say: ['SNOBBINGTON', 'IMPROV IS BANNED. RAP IS BANNED.'] },
+    { say: ['SNOBBINGTON', 'FUN IS... UNDER REVIEW.'] },
+    { say: ['WILLIAM', 'YOU FIEND.'] },
+    { say: ['SNOBBINGTON', 'FORTY YEARS AGO I STEPPED UP HERE.'] },
+    { say: ['SNOBBINGTON', 'I WENT BLANK. THEY LAUGHED.'] },
+    { say: ['SNOBBINGTON', 'NO ONE WILL EVER FREESTYLE AGAIN.'] },
+    { say: ['SNOBBINGTON', 'LEAVE, OR FACE ME.'] },
+    { say: ['SAMUEL', 'A RAP BATTLE?'] },
+    { say: ['SNOBBINGTON', "REGRETTABLY, YES. THEM'S THE RULES."] },
+    { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 12 }, { enemy: 'gerald', level: 12 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -20 }; },
+      onResult: function (r) { if (r.win) setFlag('snob1_beaten'); } }
+  ], { onDone: function () { if (hasFlag('snob1_beaten')) revealScene(); else gotoWorld(); } });
+}
+
+/* THE REVEAL — sacred. Kept verbatim. */
+function revealScene() {
+  Cutscene.play([
+    { bg: 'stage' }, { stop: true }, { sfx: 'whoosh' },
+    { narr: 'THE CROWD IS ELECTRIC! BUT THEN... A GUST OF WIND!' },
+    { sfx: 'reveal' },
+    { narr: "SAMUEL'S MUSTACHE... FALLS." },
+    { say: ['CROWD', 'GASP!'] },
+    { say: ['SNOBBINGTON', 'A WOMAN?! HA! THE GREAT SAMUEL, A FRAUD!'] },
+    { say: ['SAMUEL', 'NO. THE MUSTACHE WAS THE COSTUME.'] },
+    { say: ['SAMUEL', 'THE BARS WERE ALWAYS MINE.'] },
+    { say: ['HERSCHEL', 'WE KNEW, LASS. WE ALWAYS KNEW.'] },
+    { say: ['WILLIAM', 'IT WAS CROOKED EVERY SINGLE DAY.'] },
+    { say: ['ROSALIND', 'FINISH HIM, SAMUEL.'] },
+    { say: ['SAMUEL', 'WITH PLEASURE.'] },
+    { do: function () { transformSamuel(); } },
+    { music: 'finale' },
+    { narr: 'THE CROWD CHANTS HER NAME! SAMUEL RISES TO HER TRUE FORM!' },
+    { narr: 'SAMUEL LEARNED NO MORE DISGUISE!' },
+    { battle: function () { return { enemies: [{ boss: 'snob2' }], music: 'finale', canFlee: false, bg: 'stage', crowdStart: 100 }; },
+      onResult: function (r) { if (r.win) setFlag('finale_done'); } }
+  ], { onDone: function () { if (hasFlag('finale_done')) finaleVictory(); else gotoWorld(); } });
+}
+
+/* True Form: mustache-free sprite (keyed on 'trueform' flag), stat jump, ultimate. */
+function transformSamuel() {
+  setFlag('trueform');
+  var sam = null; for (var i = 0; i < Game.party.length; i++) if (Game.party[i].id === 'samuel') sam = Game.party[i];
+  if (!sam) return;
+  sam.level = Math.max(sam.level, 14);
+  var cls = sam.cls, old = sam.maxHP;
+  sam.maxHP = statAt(cls, 'HYPE', sam.level) + 20;
+  sam.baseFLOW = statAt(cls, 'FLOW', sam.level) + 8;
+  sam.basePOISE = statAt(cls, 'POISE', sam.level) + 6;
+  sam.baseTEMPO = statAt(cls, 'TEMPO', sam.level) + 6;
+  sam.hp = sam.maxHP; sam.status = null; sam.fainted = false;
+  sam.stage = { FLOW: 0, POISE: 0, TEMPO: 0, EVA: 0 };
+  /* Mustache Twirl -> Hat Tip (better line, same effect) */
+  var mi = sam.moves.indexOf('mustache'); if (mi >= 0) sam.moves[mi] = 'hattip';
+  /* learn the ultimate */
+  if (sam.moves.indexOf('nomoredis') < 0) { if (sam.moves.length >= 4) sam.moves[sam.moves.length - 1] = 'nomoredis'; else sam.moves.push('nomoredis'); }
+  jingle('level');
+}
+
+function finaleVictory() {
+  Cutscene.play([
+    { bg: 'stage' },
+    { say: ['SNOBBINGTON', 'I... I YIELD. THE THEATRE IS YOURS.'] },
+    { say: ['SNOBBINGTON', 'YOUR BARS ARE... SUBLIME.'] },
+    { say: ['SAMUEL', 'THEY WERE ALWAYS SUBLIME.'] },
+    { say: ['SAMUEL', 'I JUST STOPPED HIDING IT.'] },
+    { do: function () { setFlag('game_complete'); gainPart('MASTER SPRING'); healParty(); saveGame(false); } },
+    { narr: 'THE DOWNTON DADDIES ARE HOME. AND THE SHOW GOES ON. FOREVER.' }
+  ], { onDone: function () { setScene(makeBirthday()); } });
+}
+
+/* register the finale as a travel destination once unlocked */
+registerEra({ id: 'london_finale', label: 'LONDON 1889 - THE STAGE', unlockFlag: 'london_unlocked',
+  warp: { to: 'theatredistrict', tx: 9, ty: 5, dir: 'up' }, arrive: finaleArrive, arrivedFlag: 'finale_arrived' });
+
+/* ================= BIRTHDAY SEQUENCE + CREDITS ================= */
+var CONFETTI_COLORS = ['#e05f8f', '#e2b23e', '#349c8e', '#8b5cf6', '#f6f6fa', '#4ff0ff'];
+var CREDITS = [
+  '- THE DOWNTON DADDIES -', '',
+  'SAMUEL .......... THE SHOWMAN', 'HERSCHEL ........ THE TANK',
+  'WILLIAM ......... THE CHARMER', 'ROSALIND ........ THE MAGE',
+  'BABBAGE ......... FAITHFUL BUTLER', '',
+  '- WHERE ARE THEY NOW -', '',
+  'MAXIMVS RETIRED TO THE FARM.', 'JAKE TOURS AS A SPOKEN-WORD POET.',
+  'REX DANCES ON, FOREVER YOUNG.', 'SNOBBINGTON TOOK A FREESTYLE CLASS.', '',
+  'AND THE THEATRE?', 'THE THEATRE NEVER CLOSED AGAIN.', ''
+];
+function makeBirthday() {
+  var conf = [];
+  for (var i = 0; i < 60; i++) conf.push({ x: Math.random() * 240, y: -Math.random() * 160,
+    vy: 18 + Math.random() * 30, vx: (Math.random() - 0.5) * 12, c: CONFETTI_COLORS[(Math.random() * 6) | 0], w: Math.random() < 0.5 ? 2 : 3 });
+  return {
+    t: 0, phase: 'credits', scroll: 0,
+    enter: function () { musicStart('finale'); jingle('win'); this.t = 0; this.scroll = 0; this.phase = 'credits'; },
+    update: function (dt) {
+      this.t += dt;
+      for (var i = 0; i < conf.length; i++) { var p = conf[i]; p.y += p.vy * dt; p.x += p.vx * dt + Math.sin(this.t * 3 + i) * 0.3; if (p.y > 162) { p.y = -4; p.x = Math.random() * 240; } }
+      if (this.phase === 'credits') { this.scroll += dt * 16; if (this.scroll > CREDITS.length * 12 + 40) this.phase = 'bow'; }
+    },
+    onPress: function (k) {
+      if (this.phase === 'credits' && (k === 'a' || k === 'start')) { this.scroll += 40; }
+      else if (this.phase === 'bow' && (k === 'start' || k === 'a')) { this.phase = 'stinger'; this.t = 0; }
+      else if (this.phase === 'stinger' && (k === 'start' || k === 'a')) { musicStop(); saveGame(false); setScene(Title); }
+    },
+    draw: function () {
+      if (this.phase === 'stinger') { this.drawStinger(); return; }
+      /* theatre backdrop */
+      cls('#2a1830'); px(0, 0, 36, 160, '#5a2038'); px(204, 0, 36, 160, '#5a2038');
+      px(36, 0, 168, 14, '#5a2038');
+      for (var i = 0; i < 12; i++) px(40 + i * 14, 14, 9, 6, '#4a1830');
+      px(36, 120, 168, 3, COL.gold); px(36, 123, 168, 37, '#6a4a3a');
+      if (this.phase === 'credits') {
+        for (var c = 0; c < CREDITS.length; c++) { var yy = 150 - this.scroll + c * 12; if (yy > 20 && yy < 150) centerTextO(CREDITS[c], yy, CREDITS[c][0] === '-' ? COL.gold : COL.cream, COL.black); }
+      } else {
+        /* curtain call: the four daddies bow, Samuel (true form) crowned */
+        centerTextO('HAPPY BIRTHDAY', 22, COL.gold, COL.black, 2);
+        centerTextO(BIRTHDAY_NAME + '!', 44, COL.pink, COL.black, 2);
+        var row = [['herschel', 40], ['william', 88], ['samuel', 128, true], ['rosalind', 172]];
+        for (i = 0; i < row.length; i++) { var bob = Math.round(Math.sin(this.t * 4 + i) * 2);
+          if (row[i][0] === 'samuel') SPR.samuel(row[i][1] - 24, 70 + bob, { trueForm: true }); else SPR[row[i][0]](row[i][1] - 24, 74 + bob); }
+        /* crown on Samuel */
+        var sb = Math.round(Math.sin(this.t * 4 + 2) * 2);
+        px(120, 64 + sb, 16, 3, COL.gold); px(120, 60 + sb, 3, 4, COL.gold); px(126, 58 + sb, 3, 6, COL.gold); px(132, 60 + sb, 3, 4, COL.gold);
+        centerTextO('THE DADDIES TAKE A BOW', 128, COL.cream, COL.black);
+        centerTextO(DEDICATION, 140, COL.gold, COL.black);
+        if (Math.floor(this.t * 2) % 2) centerTextO('PRESS START', 150, COL.white, COL.black);
+      }
+      /* confetti over everything */
+      for (i = 0; i < conf.length; i++) { var p = conf[i]; px(p.x | 0, p.y | 0, p.w, p.w, p.c); }
+    },
+    drawStinger: function () {
+      cls('#2a2436');
+      centerTextO('ONE WEEK LATER...', 20, COL.gold, COL.black);
+      /* a beginner freestyle class; Snobbington in the front row, hating it */
+      panel(20, 40, 200, 90, COL.cream, COL.black);
+      SPR.snob(40, 60);
+      drawText('BEGINNER FREESTYLE CLASS', 90, 52, COL.black);
+      var lines = ['SNOBBINGTON SITS IN THE FRONT ROW.', 'HE HATES IT. HE IS TERRIBLE AT IT.', 'HE IS COMING BACK NEXT WEEK.'];
+      for (var i = 0; i < lines.length; i++) drawText(lines[i], 90, 74 + i * 12, COL.black);
+      if (Math.floor(this.t * 2) % 2) centerText('PRESS START', 140, COL.red);
+    }
+  };
+}
 
 
 /* ===== 90-story.js ===== */

@@ -112,7 +112,7 @@ var World = {
     var m = curMap();
     /* warp? */
     var w = warpAt(m, Game.px, Game.py);
-    if (w) { warpTo(w); return; }
+    if (w) { if (w.gate && !hasFlag(w.gate)) { if (w.blocked) w.blocked(); return; } warpTo(w); return; }
     /* encounter? */
     var tl = tileAt(m, Game.px, Game.py);
     if (tl.enc && m.enc) {

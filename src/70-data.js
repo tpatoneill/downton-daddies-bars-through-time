@@ -180,7 +180,7 @@ var BOSSES = {
     base: { HYPE: 210, FLOW: 33, POISE: 22, TEMPO: 20 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
   snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10,
     base: { HYPE: 240, FLOW: 36, POISE: 26, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
-  snob2: { name: 'SNOBBINGTON: FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
+  snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
     base: { HYPE: 300, FLOW: 44, POISE: 28, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
   understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0,
     base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }

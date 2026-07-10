@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DOWNTON DADDIES: BARS THROUGH TIME — DaddyBoy Advance</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    background:#14141a;
+    background-image:radial-gradient(circle at 50% 25%, #23232e 0%, #101015 72%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:-apple-system,"Segoe UI",sans-serif; min-height:100vh; padding:10px;
+    touch-action:manipulation;
+  }
+  /* horizontal GBA-style shell */
+  .gba {
+    position:relative; display:flex; align-items:center; gap:14px;
+    width:min(96vw,620px);
+    background:linear-gradient(150deg,#6a3d8f 0%,#54307a 45%,#3f2560 100%);
+    border-radius:18px 44px 18px 18px;
+    padding:20px 22px; user-select:none; touch-action:none;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,.22), inset 0 -8px 14px rgba(0,0,0,.28),
+                0 18px 44px rgba(0,0,0,.55);
+  }
+  .shoulder { position:absolute; top:-8px; height:16px; width:110px;
+    background:linear-gradient(180deg,#4a2b6e,#341d52); border-radius:8px 8px 0 0;
+    box-shadow:0 2px 0 #241238; display:flex; align-items:center; justify-content:center;
+    color:#c9b6e6; font-size:9px; font-weight:800; letter-spacing:1px; }
+  .shoulder:active,.shoulder.dn { transform:translateY(2px); }
+  .shoulder.l { left:22px; } .shoulder.r { right:22px; }
+  .leftcol,.rightcol { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  /* screen */
+  .bezel { background:linear-gradient(180deg,#2a2a33,#1b1b22); border-radius:10px;
+    padding:14px 18px; box-shadow: inset 0 3px 8px rgba(0,0,0,.6); flex:1; }
+  .bezel-top { display:flex; align-items:center; gap:8px; margin-bottom:7px; }
+  .bezel-dot { width:6px; height:6px; border-radius:50%; background:#e0405f; box-shadow:0 0 6px #e0405f; }
+  .bezel-label { color:#8f86b8; font-size:8px; letter-spacing:2px; margin-left:auto; }
+  canvas { display:block; width:100%; aspect-ratio:240/160; image-rendering:pixelated;
+    image-rendering:crisp-edges; background:#0b0b12; border:2px solid #000; border-radius:3px; }
+  .brand { text-align:center; margin-top:7px; color:#d9c6f2; font-weight:800; font-style:italic;
+    font-size:13px; letter-spacing:.5px; }
+  .brand span { font-size:8px; vertical-align:super; }
+  .brand em { font-style:normal; font-weight:600; color:#b49bd8; font-size:9px; margin-left:5px; }
+  /* d-pad */
+  .dpad { position:relative; width:92px; height:92px; }
+  .dpad::after { content:''; position:absolute; left:31px; top:31px; width:30px; height:30px; background:#241238; }
+  .dpad button { position:absolute; width:30px; height:30px; border:0; background:#2c1a44;
+    box-shadow:0 3px 0 #180a2b, inset 0 1px 0 rgba(255,255,255,.12); cursor:pointer; }
+  .dpad button:active,.dpad button.dn { transform:translateY(2px); box-shadow:0 1px 0 #180a2b; }
+  .dpad .up{left:31px;top:0;border-radius:6px 6px 0 0;} .dpad .down{left:31px;bottom:0;border-radius:0 0 6px 6px;}
+  .dpad .left{left:0;top:31px;border-radius:6px 0 0 6px;} .dpad .right{right:0;top:31px;border-radius:0 6px 6px 0;}
+  /* A/B */
+  .abwrap { display:flex; gap:16px; transform:rotate(-18deg); align-items:center; }
+  .abbtn { display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .abbtn button { width:42px; height:42px; border-radius:50%; border:0; cursor:pointer;
+    background:radial-gradient(circle at 35% 30%,#e05f8f,#b0356a);
+    box-shadow:0 4px 0 #7d2149, inset 0 2px 3px rgba(255,255,255,.3);
+    color:rgba(0,0,0,.4); font-weight:900; font-size:15px; }
+  .abbtn button:active,.abbtn button.dn { transform:translateY(3px); box-shadow:0 1px 0 #7d2149; }
+  .abbtn small { color:#c9b6e6; font-weight:700; font-size:8px; letter-spacing:1px; }
+  .ssrow { display:flex; gap:16px; margin-top:2px; }
+  .ssbtn { display:flex; flex-direction:column; align-items:center; gap:3px; transform:rotate(-18deg); }
+  .ssbtn button { width:40px; height:11px; border-radius:7px; border:0; cursor:pointer;
+    background:linear-gradient(180deg,#4a2b6e,#341d52); box-shadow:0 3px 0 #241238; }
+  .ssbtn button:active,.ssbtn button.dn { transform:translateY(2px); box-shadow:0 1px 0 #241238; }
+  .ssbtn small { color:#c9b6e6; font-weight:700; font-size:8px; letter-spacing:1px; }
+  .hint { color:#5a5578; font-size:10px; margin-top:12px; text-align:center; line-height:1.7;
+    font-family:monospace; max-width:600px; }
+  @media (max-width:560px){ .gba{ flex-direction:column; border-radius:18px; }
+    .leftcol,.rightcol{ flex-direction:row; gap:18px; } }
+</style>
+</head>
+<body>
+<div class="gba">
+  <div class="shoulder l" data-k="l">L</div>
+  <div class="shoulder r" data-k="r">R</div>
+  <div class="leftcol">
+    <div class="dpad">
+      <button data-k="up" class="up" aria-label="up"></button>
+      <button data-k="down" class="down" aria-label="down"></button>
+      <button data-k="left" class="left" aria-label="left"></button>
+      <button data-k="right" class="right" aria-label="right"></button>
+    </div>
+    <div class="ssbtn"><button data-k="select" aria-label="select"></button><small>SELECT</small></div>
+  </div>
+  <div class="bezel">
+    <div class="bezel-top"><div class="bezel-dot"></div><div class="bezel-label">DADDYBOY ADVANCE</div></div>
+    <canvas id="s" width="240" height="160"></canvas>
+    <div class="brand">DaddyBoy<span>&trade;</span><em>ADVANCE</em></div>
+  </div>
+  <div class="rightcol">
+    <div class="abwrap">
+      <div class="abbtn"><button data-k="b">B</button><small>B</small></div>
+      <div class="abbtn"><button data-k="a">A</button><small>A</small></div>
+    </div>
+    <div class="ssbtn"><button data-k="start" aria-label="start"></button><small>START</small></div>
+  </div>
+</div>
+<p class="hint">ARROWS = D-PAD &middot; Z = A &middot; X = B &middot; ENTER = START &middot; A/S = L/R &middot; SHIFT = SELECT</p>
+<script>
+'use strict';
+/* ============================================================
+   DOWNTON DADDIES: BARS THROUGH TIME — DaddyBoy Advance Edition
+   A birthday gift game. Built with love (and top hats).
+   ============================================================
+   >>> BIRTHDAY CONFIG - EDIT THESE! <<<                      */
+var BIRTHDAY_NAME = 'LANE ALLISON';            // <-- her real name (ALL CAPS looks best)
+var DEDICATION    = 'THE GREATEST DADDY OF ALL';
+/* ============================================================ */
+/*__BUNDLE__*/
+</script>
+</body>
+</html>

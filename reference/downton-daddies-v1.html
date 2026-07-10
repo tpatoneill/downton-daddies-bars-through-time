@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DOWNTON DADDIES: BARS THROUGH TIME</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    background:#17171d;
+    background-image:radial-gradient(circle at 50% 30%, #22222c 0%, #121218 70%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:-apple-system, "Segoe UI", sans-serif;
+    min-height:100vh; padding:12px; touch-action:manipulation;
+  }
+  .gb {
+    position:relative;
+    width:min(94vw, 400px);
+    background:linear-gradient(180deg,#d4cec5 0%,#c8c2b8 60%,#bab4aa 100%);
+    border-radius:16px 16px 64px 16px;
+    padding:16px 16px 30px;
+    box-shadow: inset 0 2px 2px rgba(255,255,255,.6), inset 0 -6px 10px rgba(0,0,0,.18), 0 16px 40px rgba(0,0,0,.55);
+    user-select:none; touch-action:none;
+  }
+  .bezel {
+    background:linear-gradient(180deg,#50505a,#3d3d46);
+    border-radius:10px 10px 40px 10px;
+    padding:14px 22px 20px;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,.5);
+  }
+  .bezel-top {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-bottom:8px;
+  }
+  .bezel-line { flex:1; height:2px; background:linear-gradient(90deg,#8a3a5f,#3a3a8a); border-radius:2px; }
+  .bezel-label { color:#aab; font-size:8px; letter-spacing:1px; white-space:nowrap; }
+  .screenwrap { position:relative; }
+  .power { position:absolute; left:-14px; top:40%; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .power i { width:6px; height:6px; border-radius:50%; background:#e02040; box-shadow:0 0 6px #e02040; display:block; }
+  canvas {
+    display:block; width:100%; aspect-ratio:160/144;
+    image-rendering:pixelated; image-rendering:crisp-edges;
+    background:#9bbc0f; border:2px solid #23232a; border-radius:2px;
+  }
+  .brand {
+    margin:10px 6px 2px; color:#2d2d6e; font-weight:800; font-style:italic;
+    font-size:17px; letter-spacing:.5px;
+  }
+  .brand span { font-size:9px; vertical-align:super; }
+  .brand em { font-style:italic; font-weight:400; color:#555; font-size:11px; margin-left:6px; }
+  .controls { display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding:0 4px; }
+  .dpad { position:relative; width:96px; height:96px; }
+  .dpad::after {
+    content:''; position:absolute; left:32px; top:32px; width:32px; height:32px;
+    background:#2e2e34;
+  }
+  .dpad button {
+    position:absolute; width:32px; height:32px; border:0; background:#2e2e34;
+    box-shadow:0 3px 0 #17171b, inset 0 1px 0 rgba(255,255,255,.15);
+    cursor:pointer;
+  }
+  .dpad button:active, .dpad button.dn { transform:translateY(2px); box-shadow:0 1px 0 #17171b; }
+  .dpad .up    { left:32px; top:0;    border-radius:5px 5px 0 0; }
+  .dpad .down  { left:32px; bottom:0; border-radius:0 0 5px 5px; }
+  .dpad .left  { left:0;    top:32px; border-radius:5px 0 0 5px; }
+  .dpad .right { right:0;   top:32px; border-radius:0 5px 5px 0; }
+  .dpad .arrow { position:absolute; pointer-events:none; width:0; height:0; border:6px solid transparent; }
+  .abwrap { display:flex; gap:18px; transform:rotate(-16deg); align-items:center; }
+  .abbtn { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .abbtn button {
+    width:46px; height:46px; border-radius:50%; border:0; cursor:pointer;
+    background:radial-gradient(circle at 35% 30%, #b04a7e, #8e2f60);
+    box-shadow:0 4px 0 #6320445c, 0 4px 0 #632044, inset 0 2px 3px rgba(255,255,255,.25);
+    color:rgba(0,0,0,.35); font-weight:900; font-size:16px;
+  }
+  .abbtn button:active, .abbtn button.dn { transform:translateY(3px); box-shadow:0 1px 0 #632044; }
+  .abbtn small { color:#5a5580; font-weight:700; font-size:9px; letter-spacing:1px; }
+  .ssrow { display:flex; justify-content:center; gap:26px; margin-top:16px; }
+  .ssbtn { display:flex; flex-direction:column; align-items:center; gap:4px; transform:rotate(-16deg); }
+  .ssbtn button {
+    width:52px; height:13px; border-radius:8px; border:0; cursor:pointer;
+    background:linear-gradient(180deg,#94949c,#77777f);
+    box-shadow:0 3px 0 #55555c, inset 0 1px 1px rgba(255,255,255,.4);
+  }
+  .ssbtn button:active, .ssbtn button.dn { transform:translateY(2px); box-shadow:0 1px 0 #55555c; }
+  .ssbtn small { color:#5a5580; font-weight:700; font-size:9px; letter-spacing:1px; }
+  .speaker {
+    position:absolute; right:24px; bottom:26px; width:74px; height:52px;
+    background:repeating-linear-gradient(115deg, #b3ada4 0 5px, #9d978e 5px 10px);
+    border-radius:10px; opacity:.9;
+  }
+  .hint { color:#666a78; font-size:11px; margin-top:14px; text-align:center; line-height:1.6; font-family:monospace; }
+  @media (max-height:760px) {
+    .gb { width:min(94vw, 360px); }
+    .hint { margin-top:8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="gb">
+  <div class="bezel">
+    <div class="bezel-top">
+      <div class="bezel-line"></div>
+      <div class="bezel-label">DOT MATRIX WITH STEREO BARS</div>
+      <div class="bezel-line"></div>
+    </div>
+    <div class="screenwrap">
+      <div class="power"><i></i></div>
+      <canvas id="s" width="160" height="144"></canvas>
+    </div>
+  </div>
+  <div class="brand">DaddyBoy<span>&trade;</span><em>CLASSIC</em></div>
+  <div class="controls">
+    <div class="dpad">
+      <button data-k="up" class="up" aria-label="up"></button>
+      <button data-k="down" class="down" aria-label="down"></button>
+      <button data-k="left" class="left" aria-label="left"></button>
+      <button data-k="right" class="right" aria-label="right"></button>
+    </div>
+    <div class="abwrap">
+      <div class="abbtn"><button data-k="b">B</button><small>B</small></div>
+      <div class="abbtn"><button data-k="a">A</button><small>A</small></div>
+    </div>
+  </div>
+  <div class="ssrow">
+    <div class="ssbtn"><button data-k="select" aria-label="select"></button><small>SELECT</small></div>
+    <div class="ssbtn"><button data-k="start" aria-label="start"></button><small>START</small></div>
+  </div>
+  <div class="speaker"></div>
+</div>
+<p class="hint">KEYBOARD: ARROW KEYS = D-PAD &middot; Z = A &middot; X = B &middot; ENTER = START</p>
+
+<script>
+'use strict';
+/* ============================================================
+   DOWNTON DADDIES: BARS THROUGH TIME
+   A birthday gift game. Built with love (and top hats).
+   ============================================================
+   >>> BIRTHDAY CONFIG - EDIT THESE! <<<                      */
+var BIRTHDAY_NAME = 'LANE ALLISON';   // <-- her real name (ALL CAPS looks best)
+var DEDICATION    = 'THE GREATEST DADDY OF ALL';
+/* ============================================================ */
+
+var cv = document.getElementById('s');
+var ctx = cv.getContext('2d');
+
+/* ---- palettes: classic DMG green, and the birthday color unlock ---- */
+var PAL_GB    = ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'];  /* 0=darkest .. 3=lightest */
+var PAL_PARTY = ['#2b1b45', '#e05572', '#3bb6a2', '#fdf0d5'];
+var PAL = PAL_GB;
+
+function px(x, y, w, h, c) {
+  ctx.fillStyle = PAL[c];
+  ctx.fillRect(x | 0, y | 0, w, h);
+}
+function cls(c) { px(0, 0, 160, 144, c); }
+
+/* ---- tiny pixel font (4x5-ish, variable width) ---- */
+var FONT = {
+  'A':'.XX.|X..X|XXXX|X..X|X..X','B':'XXX.|X..X|XXX.|X..X|XXX.','C':'.XXX|X...|X...|X...|.XXX',
+  'D':'XXX.|X..X|X..X|X..X|XXX.','E':'XXXX|X...|XXX.|X...|XXXX','F':'XXXX|X...|XXX.|X...|X...',
+  'G':'.XXX|X...|X.XX|X..X|.XXX','H':'X..X|X..X|XXXX|X..X|X..X','I':'XXX|.X.|.X.|.X.|XXX',
+  'J':'..XX|...X|...X|X..X|.XX.','K':'X..X|X.X.|XX..|X.X.|X..X','L':'X...|X...|X...|X...|XXXX',
+  'M':'X...X|XX.XX|X.X.X|X...X|X...X','N':'X..X|XX.X|X.XX|X..X|X..X','O':'.XX.|X..X|X..X|X..X|.XX.',
+  'P':'XXX.|X..X|XXX.|X...|X...','Q':'.XX.|X..X|X..X|X.XX|.XXX','R':'XXX.|X..X|XXX.|X.X.|X..X',
+  'S':'.XXX|X...|.XX.|...X|XXX.','T':'XXX|.X.|.X.|.X.|.X.','U':'X..X|X..X|X..X|X..X|.XX.',
+  'V':'X...X|X...X|.X.X.|.X.X.|..X..','W':'X...X|X...X|X.X.X|XX.XX|X...X',
+  'X':'X..X|X..X|.XX.|X..X|X..X','Y':'X.X|X.X|.X.|.X.|.X.','Z':'XXXX|...X|.XX.|X...|XXXX',
+  '0':'.XX.|X..X|X..X|X..X|.XX.','1':'.X.|XX.|.X.|.X.|XXX','2':'XX.|..X|.X.|X..|XXX',
+  '3':'XX.|..X|.X.|..X|XX.','4':'X.X|X.X|XXX|..X|..X','5':'XXX|X..|XX.|..X|XX.',
+  '6':'.XX|X..|XXX|X.X|XXX','7':'XXX|..X|.X.|.X.|.X.','8':'XXX|X.X|XXX|X.X|XXX',
+  '9':'XXX|X.X|XXX|..X|XX.',
+  '.':'.|.|.|.|X',',':'..|..|..|.X|X.','!':'X|X|X|.|X','?':'XX.|..X|.X.|...|.X.',
+  "'":'X|X|.|.|.','-':'...|...|XXX|...|...',':':'.|X|.|X|.','+':'...|.X.|XXX|.X.|...',
+  '/':'..X|.X.|.X.|.X.|X..','&':'.X.X.|XXXXX|XXXXX|.XXX.|..X..','*':'X.X|.X.|X.X|...|...',
+  '(':'.X|X.|X.|X.|.X',')':'X.|.X|.X|.X|X.','%':'X..X|...X|..X.|.X..|X..X'
+};
+function drawText(s, x, y, c, scale) {
+  if (c === undefined) c = 0;
+  scale = scale || 1;
+  s = ('' + s).toUpperCase();
+  var cx = x;
+  for (var i = 0; i < s.length; i++) {
+    var ch = s[i];
+    if (ch === ' ') { cx += 3 * scale; continue; }
+    var g = FONT[ch];
+    if (!g) { cx += 4 * scale; continue; }
+    var rows = g.split('|');
+    var w = rows[0].length;
+    for (var r = 0; r < rows.length; r++)
+      for (var q = 0; q < w; q++)
+        if (rows[r][q] === 'X') px(cx + q * scale, y + r * scale, scale, scale, c);
+    cx += (w + 1) * scale;
+  }
+  return cx - x;
+}
+function textW(s, scale) {
+  scale = scale || 1;
+  s = ('' + s).toUpperCase();
+  var w = 0;
+  for (var i = 0; i < s.length; i++) {
+    var ch = s[i];
+    if (ch === ' ') { w += 3 * scale; continue; }
+    var g = FONT[ch];
+    w += g ? (g.split('|')[0].length + 1) * scale : 4 * scale;
+  }
+  return w;
+}
+function centerText(s, y, c, scale) { drawText(s, (160 - textW(s, scale)) >> 1, y, c, scale); }
+function wrap(t, maxW) {
+  var words = ('' + t).split(' ');
+  var lines = [], cur = '';
+  for (var i = 0; i < words.length; i++) {
+    var test = cur ? cur + ' ' + words[i] : words[i];
+    if (textW(test) > maxW && cur) { lines.push(cur); cur = words[i]; }
+    else cur = test;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+/* ---- input ---- */
+var scene = null;
+function setScene(sc) { scene = sc; if (sc && sc.enter) sc.enter(); }
+var held = {};
+function press(k) {
+  ensureAudio();
+  if (ac && ac.state === 'suspended') ac.resume();
+  if (held[k]) return;
+  held[k] = true;
+  if (scene && scene.onPress) scene.onPress(k);
+}
+function release(k) { held[k] = false; }
+
+var KEYMAP = {
+  'ArrowLeft':'left','ArrowRight':'right','ArrowUp':'up','ArrowDown':'down',
+  'z':'a','Z':'a','x':'b','X':'b','Enter':'start','Shift':'select',
+  'a':'left','d':'right','w':'up','s':'down'
+};
+window.addEventListener('keydown', function (e) {
+  var k = KEYMAP[e.key];
+  if (!k) return;
+  e.preventDefault();
+  if (!e.repeat) press(k);
+});
+window.addEventListener('keyup', function (e) {
+  var k = KEYMAP[e.key];
+  if (!k) return;
+  e.preventDefault();
+  release(k);
+});
+var btns = document.querySelectorAll('[data-k]');
+for (var bi = 0; bi < btns.length; bi++) {
+  (function (b) {
+    var k = b.getAttribute('data-k');
+    b.addEventListener('pointerdown', function (e) { e.preventDefault(); b.classList.add('dn'); press(k); });
+    var up = function () { b.classList.remove('dn'); release(k); };
+    b.addEventListener('pointerup', up);
+    b.addEventListener('pointerleave', up);
+    b.addEventListener('pointercancel', up);
+    b.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  })(btns[bi]);
+}
+
+/* ---- audio: tiny chiptune engine ---- */
+var ac = null, master = null, noiseBuf = null;
+function ensureAudio() {
+  if (ac) return;
+  try {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain();
+    master.gain.value = 0.38;
+    master.connect(ac.destination);
+    var len = ac.sampleRate * 0.25;
+    noiseBuf = ac.createBuffer(1, len, ac.sampleRate);
+    var d = noiseBuf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  } catch (e) { ac = null; }
+}
+function tnow() { return ac ? ac.currentTime : performance.now() / 1000; }
+function tone(type, f0, f1, t, dur, vol) {
+  if (!ac) return;
+  var o = ac.createOscillator(), g = ac.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(Math.max(1, f0), t);
+  if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function noiseHit(t, dur, vol) {
+  if (!ac) return;
+  var src = ac.createBufferSource(), g = ac.createGain();
+  src.buffer = noiseBuf;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(g); g.connect(master);
+  src.start(t); src.stop(t + dur + 0.02);
+}
+function kick(t)  { tone('sine', 140, 40, t, 0.13, 0.55); }
+function snare(t) { noiseHit(t, 0.09, 0.28); tone('triangle', 190, 120, t, 0.06, 0.12); }
+function hat(t)   { noiseHit(t, 0.028, 0.09); }
+function bassN(semi, t, dur, root) { tone('square', root * Math.pow(2, semi / 12), 0, t, dur, 0.11); }
+function sfxBlip(f, vol) { tone('square', f, 0, tnow(), 0.05, vol || 0.12); }
+function sfxHit(perfect) {
+  var t = tnow();
+  tone('square', perfect ? 880 : 660, perfect ? 1320 : 880, t, 0.07, 0.14);
+}
+function sfxMiss() { tone('sawtooth', 160, 70, tnow(), 0.18, 0.16); }
+function sfxWhoosh() {
+  var t = tnow();
+  noiseHit(t, 0.9, 0.2);
+  tone('sawtooth', 900, 80, t, 0.9, 0.1);
+}
+function sfxBoom() {
+  var t = tnow();
+  noiseHit(t, 0.7, 0.5);
+  tone('sine', 120, 30, t, 0.6, 0.5);
+}
+function jingleWin() {
+  if (!ac) return;
+  var t = tnow(), seq = [0, 4, 7, 12, 16], root = 392;
+  for (var i = 0; i < seq.length; i++)
+    tone('square', root * Math.pow(2, seq[i] / 12), 0, t + i * 0.11, 0.14, 0.16);
+}
+function jingleLose() {
+  if (!ac) return;
+  var t = tnow(), seq = [7, 5, 3, 0], root = 220;
+  for (var i = 0; i < seq.length; i++)
+    tone('square', root * Math.pow(2, seq[i] / 12), 0, t + i * 0.16, 0.2, 0.15);
+}
+
+/* ---- music tracks (16 eighth-note steps = 2 bars) ---- */
+function K(list) {
+  var a = [];
+  for (var i = 0; i < 16; i++) a.push(list.indexOf(i) >= 0 ? 1 : 0);
+  return a;
+}
+var N8 = [0,2,4,6,8,10,12,14];
+var ALL = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+var TRACKS = {
+  stage:  { bpm: 92,  root: 65.4, kick: K([0,8]),        snare: K([4,12]), hat: K(N8),
+            bass: [0,null,null,null,7,null,null,null,5,null,null,null,7,null,3,null] },
+  rome:   { bpm: 96,  root: 65.4, kick: K([0,6,8]),      snare: K([4,12]), hat: K(N8),
+            bass: [0,null,null,null,3,null,null,null,7,null,null,null,3,null,10,null] },
+  west:   { bpm: 112, root: 73.4, kick: K([0,6,8,14]),   snare: K([4,12]), hat: K(N8),
+            bass: [0,null,7,null,0,null,7,null,5,null,3,null,0,null,7,null] },
+  disco:  { bpm: 126, root: 55,   kick: K(N8),           snare: K([4,12]), hat: K(ALL),
+            bass: [0,12,null,12,0,12,null,12,3,15,null,15,5,17,null,12] },
+  london: { bpm: 132, root: 61.7, kick: K([0,6,8,14]),   snare: K([4,12]), hat: K(N8),
+            bass: [0,null,null,3,null,null,7,null,8,null,7,null,3,null,null,null] },
+  london2:{ bpm: 144, root: 61.7, kick: K([0,4,6,8,14]), snare: K([4,12]), hat: K(ALL),
+            bass: [0,null,12,3,null,15,7,null,8,null,7,12,3,null,10,null] }
+};
+var Music = { on: false, tr: null, step: 0, next: 0 };
+function musicStart(tr, at) {
+  if (!ac) return;
+  Music.on = true; Music.tr = tr; Music.step = 0;
+  Music.next = (at !== undefined) ? at : tnow() + 0.06;
+}
+function musicStop() { Music.on = false; }
+function musicTick() {
+  if (!Music.on || !ac) return;
+  var tr = Music.tr, sl = 30 / tr.bpm;
+  var guard = 0;
+  while (Music.next < tnow() + 0.16 && guard++ < 64) {
+    var st = Music.step % 16, t = Math.max(Music.next, tnow());
+    if (tr.kick[st]) kick(t);
+    if (tr.snare[st]) snare(t);
+    if (tr.hat[st]) hat(t);
+    var b = tr.bass[st];
+    if (b !== null && b !== undefined) bassN(b, t, sl * 0.85, tr.root);
+    Music.step++;
+    Music.next += sl;
+  }
+}
+
+/* ============================================================
+   PIXEL ART: character portraits (20x20) & backgrounds
+   ============================================================ */
+function faceBase(x, y) {
+  px(x+6, y+8, 8, 6, 2);            /* head */
+  px(x+8, y+10, 1, 1, 0);           /* eyes */
+  px(x+12, y+10, 1, 1, 0);
+  px(x+7, y+14, 6, 1, 2);           /* chin */
+}
+function topHat(x, y, h) {
+  px(x+5, y+8-h, 10, h, 0);         /* crown */
+  px(x+3, y+7, 14, 1, 0);           /* brim */
+  if (h >= 3) px(x+5, y+6, 10, 1, 1); /* band */
+}
+var PORTRAITS = {
+  samuel: function (x, y) {
+    topHat(x, y, 6); faceBase(x, y);
+    px(x+6, y+12, 3, 1, 0); px(x+11, y+12, 3, 1, 0);  /* the mustache */
+    px(x+7, y+13, 2, 1, 0); px(x+11, y+13, 2, 1, 0);
+    px(x+4, y+15, 12, 5, 0);                          /* suit */
+    px(x+9, y+15, 2, 3, 3);                           /* shirt */
+    px(x+8, y+15, 4, 1, 1);                           /* bow */
+  },
+  samuelTrue: function (x, y) {                       /* mustache-free, finale form */
+    topHat(x, y, 6); faceBase(x, y);
+    px(x+5, y+9, 1, 5, 0); px(x+14, y+9, 1, 5, 0);    /* hair wisps */
+    px(x+8, y+13, 4, 1, 0);                           /* confident smile */
+    px(x+4, y+15, 12, 5, 0);
+    px(x+9, y+15, 2, 3, 3);
+    px(x+8, y+15, 4, 1, 1);
+  },
+  herschel: function (x, y) {
+    topHat(x, y, 5); faceBase(x, y);
+    px(x+8, y+10, 2, 1, 0); px(x+12, y+10, 2, 1, 0);  /* squint */
+    px(x+7, y+9, 2, 1, 0); px(x+11, y+9, 2, 1, 0);    /* brows */
+    px(x+6, y+13, 8, 3, 1);                           /* beard */
+    px(x+4, y+16, 12, 4, 1);                          /* hunched coat */
+    px(x+17, y+11, 1, 9, 0); px(x+16, y+10, 2, 1, 0); /* cane */
+  },
+  william: function (x, y) {
+    topHat(x, y, 4); faceBase(x, y);
+    px(x+3, y+8, 3, 9, 1); px(x+14, y+8, 3, 9, 1);    /* flowing hair */
+    px(x+4, y+17, 1, 2, 1); px(x+15, y+17, 1, 2, 1);
+    px(x+8, y+13, 4, 1, 0);                           /* charming smile */
+    px(x+5, y+15, 10, 5, 1);
+    px(x+9, y+16, 2, 2, 3);                           /* royal medal */
+  },
+  rosalind: function (x, y) {
+    topHat(x, y, 5); faceBase(x, y);
+    px(x+4, y+4, 12, 1, 1);                           /* goggle strap */
+    px(x+6, y+3, 3, 2, 3); px(x+11, y+3, 3, 2, 3);    /* goggle lenses */
+    px(x+3, y+10, 2, 3, 0); px(x+15, y+10, 2, 3, 0);  /* hair buns */
+    px(x+8, y+13, 3, 1, 0);                           /* smile */
+    px(x+5, y+15, 10, 5, 1);
+    px(x+7, y+16, 6, 1, 3);                           /* lab collar */
+  },
+  maximus: function (x, y) {
+    faceBase(x, y);
+    px(x+5, y+6, 10, 2, 1);                           /* hair */
+    px(x+4, y+6, 3, 2, 3); px(x+13, y+6, 3, 2, 3);    /* laurel */
+    px(x+6, y+7, 8, 1, 3);
+    px(x+7, y+9, 3, 1, 0); px(x+11, y+9, 3, 1, 0);    /* stern brow */
+    px(x+9, y+13, 3, 1, 0);                           /* frown */
+    px(x+4, y+15, 12, 5, 1);                          /* armor */
+    px(x+6, y+16, 1, 1, 3); px(x+13, y+16, 1, 1, 3);
+    px(x+4, y+18, 12, 1, 0);                          /* belt */
+  },
+  jake: function (x, y) {
+    faceBase(x, y);
+    px(x+7, y+3, 6, 4, 0); px(x+3, y+7, 14, 1, 0);    /* cowboy hat */
+    px(x+8, y+10, 2, 1, 0); px(x+12, y+10, 2, 1, 0);  /* squint */
+    px(x+7, y+13, 1, 1, 0); px(x+10, y+14, 1, 1, 0);  /* stubble */
+    px(x+12, y+13, 1, 1, 0);
+    px(x+5, y+15, 10, 2, 1);                          /* bandana */
+    px(x+8, y+17, 4, 1, 1);
+    px(x+4, y+17, 12, 3, 0);
+  },
+  rex: function (x, y) {
+    px(x+4, y+2, 12, 7, 0);                           /* the afro */
+    px(x+3, y+4, 1, 4, 0); px(x+16, y+4, 1, 4, 0);
+    px(x+5, y+1, 10, 1, 0);
+    faceBase(x, y);
+    px(x+6, y+9, 3, 2, 0); px(x+11, y+9, 3, 2, 0);    /* shades */
+    px(x+9, y+9, 2, 1, 0);
+    px(x+8, y+13, 4, 1, 0);                           /* smile */
+    px(x+3, y+15, 4, 2, 3); px(x+13, y+15, 4, 2, 3);  /* collar wings */
+    px(x+6, y+15, 8, 5, 1);
+    px(x+9, y+17, 2, 2, 3);                           /* medallion */
+  },
+  snob: function (x, y) {
+    px(x+5, y, 10, 7, 0); px(x+3, y+7, 14, 1, 0);     /* extra tall hat */
+    px(x+5, y+5, 10, 1, 1);
+    faceBase(x, y);
+    px(x+11, y+9, 3, 1, 0); px(x+11, y+11, 3, 1, 0);  /* monocle */
+    px(x+10, y+10, 1, 1, 0); px(x+14, y+10, 1, 1, 0);
+    px(x+14, y+12, 1, 3, 0);                          /* monocle chain */
+    px(x+8, y+13, 4, 1, 0);                           /* sneer */
+    px(x+7, y+12, 1, 1, 0);
+    px(x+4, y+15, 12, 5, 0);
+    px(x+8, y+15, 4, 3, 3);                           /* cravat */
+  }
+};
+
+/* ---- backgrounds (full-screen cutscene art) ---- */
+var BGS = {
+  stage: function () {
+    cls(3);
+    px(0, 0, 24, 144, 0); px(136, 0, 24, 144, 0);        /* curtains */
+    px(24, 0, 112, 9, 0);                                 /* valance */
+    for (var i = 0; i < 9; i++) px(26 + i * 12, 9, 7, 4, 0);
+    px(24, 86, 112, 2, 1);                                /* stage edge */
+    px(24, 88, 112, 56, 2);                               /* boards */
+    px(79, 58, 2, 28, 0);                                 /* mic stand */
+    px(76, 52, 8, 6, 0); px(78, 50, 4, 2, 0);             /* mic */
+    px(72, 86, 16, 2, 0);
+  },
+  rome: function () {
+    cls(3);
+    px(130, 8, 12, 12, 2);                                /* sun */
+    px(0, 38, 160, 48, 1);                                /* colosseum */
+    for (var i = 0; i < 8; i++) {
+      px(5 + i * 20, 56, 12, 30, 3);                      /* arches */
+      px(7 + i * 20, 52, 8, 4, 3);
+      px(7 + i * 20, 42, 8, 6, 3);                        /* upper windows */
+    }
+    px(0, 86, 160, 58, 2);                                /* sand */
+  },
+  west: function () {
+    cls(3);
+    px(18, 8, 12, 12, 2);                                 /* sun */
+    px(96, 42, 42, 44, 1); px(122, 30, 32, 56, 1);        /* mesas */
+    px(0, 84, 160, 2, 1);
+    px(0, 86, 160, 58, 2);                                /* desert */
+    px(32, 58, 4, 28, 1);                                 /* cactus */
+    px(26, 66, 6, 4, 1); px(26, 60, 4, 6, 1);
+    px(38, 70, 6, 4, 1); px(40, 64, 4, 6, 1);
+  },
+  disco: function () {
+    cls(0);
+    px(79, 0, 2, 10, 1);                                  /* ball wire */
+    for (var r = 0; r < 5; r++)                           /* disco ball */
+      for (var q = 0; q < 5; q++)
+        px(70 + q * 4, 10 + r * 4, 4, 4, ((r + q) % 2) ? 2 : 3);
+    var dots = [[16,20],[40,34],[120,26],[142,40],[24,52],[136,62],[60,44],[100,50]];
+    for (var i = 0; i < dots.length; i++) px(dots[i][0], dots[i][1], 2, 2, (i % 2) ? 2 : 3);
+    for (var yy = 0; yy < 6; yy++)                        /* dance floor */
+      for (var xx = 0; xx < 10; xx++)
+        px(xx * 16, 96 + yy * 8, 16, 8, ((xx + yy) % 2) ? 1 : 2);
+  },
+  london: function () {
+    cls(0);
+    px(128, 8, 14, 14, 3);                                /* moon */
+    var st = [[20,10],[52,16],[90,8],[110,20],[150,30],[70,26]];
+    for (var i = 0; i < st.length; i++) px(st[i][0], st[i][1], 1, 1, 3);
+    px(20, 28, 20, 58, 1);                                /* big ben */
+    px(24, 20, 12, 8, 1); px(28, 12, 4, 8, 1);
+    px(24, 36, 12, 12, 3);                                /* clock */
+    px(29, 38, 2, 5, 0); px(30, 42, 4, 1, 0);
+    px(48, 60, 20, 26, 1); px(70, 50, 24, 36, 1);         /* skyline */
+    px(96, 62, 30, 24, 1); px(128, 54, 22, 32, 1);
+    px(0, 86, 160, 58, 2);                                /* street */
+  }
+};
+
+/* ---- arrows for the rhythm lanes ---- */
+var ARR = {
+  up:    ['...X...','..XXX..','.XXXXX.','XXXXXXX','..XXX..','..XXX..','..XXX..'],
+  down:  ['..XXX..','..XXX..','..XXX..','XXXXXXX','.XXXXX.','..XXX..','...X...'],
+  left:  ['...X...','..XX...','.XXXXXX','XXXXXXX','.XXXXXX','..XX...','...X...'],
+  right: ['...X...','...XX..','XXXXXX.','XXXXXXX','XXXXXX.','...XX..','...X...']
+};
+function drawPat(pat, x, y, c) {
+  for (var r = 0; r < pat.length; r++)
+    for (var q = 0; q < pat[r].length; q++)
+      if (pat[r][q] === 'X') px(x + q, y + r, 1, 1, c);
+}
+var LANES = ['left', 'up', 'down', 'right'];
+
+/* ============================================================
+   SPEAKERS & DIALOGUE
+   ============================================================ */
+var SPEAKERS = {
+  'SAMUEL':      { p: 'samuel',   f: 392 },
+  'HERSCHEL':    { p: 'herschel', f: 150 },
+  'WILLIAM':     { p: 'william',  f: 494 },
+  'ROSALIND':    { p: 'rosalind', f: 587 },
+  'MAXIMVS':     { p: 'maximus',  f: 208 },
+  'JAKE':        { p: 'jake',     f: 180 },
+  'REX':         { p: 'rex',      f: 262 },
+  'SNOBBINGTON': { p: 'snob',     f: 311 },
+  'CROWD':       { p: null,       f: 330 }
+};
+var Story = {
+  who: '', lines: [], total: 0, shown: 0, done: false, lastBlip: 0,
+  update: function (dt) {
+    if (!this.done) {
+      this.shown += dt * 42;
+      if (this.shown >= this.total) { this.shown = this.total; this.done = true; }
+      var iShown = Math.floor(this.shown);
+      if (iShown > this.lastBlip + 2) {
+        this.lastBlip = iShown;
+        var sp = SPEAKERS[this.who];
+        if (sp) sfxBlip(sp.f, 0.05);
+      }
+    }
+  },
+  draw: function () {
+    BGS[Director.bg]();
+    /* dialogue box */
+    px(2, 94, 156, 48, 3);
+    px(2, 94, 156, 1, 0); px(2, 141, 156, 1, 0);
+    px(2, 94, 1, 48, 0); px(157, 94, 1, 48, 0);
+    px(4, 96, 152, 1, 1);
+    var narr = (this.who === 'NARRATOR');
+    var remaining = Math.floor(this.shown);
+    var ty = narr ? 106 : 108;
+    if (!narr) {
+      var sp = SPEAKERS[this.who];
+      if (sp && sp.p) PORTRAITS[sp.p](5, 104);
+      drawText(this.who, 30, 99, 1);
+    }
+    for (var i = 0; i < this.lines.length; i++) {
+      var line = this.lines[i];
+      var take = Math.min(line.length, Math.max(0, remaining));
+      remaining -= line.length;
+      if (take > 0) {
+        if (narr) centerText(line.substr(0, take) === line ? line : line.substr(0, take), ty + i * 8, 0);
+        else drawText(line.substr(0, take), 30, ty + i * 8, 0);
+      }
+    }
+    if (this.done && (Math.floor(performance.now() / 400) % 2)) {
+      drawText('A', 148, 134, 1);
+    }
+  },
+  onPress: function (k) {
+    if (k === 'a' || k === 'b' || k === 'start') {
+      if (!this.done) { this.shown = this.total; this.done = true; }
+      else { sfxBlip(520, 0.08); runNext(); }
+    }
+  }
+};
+function startDialogue(who, text) {
+  Story.who = who;
+  var narr = (who === 'NARRATOR');
+  Story.lines = wrap(text, narr ? 148 : 124);
+  Story.total = 0;
+  for (var i = 0; i < Story.lines.length; i++) Story.total += Story.lines[i].length;
+  Story.shown = 0; Story.done = false; Story.lastBlip = 0;
+  setScene(Story);
+}
+
+/* ============================================================
+   SIMPLE SCENES: boot, title, boom, travel
+   ============================================================ */
+var Boot = {
+  t: 0,
+  enter: function () { this.t = 0; },
+  update: function (dt) {
+    this.t += dt;
+    if (this.t > 2.0) setScene(Title);
+  },
+  draw: function () {
+    cls(3);
+    var y = Math.min(58, -10 + this.t * 60);
+    centerText('DADDYSOFT', y, 0, 2);
+    if (this.t > 1.3) centerText('PRESENTS', 80, 1);
+  },
+  onPress: function (k) { if (this.t > 0.4) setScene(Title); }
+};
+var Title = {
+  t: 0,
+  enter: function () { this.t = 0; },
+  update: function (dt) { this.t += dt; },
+  draw: function () {
+    cls(3);
+    /* the top hat */
+    px(64, 14, 32, 18, 0);
+    px(64, 26, 32, 3, 1);
+    px(52, 32, 56, 4, 0);
+    centerText('DOWNTON', 44, 0, 2);
+    centerText('DADDIES', 62, 0, 2);
+    px(30, 80, 100, 1, 1);
+    centerText('BARS THROUGH TIME', 85, 1);
+    px(30, 94, 100, 1, 1);
+    if (Math.floor(this.t * 2) % 2) centerText('PRESS START', 108, 0);
+    centerText('(C) 1889 DADDYSOFT', 132, 1);
+  },
+  onPress: function (k) {
+    if (k === 'start' || k === 'a') {
+      sfxBlip(660, 0.14); sfxBlip(880, 0.1);
+      Director.i = 0;
+      runNext();
+    }
+  }
+};
+function makeBoom() {
+  return {
+    t: 0,
+    enter: function () { this.t = 0; sfxBoom(); musicStop(); },
+    update: function (dt) {
+      this.t += dt;
+      if (this.t > 1.1) runNext();
+    },
+    draw: function () {
+      var sh = this.t < 0.6 ? Math.round(Math.sin(this.t * 60) * 3) : 0;
+      ctx.save(); ctx.translate(sh, 0);
+      if (Math.floor(this.t * 16) % 2 && this.t < 0.5) cls(3); else BGS[Director.bg]();
+      centerText('B O O M !', 60, this.t < 0.5 ? 0 : 0, 2);
+      ctx.restore();
+    },
+    onPress: function () {}
+  };
+}
+function makeTravel(era, label) {
+  return {
+    t: 0,
+    enter: function () { this.t = 0; musicStop(); sfxWhoosh(); },
+    update: function (dt) {
+      this.t += dt;
+      if (this.t > 2.4) runNext();
+    },
+    draw: function () {
+      cls(0);
+      for (var i = 0; i < 7; i++) {
+        var s = Math.round((this.t * 90 + i * 26) % 170);
+        var c = 1 + ((i + Math.floor(this.t * 6)) % 3);
+        var cx = 80, cy = 66;
+        px(cx - s / 2, cy - s / 2, s, 2, c);
+        px(cx - s / 2, cy + s / 2, s, 2, c);
+        px(cx - s / 2, cy - s / 2, 2, s, c);
+        px(cx + s / 2, cy - s / 2, 2, s, c);
+      }
+      px(20, 100, 120, 26, 0);
+      centerText('TRAVELING TO', 104, 3);
+      centerText(label, 114, 3);
+    },
+    onPress: function () {}
+  };
+}
+
+/* ============================================================
+   RHYTHM BATTLE ENGINE
+   ============================================================ */
+var BATTLES = [
+  { era: 'rome', track: 'rome', foe: 'MAXIMVS', port: 'maximus', bpm: 96, bars: 14,
+    density: 0.5, gap: 2, spec: 2,
+    lyrics: ['I CAME I SAW I SPAT FIRE', 'ALL ROADS LEAD TO THESE BARS',
+             'TOGA TOGA TOP HAT FLOW', 'THUMBS UP FROM THE EMPEROR'],
+    taunts: ['IS THAT ALL, PLEBEIAN?', 'MY GRANDMOTHER RAPS HARDER'] },
+  { era: 'west', track: 'west', foe: 'JAKE', port: 'jake', bpm: 112, bars: 16,
+    density: 0.5, gap: 2, spec: 2,
+    lyrics: ['FASTEST TONGUE IN THE WEST', 'YEE AND FURTHERMORE HAW',
+             'THIS TOWN RIDES WITH SAMUEL', 'HOLD MY REINS AND MY CROWN'],
+    taunts: ['ALL HAT, NO CATTLE, HUH?', 'THAT VERSE WAS PLUM AWFUL'] },
+  { era: 'disco', track: 'disco', foe: 'REX', port: 'rex', bpm: 126, bars: 16,
+    density: 0.55, gap: 1, spec: 2,
+    lyrics: ['STAYIN ALIVE SINCE 1889', 'MY FLOW IS THE MIRROR BALL',
+             'BOOGIE DOWN THROUGH TIME', 'FUNKY LIKE A FLUX ENGINE'],
+    taunts: ['YOU CALL THAT FUNKY?', 'THE HUSTLE HAS LEFT, BABY'] },
+  { era: 'london', track: 'london', foe: 'SNOB', port: 'snob', bpm: 132, bars: 12,
+    density: 0.52, gap: 1, spec: 2,
+    lyrics: ['THIS STAGE RUNS ON OUR NAME', 'BARS OLDER THAN YOUR TITLE',
+             'THE DADDIES NEVER FOLD', 'CURTAIN CALL FOR YOUR REIGN'],
+    taunts: ['HOW DREADFULLY COMMON', 'SCRIPTED DRAMA WINS AGAIN'] },
+  { era: 'london', track: 'london2', foe: 'SNOB', port: 'snob', bpm: 144, bars: 16,
+    density: 0.62, gap: 1, spec: 0, start: 70, trueForm: 1,
+    lyrics: ['NO MUSTACHE, JUST THE TRUTH', 'QUEEN OF EVERY CENTURY',
+             'HER MAJESTY OF THE MIC', 'THE REALEST DADDY OF ALL'],
+    taunts: ['IMPOSSIBLE!', 'MY MONOCLE! MY PRIDE!'] }
+];
+
+function mulberry(seed) {
+  return function () {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function makeChart(cfg, id) {
+  var rng = mulberry(1889 + id * 77);
+  var steps = cfg.bars * 8;
+  var notes = [], last = -9, lastLane = -1;
+  for (var s = 8; s < steps - 4; s++) {
+    if (s - last < cfg.gap) continue;
+    if (rng() < cfg.density) {
+      var lane = (rng() * 4) | 0;
+      if (lane === lastLane && rng() < 0.5) lane = (lane + 1 + ((rng() * 3) | 0)) % 4;
+      notes.push({ s: s, lane: lane, hit: false, missed: false, spec: false });
+      last = s; lastLane = lane;
+    }
+  }
+  for (var i = 0; i < (cfg.spec || 0); i++) {
+    var n = notes[Math.floor(rng() * (notes.length - 4)) + 2];
+    if (n) n.spec = true;
+  }
+  return notes;
+}
+
+var HIT_Y = 112, LANE_X0 = 44, LANE_W = 18, NOTE_SPEED = 72;
+
+function makeBattle(id) {
+  var cfg = BATTLES[id];
+  var half = 30 / cfg.bpm;   /* eighth-note length */
+  var spb = 60 / cfg.bpm;
+  var B = {
+    state: 'ready',
+    chart: makeChart(cfg, id),
+    meter: cfg.start || 50,
+    combo: 0, hits: 0, cleanIdx: 0,
+    judge: '', judgeT: 0, judgeC: 0,
+    lyric: '', lyricT: 0, lyricIdx: 0,
+    taunt: '', tauntT: 0, missRow: 0,
+    start: 0, endT: 0, won: false,
+    enter: function () { musicStop(); },
+    noteT: function (n) { return this.start + n.s * half; },
+    go: function () {
+      ensureAudio();
+      this.start = tnow() + spb * 4 + 0.5;
+      this.endT = this.start + (this.chart.length ? this.chart[this.chart.length - 1].s * half : 0) + 1.4;
+      musicStart(TRACKS[cfg.track], this.start - spb * 4);
+      this.state = 'run';
+    },
+    addMeter: function (d) {
+      this.meter = Math.max(0, Math.min(100, this.meter + d));
+      if (this.meter <= 0 && this.state === 'run') this.finish(false);
+    },
+    setJudge: function (s, c) { this.judge = s; this.judgeT = 0.6; this.judgeC = c; },
+    onMiss: function (n) {
+      n.missed = true;
+      this.combo = 0; this.missRow++;
+      sfxMiss();
+      if (n.spec) {
+        this.setJudge('THE STACHE SLIPS!', 0);
+        this.addMeter(-8);
+      } else {
+        this.setJudge('MISS', 0);
+        this.addMeter(-4);
+      }
+      if (this.missRow >= 3) {
+        this.missRow = 0;
+        this.taunt = cfg.foe + ': ' + cfg.taunts[(Math.random() * cfg.taunts.length) | 0];
+        this.tauntT = 2.2;
+      }
+    },
+    finish: function (won) {
+      this.state = 'result';
+      this.won = won;
+      musicStop();
+      if (won) jingleWin(); else jingleLose();
+    },
+    update: function (dt) {
+      this.judgeT = Math.max(0, this.judgeT - dt);
+      this.lyricT = Math.max(0, this.lyricT - dt);
+      this.tauntT = Math.max(0, this.tauntT - dt);
+      if (this.state !== 'run') return;
+      var t = tnow();
+      /* sweep for missed notes */
+      while (this.cleanIdx < this.chart.length) {
+        var n = this.chart[this.cleanIdx];
+        if (this.noteT(n) < t - 0.24) {
+          if (!n.hit && !n.missed) this.onMiss(n);
+          this.cleanIdx++;
+        } else break;
+      }
+      if (t > this.endT) this.finish(this.meter >= 50);
+    },
+    hitLane: function (lane) {
+      if (this.state !== 'run') return;
+      var t = tnow(), best = null, bestD = 0.24;
+      for (var i = this.cleanIdx; i < this.chart.length; i++) {
+        var n = this.chart[i];
+        var d = this.noteT(n) - t;
+        if (d > 0.3) break;
+        if (n.lane !== lane || n.hit || n.missed) continue;
+        if (Math.abs(d) < bestD) { bestD = Math.abs(d); best = n; }
+      }
+      if (best) {
+        best.hit = true;
+        this.hits++; this.combo++; this.missRow = 0;
+        var perfect = bestD <= 0.1;
+        sfxHit(perfect);
+        this.setJudge(perfect ? 'PERFECT!' : 'GOOD', perfect ? 0 : 1);
+        this.addMeter(perfect ? 3 : 2);
+        if (best.spec) this.addMeter(2);
+        if (this.hits % 8 === 0) {
+          this.lyric = cfg.lyrics[this.lyricIdx % cfg.lyrics.length];
+          this.lyricIdx++; this.lyricT = 2.6;
+        }
+      } else {
+        this.addMeter(-1);
+      }
+    },
+    draw: function () {
+      cls(3);
+      /* era strip behind header */
+      px(0, 0, 160, 24, 3);
+      /* header */
+      var foeP = PORTRAITS[cfg.port], samP = PORTRAITS[cfg.trueForm ? 'samuelTrue' : 'samuel'];
+      foeP(2, 2);
+      samP(138, 2);
+      drawText(cfg.foe, 24, 4, 0);
+      var sn = 'SAMUEL';
+      drawText(sn, 136 - textW(sn), 4, 0);
+      centerText('VS', 12, 1);
+      /* crowd meter */
+      drawText('CROWD', 2, 27, 1);
+      px(30, 26, 102, 7, 0);
+      px(31, 27, 100, 5, 3);
+      px(31, 27, this.meter, 5, this.meter >= 50 ? 0 : 1);
+      px(31 + 50, 25, 1, 9, 1); /* win line */
+      /* lane area */
+      px(LANE_X0, 36, LANE_W * 4, 86, 3);
+      for (var l = 0; l <= 4; l++) px(LANE_X0 + l * LANE_W, 36, 1, 86, 2);
+      px(LANE_X0, HIT_Y, LANE_W * 4, 1, 1);
+      /* receptors */
+      for (l = 0; l < 4; l++) {
+        var rx = LANE_X0 + l * LANE_W + 2;
+        px(rx, HIT_Y - 5, 15, 12, 3);
+        px(rx, HIT_Y - 5, 15, 1, 1); px(rx, HIT_Y + 6, 15, 1, 1);
+        px(rx, HIT_Y - 5, 1, 12, 1); px(rx + 14, HIT_Y - 5, 1, 12, 1);
+        drawPat(ARR[LANES[l]], rx + 4, HIT_Y - 2, held[LANES[l]] ? 0 : 2);
+      }
+      /* notes */
+      var t = tnow();
+      if (this.state === 'run' || this.state === 'ready') {
+        for (var i = 0; i < this.chart.length; i++) {
+          var n = this.chart[i];
+          if (n.hit || n.missed) continue;
+          var dtN = this.noteT(n) - t;
+          if (dtN < -0.3 || dtN > 1.5) continue;
+          var y = HIT_Y - dtN * NOTE_SPEED;
+          var nx = LANE_X0 + n.lane * LANE_W + 2;
+          var flash = n.spec && (Math.floor(t * 10) % 2);
+          px(nx, y - 5, 15, 11, flash ? 1 : 0);
+          drawPat(ARR[LANES[n.lane]], nx + 4, y - 3, 3);
+          if (n.spec) { px(nx + 2, y - 4, 3, 1, 3); px(nx + 10, y - 4, 3, 1, 3); }
+        }
+      }
+      /* combo */
+      if (this.combo > 1) {
+        drawText('' + this.combo, 124, 60, 0, 2);
+        drawText('COMBO', 124, 74, 1);
+      }
+      /* judgement */
+      if (this.judgeT > 0) centerText(this.judge, 92, this.judgeC);
+      /* lyric ticker */
+      if (this.lyricT > 0) centerText(this.lyric, 126, 0);
+      else if (this.tauntT > 0) centerText(this.taunt, 126, 1);
+      /* count-in */
+      if (this.state === 'run' && t < this.start) {
+        var c = Math.ceil((this.start - t) / spb);
+        px(60, 52, 40, 22, 0);
+        centerText(c > 0 ? '' + c : 'RAP!', 58, 3, 2);
+      }
+      /* ready overlay */
+      if (this.state === 'ready') {
+        px(10, 38, 140, 74, 0);
+        px(12, 40, 136, 70, 3);
+        centerText('RAP BATTLE!', 46, 0, 1);
+        centerText('VS ' + cfg.foe, 56, 1);
+        px(24, 66, 112, 1, 1);
+        centerText('HIT NOTES ON THE LINE', 72, 0);
+        centerText('SHINY NOTES: GUARD', 82, 0);
+        centerText('THE MUSTACHE!', 90, 0);
+        if (Math.floor(performance.now() / 400) % 2) centerText('PRESS A', 100, 1);
+      }
+      /* result overlay */
+      if (this.state === 'result') {
+        px(14, 44, 132, 60, 0);
+        px(16, 46, 128, 56, 3);
+        if (this.won) {
+          centerText('VICTORY!', 54, 0, 2);
+          centerText('CROWD HYPE: ' + this.meter + '%', 74, 0);
+          if (Math.floor(performance.now() / 400) % 2) centerText('PRESS A', 88, 1);
+        } else {
+          centerText('THE CROWD BOOS...', 56, 0);
+          centerText('HYPE: ' + this.meter + '%', 68, 1);
+          centerText('PRESS A TO', 80, 0);
+          centerText('RUN IT BACK', 88, 0);
+        }
+      }
+    },
+    onPress: function (k) {
+      if (this.state === 'ready' && (k === 'a' || k === 'start')) { this.go(); return; }
+      if (this.state === 'result' && (k === 'a' || k === 'start')) {
+        if (this.won) runNext();
+        else setScene(makeBattle(id));
+        return;
+      }
+      var lane = LANES.indexOf(k);
+      if (lane >= 0) this.hitLane(lane);
+    }
+  };
+  return B;
+}
+
+/* ============================================================
+   BIRTHDAY ENDING: the color unlock
+   ============================================================ */
+var CONFETTI_COLORS = ['#e05572', '#f2a541', '#3bb6a2', '#8b5cf6', '#fdf0d5', '#5ec8f2'];
+function makeEnding() {
+  var conf = [];
+  for (var i = 0; i < 46; i++) {
+    conf.push({
+      x: Math.random() * 160, y: -Math.random() * 144,
+      vy: 14 + Math.random() * 26, vx: (Math.random() - 0.5) * 10,
+      c: CONFETTI_COLORS[(Math.random() * CONFETTI_COLORS.length) | 0],
+      w: Math.random() < 0.5 ? 2 : 3
+    });
+  }
+  return {
+    t: 0,
+    enter: function () {
+      this.t = 0;
+      PAL = PAL_PARTY;                      /* COLOR UNLOCKED */
+      musicStart(TRACKS.disco);
+      jingleWin();
+    },
+    update: function (dt) {
+      this.t += dt;
+      for (var i = 0; i < conf.length; i++) {
+        var p = conf[i];
+        p.y += p.vy * dt; p.x += p.vx * dt + Math.sin(this.t * 3 + i) * 0.3;
+        if (p.y > 146) { p.y = -4; p.x = Math.random() * 160; }
+      }
+    },
+    draw: function () {
+      cls(3);
+      px(0, 0, 18, 144, 0); px(142, 0, 18, 144, 0);   /* curtains */
+      px(18, 0, 124, 8, 0);
+      for (var i = 0; i < 10; i++) px(20 + i * 12, 8, 7, 3, 0);
+      px(18, 96, 124, 2, 1);
+      px(18, 98, 124, 46, 2);
+      centerText('HAPPY BIRTHDAY', 16, 0, 2);
+      centerText(BIRTHDAY_NAME + '!', 32, 1, 2);
+      /* the daddies take a bow */
+      var row = ['herschel', 'william', 'samuelTrue', 'rosalind'];
+      var xs = [24, 56, 88, 120];
+      for (i = 0; i < row.length; i++) {
+        var bob = Math.round(Math.sin(this.t * 4 + i) * 1.5);
+        PORTRAITS[row[i]](xs[i], 62 + bob);
+      }
+      /* crown on samuel */
+      var sb = Math.round(Math.sin(this.t * 4 + 2) * 1.5);
+      px(93, 56 + sb, 10, 2, 1);
+      px(93, 54 + sb, 2, 2, 1); px(97, 54 + sb, 2, 2, 1); px(101, 54 + sb, 2, 2, 1);
+      centerText('THE DADDIES TAKE A BOW', 104, 0);
+      centerText(DEDICATION, 114, 1);
+      if (Math.floor(this.t * 2) % 2) centerText('PRESS START TO ENCORE', 130, 0);
+      /* confetti on top of everything */
+      for (i = 0; i < conf.length; i++) {
+        var p = conf[i];
+        ctx.fillStyle = p.c;
+        ctx.fillRect(p.x | 0, p.y | 0, p.w, p.w);
+      }
+    },
+    onPress: function (k) {
+      if (k === 'start' || k === 'a') {
+        PAL = PAL_GB;
+        musicStop();
+        setScene(Title);
+      }
+    }
+  };
+}
+
+/* ============================================================
+   THE SCRIPT: full story
+   ============================================================ */
+function s(who, text) { return { say: [who, text] }; }
+function n(text) { return { say: ['NARRATOR', text] }; }
+var SCRIPT = [
+  { bg: 'stage' },
+  n('LONDON, 1889. THE DOWNTON DADDIES PREPARE THEIR GREATEST SHOW.'),
+  s('ROSALIND', 'THE TIME ENGINE IS PURRING. TONIGHT WE TOUR ALL OF HISTORY!'),
+  s('WILLIAM', 'MY HAIR IS READY. THE REST IS DETAILS.'),
+  s('HERSCHEL', 'MY HIP SAYS NO. WE GO ANYWAY.'),
+  s('SAMUEL', 'DADDIES! TONIGHT WE DROP THE HOTTEST BARS OF 1889!'),
+  s('ROSALIND', 'WAIT. WHO PUT TEA IN THE FLUX CHAMBER?'),
+  s('HERSCHEL', 'IT WAS DECAF.'),
+  { fx: 'boom' },
+  n('THE ENGINE OVERLOADS! THE DADDIES ARE FLUNG ACROSS TIME!'),
+  s('SAMUEL', 'MY TEAM IS GONE. MY MUSTACHE REMAINS. HOLD ON, DADDIES.'),
+  { travel: 'rome', label: 'ROME, 74 AD' },
+  { bg: 'rome' },
+  n('ROME, 74 AD. THE COLOSSEUM.'),
+  s('HERSCHEL', 'SAMUEL! THEY PUT ME TO WORK IN THE KITCHEN. AGAIN.'),
+  s('SAMUEL', 'HERSCHEL! ARE YOU HURT?'),
+  s('HERSCHEL', 'ONLY MY PRIDE. AND MY HIP. AND MY OTHER HIP.'),
+  s('MAXIMVS', 'HALT! NONE MAY LEAVE THE COLOSSEUM WITHOUT A BATTLE!'),
+  s('SAMUEL', 'THEN I CHOOSE... A RAP BATTLE.'),
+  s('MAXIMVS', "...THEM'S THE RULES. VERY WELL."),
+  { battle: 0 },
+  s('MAXIMVS', 'TAKE THIS FLUX GEAR. YOUR BARS ARE... IMPERIAL.'),
+  s('HERSCHEL', 'NOT BAD. NOW GET ME OUT OF THIS CENTURY.'),
+  n('HERSCHEL JOINS THE PARTY! FLUX GEAR GET! 1 OF 3'),
+  { travel: 'west', label: 'DODGE CITY, 1875' },
+  { bg: 'west' },
+  n('DODGE CITY, 1875.'),
+  s('WILLIAM', "SAMUEL! I'VE BEEN HERE AN HOUR AND I'M ALREADY SHERIFF."),
+  s('SAMUEL', 'HOW?!'),
+  s('WILLIAM', 'I SMILED.'),
+  s('JAKE', 'THAT PRETTY BOY TOOK MY JOB! NOBODY LEAVES TILL SOMEBODY PAYS.'),
+  s('SAMUEL', "I'LL PAY... IN BARS."),
+  s('JAKE', "THIS TOWN AIN'T BIG ENOUGH FOR THE TWO OF US."),
+  { battle: 1 },
+  s('JAKE', 'DANG. FINEST FLOW WEST OF ANYWHERE. TAKE MY LUCKY CHRONO COIL.'),
+  s('WILLIAM', 'I SHALL RESIGN AS SHERIFF. THE TOWN WILL WEEP.'),
+  n('WILLIAM JOINS THE PARTY! CHRONO COIL GET! 2 OF 3'),
+  { travel: 'disco', label: 'NEW YORK, 1977' },
+  { bg: 'disco' },
+  n('NEW YORK, 1977. CLUB INFERNO.'),
+  s('ROSALIND', 'SAMUEL! THIS DISCO BALL IS A PERFECT TEMPORAL LENS!'),
+  s('SAMUEL', 'CAN IT GET US HOME?'),
+  s('ROSALIND', 'YES. I JUST NEED TO BORROW IT. FOREVER.'),
+  s('REX', 'NOBODY TOUCHES MY BALL, BABY. YOU WANT IT? BATTLE FOR IT.'),
+  s('SAMUEL', "THEN LET'S BOOGIE."),
+  s('REX', "OH, IT'S ON. IT'S SO ON."),
+  { battle: 2 },
+  s('REX', "BABY, YOU'RE COSMIC. TAKE THE BALL. STAY FUNKY."),
+  s('ROSALIND', 'TIME CRYSTAL SECURED! SETTING COURSE FOR HOME!'),
+  n('ROSALIND JOINS THE PARTY! TIME CRYSTAL GET! 3 OF 3'),
+  { travel: 'london', label: 'LONDON, 1889' },
+  { bg: 'london' },
+  n('LONDON, 1889. HOME. BUT THE THEATRE IS NOT EMPTY...'),
+  s('SNOBBINGTON', 'WELL, WELL. THE DOWNTON DADDIES. I HAVE PURCHASED YOUR THEATRE.'),
+  s('SNOBBINGTON', 'IMPROV IS BANNED. RAP IS BANNED. FUN IS... UNDER REVIEW.'),
+  s('WILLIAM', 'YOU FIEND.'),
+  s('SNOBBINGTON', 'LEAVE, OR FACE ME IN THE ONLY BATTLE THAT MATTERS.'),
+  s('SAMUEL', 'A RAP BATTLE?'),
+  s('SNOBBINGTON', "REGRETTABLY, YES. THEM'S THE RULES."),
+  { battle: 3 },
+  n('THE CROWD IS ELECTRIC! BUT THEN... A GUST OF WIND!'),
+  n("SAMUEL'S MUSTACHE... FALLS."),
+  s('CROWD', 'GASP!'),
+  s('SNOBBINGTON', 'A WOMAN?! HA! THE GREAT SAMUEL, A FRAUD!'),
+  s('SAMUEL', 'NO. THE MUSTACHE WAS THE COSTUME. THE BARS WERE ALWAYS MINE.'),
+  s('HERSCHEL', 'WE KNEW, LASS. WE ALWAYS KNEW.'),
+  s('WILLIAM', 'IT WAS CROOKED EVERY SINGLE DAY.'),
+  s('ROSALIND', 'FINISH HIM, SAMUEL.'),
+  s('SAMUEL', 'WITH PLEASURE.'),
+  n("THE CROWD CHANTS HER NAME! SAMUEL'S FLOW ASCENDS!"),
+  { battle: 4 },
+  s('SNOBBINGTON', 'I YIELD. THE THEATRE IS YOURS. YOUR BARS ARE... SUBLIME.'),
+  n('THE DOWNTON DADDIES ARE HOME. AND THE SHOW GOES ON. FOREVER.'),
+  { end: 1 }
+];
+
+/* ---- director ---- */
+var Director = { i: 0, bg: 'stage' };
+function runNext() {
+  var st = SCRIPT[Director.i++];
+  if (!st) { setScene(makeEnding()); return; }
+  if (st.bg) {
+    Director.bg = st.bg;
+    if (TRACKS[st.bg]) musicStart(TRACKS[st.bg]);
+    runNext();
+  }
+  else if (st.say) startDialogue(st.say[0], st.say[1]);
+  else if (st.travel) setScene(makeTravel(st.travel, st.label));
+  else if (st.fx === 'boom') setScene(makeBoom());
+  else if (st.battle !== undefined) setScene(makeBattle(st.battle));
+  else if (st.end) setScene(makeEnding());
+  else runNext();
+}
+
+/* ---- main loop ---- */
+var lastTs = 0;
+function frame(ts) {
+  var dt = Math.min(0.05, (ts - lastTs) / 1000);
+  lastTs = ts;
+  musicTick();
+  if (scene) {
+    if (scene.update) scene.update(dt);
+    if (scene.draw) scene.draw();
+  }
+  requestAnimationFrame(frame);
+}
+setScene(Boot);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -2264,15 +2264,15 @@ var BOSSES = {
   heckler_boss: { enemyId: 'heckler', name: 'THE HECKLER', level: 1, hpMul: 1.4, ai: 'basic', crowd: -10,
     type: 'CLASSIC', spr: 'heckler', moves: ['heckle'] },
   maximvs: { name: 'MC MAXIMVS', spr: 'maximvs', type: 'FLEX', level: 5, ai: 'maximvs', crowd: 0,
-    base: { HYPE: 120, FLOW: 20, POISE: 16, TEMPO: 12 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
+    base: { HYPE: 122, FLOW: 19, POISE: 15, TEMPO: 12 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
   jake: { name: 'RATTLESNAKE JAKE', spr: 'jake', type: 'ROAST', level: 8, ai: 'jake', crowd: 0,
-    base: { HYPE: 160, FLOW: 27, POISE: 18, TEMPO: 16 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
+    base: { HYPE: 238, FLOW: 35, POISE: 21, TEMPO: 19 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
   rex: { name: 'DISCO REX', spr: 'rex', type: 'HEART', level: 11, ai: 'rex', crowd: 0,
-    base: { HYPE: 210, FLOW: 33, POISE: 22, TEMPO: 20 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
+    base: { HYPE: 400, FLOW: 52, POISE: 29, TEMPO: 24 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
   snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10,
-    base: { HYPE: 240, FLOW: 36, POISE: 26, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
+    base: { HYPE: 186, FLOW: 31, POISE: 23, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
   snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
-    base: { HYPE: 300, FLOW: 44, POISE: 28, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
+    base: { HYPE: 372, FLOW: 53, POISE: 31, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
   understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0,
     base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
 };
@@ -2362,7 +2362,11 @@ registerMap('manor', {
     { x: 9, y: 1, solid: true, draw: drawMirror, onInteract: function () { say([['NARRATOR', "WILLIAM'S ENORMOUS MIRROR."], ['NARRATOR', 'IT IS ALWAYS POLITE TO WAVE BACK.']]); } },
     { x: 2, y: 5, solid: true, draw: function () {}, onInteract: function () { say([['NARRATOR', "ROSALIND'S BOOKSHELF. HALF THE"], ['NARRATOR', 'BOOKS ARE JUST WIRING DIAGRAMS.']]); } },
     { x: 10, y: 1, solid: true, draw: drawTrunk, onInteract: function () { say([['NARRATOR', "HERSCHEL'S ARMY TRUNK. A MEDAL"], ['NARRATOR', 'FOR BRAVERY IN THE KITCHEN.'], ['NARRATOR', 'THE STEW WAS HOSTILE.']]); } },
-    { x: 11, y: 6, solid: true, draw: drawTrophy, flag: 'no_trophies_yet', onInteract: function () {} },
+    { x: 11, y: 6, solid: true, draw: drawTrophy, onInteract: function () {
+        if (hasFlag('game_complete')) say([['NARRATOR', 'THE TROPHY SHELF: FOUR ERA MEMENTOS,'], ['NARRATOR', 'AND ONE VERY CROOKED MUSTACHE.']]);
+        else say([['NARRATOR', 'AN EMPTY TROPHY SHELF, WAITING.'], ['SAMUEL', 'WE\'LL FILL IT. // JOKE SLOT']]); } },
+    { x: 13, y: 1, solid: true, draw: function (x, y) { px(x + 2, y + 4, 12, 9, COL.woodd); px(x + 3, y + 5, 10, 5, '#b8c8d8'); }, onInteract: function () {
+        say([['NARRATOR', 'A FRAMED PHOTO OF THE WHOLE TEAM.'], ['NARRATOR', 'EVERYONE IS MID-LAUGH. // JOKE SLOT']]); } },
     /* JOKE SLOT: manor examine object for a personalized inside joke */
     { x: 12, y: 8, solid: true, draw: function (x, y) { px(x + 4, y + 6, 8, 8, COL.teal); px(x + 6, y + 4, 4, 4, COL.tealtip); }, onInteract: function () { say([['NARRATOR', 'A HALF-BUILT INVENTION HUMS.'], ['ROSALIND', 'DO NOT TOUCH THAT. // JOKE SLOT']]); } },
     { x: 11, y: 2, solid: true, spr: 'babbage', dir: 'down', flag: 'babbage_moved',
@@ -3217,7 +3221,7 @@ function snobbingtonFight() {
     { say: ['SNOBBINGTON', 'LEAVE, OR FACE ME.'] },
     { say: ['SAMUEL', 'A RAP BATTLE?'] },
     { say: ['SNOBBINGTON', "REGRETTABLY, YES. THEM'S THE RULES."] },
-    { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 12 }, { enemy: 'gerald', level: 12 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -20 }; },
+    { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 10 }, { enemy: 'gerald', level: 10 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -10 }; },
       onResult: function (r) { if (r.win) setFlag('snob1_beaten'); } }
   ], { onDone: function () { if (hasFlag('snob1_beaten')) revealScene(); else gotoWorld(); } });
 }

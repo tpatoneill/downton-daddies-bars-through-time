@@ -104,7 +104,7 @@ function snobbingtonFight() {
     { say: ['SNOBBINGTON', 'LEAVE, OR FACE ME.'] },
     { say: ['SAMUEL', 'A RAP BATTLE?'] },
     { say: ['SNOBBINGTON', "REGRETTABLY, YES. THEM'S THE RULES."] },
-    { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 12 }, { enemy: 'gerald', level: 12 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -20 }; },
+    { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 10 }, { enemy: 'gerald', level: 10 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -10 }; },
       onResult: function (r) { if (r.win) setFlag('snob1_beaten'); } }
   ], { onDone: function () { if (hasFlag('snob1_beaten')) revealScene(); else gotoWorld(); } });
 }

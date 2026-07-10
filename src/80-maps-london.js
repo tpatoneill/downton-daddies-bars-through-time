@@ -59,7 +59,11 @@ registerMap('manor', {
     { x: 9, y: 1, solid: true, draw: drawMirror, onInteract: function () { say([['NARRATOR', "WILLIAM'S ENORMOUS MIRROR."], ['NARRATOR', 'IT IS ALWAYS POLITE TO WAVE BACK.']]); } },
     { x: 2, y: 5, solid: true, draw: function () {}, onInteract: function () { say([['NARRATOR', "ROSALIND'S BOOKSHELF. HALF THE"], ['NARRATOR', 'BOOKS ARE JUST WIRING DIAGRAMS.']]); } },
     { x: 10, y: 1, solid: true, draw: drawTrunk, onInteract: function () { say([['NARRATOR', "HERSCHEL'S ARMY TRUNK. A MEDAL"], ['NARRATOR', 'FOR BRAVERY IN THE KITCHEN.'], ['NARRATOR', 'THE STEW WAS HOSTILE.']]); } },
-    { x: 11, y: 6, solid: true, draw: drawTrophy, flag: 'no_trophies_yet', onInteract: function () {} },
+    { x: 11, y: 6, solid: true, draw: drawTrophy, onInteract: function () {
+        if (hasFlag('game_complete')) say([['NARRATOR', 'THE TROPHY SHELF: FOUR ERA MEMENTOS,'], ['NARRATOR', 'AND ONE VERY CROOKED MUSTACHE.']]);
+        else say([['NARRATOR', 'AN EMPTY TROPHY SHELF, WAITING.'], ['SAMUEL', 'WE\'LL FILL IT. // JOKE SLOT']]); } },
+    { x: 13, y: 1, solid: true, draw: function (x, y) { px(x + 2, y + 4, 12, 9, COL.woodd); px(x + 3, y + 5, 10, 5, '#b8c8d8'); }, onInteract: function () {
+        say([['NARRATOR', 'A FRAMED PHOTO OF THE WHOLE TEAM.'], ['NARRATOR', 'EVERYONE IS MID-LAUGH. // JOKE SLOT']]); } },
     /* JOKE SLOT: manor examine object for a personalized inside joke */
     { x: 12, y: 8, solid: true, draw: function (x, y) { px(x + 4, y + 6, 8, 8, COL.teal); px(x + 6, y + 4, 4, 4, COL.tealtip); }, onInteract: function () { say([['NARRATOR', 'A HALF-BUILT INVENTION HUMS.'], ['ROSALIND', 'DO NOT TOUCH THAT. // JOKE SLOT']]); } },
     { x: 11, y: 2, solid: true, spr: 'babbage', dir: 'down', flag: 'babbage_moved',

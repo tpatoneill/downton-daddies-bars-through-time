@@ -40,3 +40,17 @@ is made to best serve DESIGN.md.
   and machine part. Dungeons folded into route/arena maps to keep the 60–90 min target tight.
 - Finale: two-phase Snobbington with the verbatim reveal and True Form transform.
 - Birthday sequence + credits montage with LANE ALLISON on the marquee.
+
+## Phase 5 — final tuning decisions
+- **Timing crits: confirmed IN** (ON BEAT! +30%, fully ignorable — auto-resolves if unpressed).
+- **Balance sweep** (naive bot = type-optimal move, no items/timing-crits/switching, single attempt,
+  60 trials, at on-curve level): Jake ~75%, Rex ~63%, Snobbington P1 ~55-65%. Maximvs is high-variance
+  (~57-95% across runs, ~78% mean) because the Rome roster is only two Daddies vs a self-buffing boss;
+  smoothed in real play by teas, timing crits, and the retry-heal net. Tutorial Heckler and the finale
+  FINAL DRAFT are intentionally ~100% (a gentle first fight and a triumphant birthday payoff). These are
+  a naive lower bound; real friendly play (items + ON BEAT + the never-game-over retry) sits comfortably
+  above. "Frustration is a bug" — so difficulty leans friendly by design.
+- **Loss path:** a party wipe never games-over — it revives + full-heals the party and hands control
+  back (story/boss fights re-offer the same battle; wild fights return to the map). Verified by qa-loss.
+- **JOKE SLOT hooks:** clearly-marked `// JOKE SLOT` comments seeded across the manor (trophy shelf,
+  team photo, an invention) and every era town NPC line, for the owner's inside-joke list.

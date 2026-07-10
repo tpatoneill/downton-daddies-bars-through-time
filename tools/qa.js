@@ -149,6 +149,7 @@ function autoBattle(h, opts) {
     }
     if (b.phase === 'result') {
       const won = b.result.win, fled = b.result.fled;
+      if (opts.stopAtResult) return { win: won, fled: fled, lost: b.result.lost }; // single attempt (balance sweep)
       h.tap('a'); h.step(3, 20);
       // loss on a boss/story fight retries the same battle; keep playing until we leave battle
       if (!isBattle(G)) return { win: won, fled: fled, lost: b.result.lost };

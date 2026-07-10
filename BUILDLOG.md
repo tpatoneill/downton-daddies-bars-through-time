@@ -82,3 +82,24 @@ Both validated end-to-end (travel, joins, all maps, bosses, parts, unlocks). Add
   every map walked, every mandatory battle fought via the real travel hub, save/load roundtrip.
   All suites green: phase1 10, phase2 7, phase4 8, full 6.
 Screenshots: `screenshots/p4-*.png`.
+
+## Phase 5 — Personalization + Balance + Ship  ✔ (all QA green)
+- **Balance sweep** (`tools/qa-balance.js`): tuned every boss against a naive type-optimal bot
+  (60 trials, single attempt, on-curve level). Landed Jake ~75%, Rex ~63%, Snobbington P1 ~60%;
+  tutorial + finale phase-2 intentionally triumphant; Maximvs high-variance (~78% mean). See DECISIONS.
+- **Loss-path test** (`tools/qa-loss.js`): party wipe -> revive + full heal + control returned;
+  SPARE MUSTACHE revive mid-battle. No soft-locks.
+- **JOKE SLOT hooks** seeded across the manor + every era town for the owner's inside jokes.
+- **Every map rendered** (`tools/shots-allmaps.js` -> `screenshots/map-01..17-*.png`) for review.
+- **Self-contained** confirmed: zero external URLs/fonts/CDNs; config block intact
+  (`BIRTHDAY_NAME='LANE ALLISON'`, `DEDICATION='THE GREATEST DADDY OF ALL'`). ~192 KB single file.
+
+### Final QA status
+- qa-phase1 (10) · qa-phase2 (7) · qa-phase4 (8) · qa-loss (2) · qa-full (6) — **all pass**.
+- qa-full is the complete critical-path playthrough: Act0 -> Rome -> Dodge -> NYC -> Finale ->
+  Birthday, walking every map, every mandatory battle, the reveal + True Form, save/load roundtrip,
+  ending on the birthday marquee for LANE ALLISON.
+
+### The deliverable
+`dist/index.html` — one self-contained file, works offline, touch + keyboard, saves to localStorage
+(in-memory fallback). Build with `node build.js`; test with `node tools/qa-*.js`.

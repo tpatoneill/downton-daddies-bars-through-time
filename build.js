@@ -16,7 +16,9 @@ function loadModules() {
 function build() {
   const tpl = fs.readFileSync(path.join(ROOT, 'template.html'), 'utf8');
   const bundle = loadModules();
-  const out = tpl.replace('/*__BUNDLE__*/', bundle);
+  // NOTE: use a function replacement — a plain string would let special patterns
+  // like `$'`/`$&` in the bundle (e.g. the '$' glyph in the pixel font) corrupt output.
+  const out = tpl.replace('/*__BUNDLE__*/', () => bundle);
   fs.mkdirSync(path.join(ROOT, 'dist'), { recursive: true });
   fs.writeFileSync(path.join(ROOT, 'dist', 'index.html'), out);
   const kb = (Buffer.byteLength(out) / 1024).toFixed(1);

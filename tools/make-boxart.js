@@ -1,6 +1,9 @@
-/* make-boxart.js — print-ready physical box art (4.5in x 6.5in @ 300dpi = 1350x1950px).
-   Composes at 270x390 in the game's own pixel style (real sprite painters + font),
-   embeds real screenshots on the back, stamps a scannable QR, then upscales 5x.
+/* make-boxart.js — print-ready physical box art (4.5in x 6.5in @ 300dpi = 1350x1950px),
+   modeled on the classic GBA / Pokemon Emerald box format:
+   FRONT: vertical silver DADDYBOY ADVANCE band, arched logo, one big hero on a
+   glittery radial-burst field, rating box + company + publisher logos at bottom.
+   BACK: dark panel with blurb + bullets left, stacked framed screenshots + QR
+   right, character overlapping the panel, barcode / seal / model strip below.
    Outputs: print/cover-front.png, print/cover-back.png, print/qr-code.png */
 const fs = require('fs');
 const path = require('path');
@@ -16,18 +19,17 @@ fs.mkdirSync(OUT, { recursive: true });
 /* ---- load the game bundle bound to an arbitrary canvas, exporting draw internals ---- */
 function loadArt(w, h) {
   const cv = makeCanvas(w, h);
-  let raf = null;
   global.window = { addEventListener() {}, AudioContext: undefined, webkitAudioContext: undefined };
   global.document = { getElementById: () => ({ getContext: () => cv.ctx }), querySelectorAll: () => [] };
   global.performance = { now: () => 0 };
-  global.requestAnimationFrame = cb => { raf = cb; };
+  global.requestAnimationFrame = () => {};
   global.localStorage = { getItem: () => null, setItem() {}, removeItem() {} };
   const src = "var BIRTHDAY_NAME='LANE ALLISON';var DEDICATION='THE GREATEST DADDY OF ALL';\n" + bundleOnly();
-  const run = new Function(src + ';return { px, drawText, drawTextO, textW, panel, SPR, COL, ctx, fillEll };');
+  const run = new Function(src + ';return { px, drawText, drawTextO, textW, SPR, COL, ctx, fillEll, strokeEll };');
   return { G: run(), cv };
 }
 
-/* ---- real screenshots for the back (normal 240x160 instances) ---- */
+/* ---- real screenshots for the back ---- */
 function screenshot(setup) {
   const { loadGame, advanceUntil, isWorld } = require('./qa.js');
   const h = loadGame(); const G = h.G;
@@ -35,7 +37,7 @@ function screenshot(setup) {
   advanceUntil(h, isWorld, 6000);
   setup(h, G);
   h.step(6);
-  return h.cv.buf.slice(); // copy
+  return h.cv.buf.slice();
 }
 console.log('rendering in-game screenshots...');
 const shotBattle = screenshot((h, G) => {
@@ -48,131 +50,178 @@ const shotHypo = screenshot((h, G) => {
   G.Game.party = [G.makeFighter('samuel', 6)];
   G.Game.map = 'hypogeum'; G.Game.px = 8; G.Game.py = 6; G.Game.dir = 'up'; G.setScene(G.World);
 });
-const shotDisco = screenshot((h, G) => {
-  ['act0_tutorial', 'nyc_arrived_seen', 'rosalind_joined'].forEach(f => G.setFlag(f));
-  G.Game.party = [G.makeFighter('samuel', 10)];
-  G.Game.map = 'clubinferno'; G.Game.px = 8; G.Game.py = 7; G.Game.dir = 'down'; G.setScene(G.World);
-});
 
 /* ---- helpers ---- */
-function blitHalf(cv, shotBuf, dx0, dy0) { // 240x160 -> 120x80 into comp buffer
-  for (let y = 0; y < 80; y++) for (let x = 0; x < 120; x++) {
-    const si = ((y * 2) * 240 + (x * 2)) * 4, di = ((dy0 + y) * W + (dx0 + x)) * 4;
+function blitScaled(cv, shotBuf, dx0, dy0, dw, dh) { // 240x160 -> dw x dh
+  for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
+    const sx = Math.floor(x * 240 / dw), sy = Math.floor(y * 160 / dh);
+    const si = (sy * 240 + sx) * 4, di = ((dy0 + y) * W + (dx0 + x)) * 4;
     cv.buf[di] = shotBuf[si]; cv.buf[di + 1] = shotBuf[si + 1]; cv.buf[di + 2] = shotBuf[si + 2]; cv.buf[di + 3] = 255;
   }
 }
-function centerX(G, s, scale) { return Math.round((W - G.textW(s, scale)) / 2); }
+/* render text on a scratch canvas, blit it rotated 90° CCW (reads bottom-to-top) */
+function vertText(destCv, text, scale, color, dx, dy) {
+  const sw = 220, sh = 20;
+  const { G: S, cv: scv } = loadArt(sw, sh);
+  S.px(0, 0, sw, sh, '#ff00ff');
+  S.drawText(text, 0, 2, color, scale);
+  const tw = S.textW(text, scale), th = 5 * scale + 4;
+  for (let xx = 0; xx < tw; xx++) for (let yy = 0; yy < th; yy++) {
+    const si = (yy * sw + xx) * 4;
+    if (scv.buf[si] === 255 && scv.buf[si + 1] === 0 && scv.buf[si + 2] === 255) continue;
+    const dxp = dx + yy, dyp = dy + (tw - 1 - xx);
+    if (dxp < 0 || dyp < 0 || dxp >= W || dyp >= H) continue;
+    const di = (dyp * W + dxp) * 4;
+    destCv.buf[di] = scv.buf[si]; destCv.buf[di + 1] = scv.buf[si + 1]; destCv.buf[di + 2] = scv.buf[si + 2]; destCv.buf[di + 3] = 255;
+  }
+  return tw;
+}
+/* arched logo text (letters follow a Pokemon-logo-style arc, ends dipping down) */
+function archText(G, text, cx, baseY, scale, amp, fill, outline) {
+  const total = G.textW(text, scale);
+  let x = Math.round(cx - total / 2);
+  const n = text.length;
+  for (let i = 0; i < n; i++) {
+    const ch = text[i];
+    const t = (i / (n - 1)) * 2 - 1;                 // -1..1
+    const yoff = Math.round(amp * t * t);            // ends dip down
+    if (ch !== ' ') G.drawTextO(ch, x, baseY + yoff, fill, outline, scale);
+    x += G.textW(ch, scale) || 4 * scale;
+  }
+}
+/* the glittery radial-burst field (Emerald-style, in DaddyBoy purple) */
+function glitterField(G, cx, cy) {
+  const { px } = G;
+  px(0, 0, W, H, '#3a2560');
+  for (let i = 0; i < 28; i++) {                     /* radial light rays */
+    const a = (i / 28) * Math.PI * 2;
+    for (let r = 6; r < 460; r += 3) {
+      const x = Math.round(cx + Math.cos(a) * r), y = Math.round(cy + Math.sin(a) * r);
+      if (x < -4 || y < -4 || x >= W + 4 || y >= H + 4) break;
+      if (i % 2 === 0 && x >= 0 && y >= 0 && x < W && y < H) px(x, y, 2, 2, '#472e73');
+    }
+  }
+  const tones = ['#2c1a44', '#54398a', '#63459e', '#3f2a6b'];
+  for (let i = 0; i < 240; i++) {                    /* glitter facets */
+    const x = (i * 97 + 31) % W, y = (i * 61 + 17) % H, s = 2 + (i % 4);
+    px(x, y, s, s, tones[i % 4]);
+  }
+  for (let i = 0; i < 26; i++) {                     /* white sparkles */
+    const x = (i * 143 + 53) % (W - 8), y = (i * 89 + 29) % (H - 8);
+    px(x + 2, y, 1, 5, '#cfc2ec'); px(x, y + 2, 5, 1, '#cfc2ec'); px(x + 2, y + 2, 1, 1, '#ffffff');
+  }
+}
+function centerXAt(G, s, scale, cx) { return Math.round(cx - G.textW(s, scale) / 2); }
 
 /* ================= FRONT COVER ================= */
 console.log('composing front cover...');
 {
   const { G, cv } = loadArt(W, H);
-  const { px, drawText, drawTextO, SPR, COL, ctx } = G;
-  px(0, 0, W, H, '#241238');
-  for (let y = 0; y < H; y += 6) px(0, y, W, 3, (y / 6) % 2 ? '#2c1a44' : '#341d52');
-  /* top hardware band (GBA-box style) */
-  px(0, 0, W, 26, '#160b28'); px(0, 26, W, 2, COL.gold);
-  drawText('DADDYBOY', 10, 7, COL.gold, 1); drawText('ADVANCE', 62, 7, '#c9b6e6', 1);
-  drawText('VIDEO GAME CARTRIDGE... SPIRITUALLY', 10, 17, '#5a5578', 1);
-  px(238, 5, 24, 16, '#2c1a44'); px(241, 8, 18, 10, '#4ff0ff'); /* little screen icon */
-  /* gold spoke burst behind everything center */
-  for (let i = 0; i < 20; i++) {
-    const a = (i / 20) * Math.PI * 2;
-    for (let r = 24; r < 130; r += 6) px(Math.round(135 + Math.cos(a) * r), Math.round(235 + Math.sin(a) * r * 0.72), 2, 2, i % 2 ? '#3a2a5a' : '#4a3568');
-  }
-  /* crest top hat */
-  const hx = 135;
-  px(hx - 30, 36, 60, 26, COL.black); px(hx - 30, 54, 60, 5, COL.hatband); px(hx - 44, 62, 88, 6, COL.black);
-  /* title */
-  drawTextO('DOWNTON', centerX(G, 'DOWNTON', 4), 76, COL.gold, COL.black, 4);
-  drawTextO('DADDIES', centerX(G, 'DADDIES', 4), 104, COL.gold, COL.black, 4);
-  drawTextO('BARS THROUGH TIME', centerX(G, 'BARS THROUGH TIME', 2), 134, COL.pink, COL.black, 2);
-  px(40, 152, 190, 1, COL.gold);
-  /* character lineup: back row William + Rosalind, front center Samuel (mustache intact!) */
-  ctx.save(); ctx.translate(34, 196); ctx.scale(1.5, 1.5); SPR.william(0, 0); ctx.restore();
-  ctx.save(); ctx.translate(164, 196); ctx.scale(1.5, 1.5); SPR.rosalind(0, 0); ctx.restore();
-  ctx.save(); ctx.translate(8, 224); ctx.scale(1.5, 1.5); SPR.herschel(0, 0); ctx.restore();
-  ctx.save(); ctx.translate(198, 224); ctx.scale(1.5, 1.5); SPR.maximvs(0, 0); ctx.restore();
-  ctx.save(); ctx.translate(87, 200); ctx.scale(2, 2); SPR.samuel(0, 0); ctx.restore();
-  /* goblins peeking from the bottom corners */
-  ctx.save(); ctx.translate(2, 320); SPR.goblin(0, 0); ctx.restore();
-  ctx.save(); ctx.translate(222, 320); SPR.goblin(0, 0); ctx.restore();
-  /* confetti */
-  const conf = [[20,170],[60,160],[120,158],[190,164],[240,175],[30,300],[130,310],[250,290],[80,330],[180,335]];
-  conf.forEach((p, i) => px(p[0], p[1], 3, 3, ['#e05f8f', '#e2b23e', '#349c8e', '#8b5cf6', '#4ff0ff'][i % 5]));
-  /* tagline ribbon */
-  px(0, 336, W, 18, '#160b28'); px(0, 335, W, 1, COL.gold); px(0, 354, W, 1, COL.gold);
-  drawTextO('SPIT BARS ACROSS ALL OF HISTORY.', centerX(G, 'SPIT BARS ACROSS ALL OF HISTORY.', 1), 341, COL.cream, COL.black, 1);
-  /* bottom band */
-  px(0, 358, W, 32, '#160b28');
-  drawTextO('DADDYSOFT', centerX(G, 'DADDYSOFT', 2), 363, COL.gold, COL.black, 2);
-  drawText('(C) 1889 DADDYSOFT - MADE WITH LOVE AND TOP HATS', centerX(G, '(C) 1889 DADDYSOFT - MADE WITH LOVE AND TOP HATS', 1), 380, '#5a5578', 1);
+  const { px, drawText, drawTextO, SPR, COL, ctx, fillEll } = G;
+  const BAND = 28, CX = BAND + (W - BAND) / 2;       // content centers right of the band
+  glitterField(G, CX, 235);
+  px(0, 0, W, 2, '#1a0f2e'); px(0, H - 2, W, 2, '#1a0f2e'); px(W - 2, 0, 2, H, '#1a0f2e');
+  /* ---- vertical silver hardware band (GBA style) ---- */
+  for (let x = 0; x < BAND; x++) { const t = x / BAND; const v = Math.round(150 + 60 * Math.sin(t * Math.PI)); px(x, 0, 1, H, 'rgb(' + v + ',' + v + ',' + (v + 8) + ')'); }
+  px(BAND, 0, 2, H, '#1a0f2e');
+  px(0, 0, BAND, 34, '#3d2b6b');                     /* ONLY FOR tab */
+  vertText(cv, 'ONLY FOR', 1, '#ffffff', 9, 3);
+  vertText(cv, 'DADDYBOY ADVANCE', 2, '#22224a', 5, 44);
+  /* ---- arched logo ---- */
+  archText(G, 'DOWNTON', CX, 24, 4, 7, COL.gold, '#1a2138');
+  archText(G, 'DADDIES', CX, 56, 4, 7, COL.gold, '#1a2138');
+  drawTextO('BARS THROUGH', centerXAt(G, 'BARS THROUGH', 2, CX), 94, '#f6f6fa', '#1a2138', 2);
+  drawTextO('TIME', centerXAt(G, 'TIME', 2, CX), 110, '#f6f6fa', '#1a2138', 2);
+  /* ---- the box legendary: BIG Samuel ---- */
+  ctx.save(); ctx.translate(CX - 72, 142); ctx.scale(3, 3); SPR.samuel(0, 0); ctx.restore();
+  /* gold connected-badge (right side, Emerald-style) */
+  fillEll(226, 286, 262, 322, COL.gold); G.strokeEll(226, 286, 262, 322, '#8a6a1e');
+  drawText('100%', 234, 294, '#5a3c0a', 1);
+  drawText('BIRTH', 233, 301, '#5a3c0a', 1);
+  drawText('DAY', 238, 308, '#5a3c0a', 1);
+  /* ---- rating box (ESRB-style, lower-left) ---- */
+  px(34, 330, 30, 38, '#ffffff'); px(35, 331, 28, 36, '#000000'); px(36, 332, 26, 30, '#ffffff');
+  drawTextO('D', 44, 336, '#000000', '#ffffff', 3);
+  drawText('DADDY', 36, 355, '#000000', 1);
+  vertText(cv, 'RATED BY DAD', 1, '#e8e0f8', 66, 330);
+  /* company + publisher */
+  drawText('THE DOWNTON DADDIES COMPANY', centerXAt(G, 'THE DOWNTON DADDIES COMPANY', 1, CX), 374, '#f6f6fa', 1);
+  fillEll(206, 354, 262, 370, '#c8102e');
+  drawTextO('DADDYSOFT', 209, 359, '#ffffff', '#8a0a1e', 1);
   fs.writeFileSync(path.join(OUT, 'cover-front.png'), encodePNG(cv.buf, W, H, SCALE));
   console.log('  print/cover-front.png (1350x1950 @300dpi = 4.5x6.5in)');
 }
 
 /* ================= BACK COVER ================= */
 console.log('composing back cover...');
-QR.create(URL, { errorCorrectionLevel: 'M' }); // warm
-const qr = QR.create(URL, { errorCorrectionLevel: 'M' }).modules; // size x size, .get(r,c)
+const qr = QR.create(URL, { errorCorrectionLevel: 'M' }).modules;
 {
   const { G, cv } = loadArt(W, H);
-  const { px, drawText, drawTextO, SPR, COL, ctx } = G;
-  px(0, 0, W, H, '#241238');
-  for (let y = 0; y < H; y += 6) px(0, y, W, 3, (y / 6) % 2 ? '#2c1a44' : '#341d52');
-  /* header */
-  px(0, 0, W, 24, '#160b28'); px(0, 24, W, 2, COL.gold);
-  drawTextO('THE SHOW MUST GO ON.', 10, 4, COL.gold, COL.black, 1);
-  drawTextO('THROUGH ALL OF TIME.', 10, 14, COL.pink, COL.black, 1);
-  ctx.save(); ctx.translate(232, 2); ctx.scale(0.45, 0.45); SPR.samuel(0, 0); ctx.restore();
-  /* blurb */
+  const { px, drawText, drawTextO, SPR, COL, ctx, fillEll } = G;
+  glitterField(G, 135, 40);
+  px(0, 0, W, 2, '#1a0f2e'); px(0, H - 2, W, 2, '#1a0f2e'); px(0, 0, 2, H, '#1a0f2e'); px(W - 2, 0, 2, H, '#1a0f2e');
+  /* ---- top-left: small logo block ---- */
+  archText(G, 'DOWNTON', 62, 8, 2, 3, COL.gold, '#1a2138');
+  archText(G, 'DADDIES', 62, 24, 2, 3, COL.gold, '#1a2138');
+  drawTextO('BARS THROUGH TIME', 14, 40, '#f6f6fa', '#1a2138', 1);
+  /* ---- top-right: hardware compatibility strip ---- */
+  px(158, 8, 100, 14, '#ffffff'); px(159, 9, 98, 12, '#1a0f2e');
+  drawText('DADDYBOY ADVANCE', 163, 13, '#ffffff', 1);
+  px(158, 26, 100, 12, '#ffffff');
+  drawText('ANY BROWSER', 178, 29, '#000000', 1);
+  drawText('NOT COMPATIBLE', 158, 41, '#ff8a9a', 1);
+  drawText('WITH BEING SAD.', 158, 49, '#ff8a9a', 1);
+  /* ---- the big dark panel ---- */
+  px(10, 58, 250, 268, '#160b28'); px(12, 60, 246, 264, '#231240');
+  px(10, 58, 250, 1, COL.gold); px(10, 325, 250, 1, COL.gold); px(10, 58, 1, 268, COL.gold); px(259, 58, 1, 268, COL.gold);
+  /* blurb (left column) */
   const blurb = [
-    'AN EXPLOSION. A SCATTERED TEAM. A TIME',
-    'MACHINE FULL OF GOBLINS. SAMUEL MUST',
-    'RESCUE THE DADDIES ACROSS ROME, DODGE',
-    'CITY, DISCO-ERA NEW YORK AND BEYOND -',
-    'AND TAKE BACK THE THEATRE FROM THE',
-    'SCRIPTED ORDER. IN RAP BATTLES.'
+    'HISTORY IS UNSTABLE - THE',
+    'TIME ENGINE HAS EXPLODED!',
+    'YOUR BARS WILL BE TESTED',
+    'LIKE NEVER BEFORE. RESCUE',
+    'THE SCATTERED DADDIES IN',
+    'ROME, DODGE CITY, DISCO-',
+    'ERA NEW YORK AND A REALM',
+    'OF GOBLINS - THEN TAKE',
+    'THE THEATRE BACK FROM',
+    'THE SCRIPTED ORDER!'
   ];
-  blurb.forEach((l, i) => drawText(l, 10, 34 + i * 9, COL.cream, 1));
-  /* screenshots row 1 (real captures) */
-  function frame(x, y) { px(x - 2, y - 2, 124, 84, COL.gold); px(x - 1, y - 1, 122, 82, COL.black); }
-  frame(10, 96); blitHalf(cv, shotBattle, 10, 96);
-  frame(140, 96); blitHalf(cv, shotHypo, 140, 96);
-  drawText('BATTLE THE CHAMPION', 10, 179, '#c9b6e6', 1);
-  drawText('CRAWL THE HYPOGEUM', 140, 179, '#c9b6e6', 1);
-  /* screenshot row 2 + features */
-  frame(10, 194); blitHalf(cv, shotDisco, 10, 194);
-  drawText('BOOGIE THROUGH TIME', 10, 277, '#c9b6e6', 1);
-  const feats = ['4 PLAYABLE DADDIES', '6 ERAS OF HISTORY', 'TURN-BASED RAP BATTLES', 'WIN THE CROWD.', 'STEAL THE SHOW.', 'GOLDEN MUSTACHES', 'A SECRET WORTH SINGING'];
-  feats.forEach((f, i) => { px(140, 196 + i * 12, 4, 4, COL.gold); drawText(f, 148, 194 + i * 12, COL.white, 1); });
-  /* dedication ribbon */
-  px(0, 284, W, 19, '#160b28'); px(0, 283, W, 1, COL.gold); px(0, 303, W, 1, COL.gold);
-  drawTextO('MADE FOR LANE ALLISON -', centerX(G, 'MADE FOR LANE ALLISON -', 1), 286, COL.gold, COL.black, 1);
-  drawTextO('THE GREATEST DADDY OF ALL', centerX(G, 'THE GREATEST DADDY OF ALL', 1), 295, COL.pink, COL.black, 1);
-  /* QR (scannable): full white quiet zone, nothing drawn over it */
-  const qs = qr.size, mod = 2, qx = 14, qy = 310;
-  px(qx - 6, 304, qs * mod + 12, 86, '#ffffff'); /* generous quiet zone, 304..390 */
+  blurb.forEach((l, i) => drawText(l, 18, 66 + i * 9, '#f6f6fa', 1));
+  /* bullets */
+  const feats = ['FOUR PLAYABLE DADDIES.', 'CRAWL THE HYPOGEUM.', 'WIN THE CROWD.', '12 GOLDEN MUSTACHES.'];
+  feats.forEach((f, i) => { px(18, 162 + i * 10 + 1, 3, 3, COL.gold); drawText(f, 25, 162 + i * 10, '#e8e0f8', 1); });
+  /* character overlapping the panel (Emerald's May slot) */
+  ctx.save(); ctx.translate(34, 204); ctx.scale(2, 2); SPR.william(0, 0); ctx.restore();
+  drawText('THE FRONT LINE', 160, 312, COL.gold, 1);
+  drawText('OF RAP BATTLING!', 160, 320, COL.gold, 1);
+  /* ---- right column: 2 framed screenshots + QR box ---- */
+  function shotFrame(x, y, w2, h2) { px(x - 2, y - 2, w2 + 4, h2 + 4, '#ffffff'); px(x - 1, y - 1, w2 + 2, h2 + 2, '#000000'); }
+  shotFrame(160, 62, 90, 60); blitScaled(cv, shotBattle, 160, 62, 90, 60);
+  shotFrame(160, 132, 90, 60); blitScaled(cv, shotHypo, 160, 132, 90, 60);
+  /* QR as the third callout: generous white quiet zone */
+  const qs = qr.size, mod = 2;                       // 37*2 = 74
+  px(158, 202, 94, 104, '#ffffff');
+  const qx = 158 + Math.round((94 - qs * mod) / 2), qy = 208;
   for (let r = 0; r < qs; r++) for (let c = 0; c < qs; c++)
     if (qr.get(r, c)) px(qx + c * mod, qy + r * mod, mod, mod, '#000000');
-  /* center info column */
-  const bx = 104;
-  px(bx, 310, 56, 22, COL.white); px(bx + 1, 311, 54, 20, COL.black);
-  drawText('RATED', bx + 16, 313, COL.white, 1); drawTextO('D', bx + 24, 320, COL.gold, COL.black, 1);
-  drawText('DADDY', bx + 15, 325, COL.white, 1);
-  drawText('1 PLAYER', bx + 6, 338, '#c9b6e6', 1);
-  drawText('SAVES: YES', bx + 2, 348, '#c9b6e6', 1);
-  drawText('HIPS: BOTH', bx + 2, 358, '#c9b6e6', 1);
-  drawTextO('SCAN QR TO PLAY', bx - 2, 370, COL.gold, COL.black, 1);
-  drawText('ANY BROWSER.', bx + 4, 380, '#c9b6e6', 1);
-  /* fake barcode */
-  px(188, 310, 72, 40, '#ffffff');
-  let bxx = 192; const seed = [3,1,2,1,1,3,1,2,2,1,3,1,1,2,1,3,2,1,1,2,3,1];
-  seed.forEach((w2, i) => { if (i % 2 === 0) px(bxx, 314, w2, 28, '#000000'); bxx += w2 + 1; });
-  drawText('1 8 8 9 0 7 1 2', 194, 343, '#000000', 1);
-  drawText('DADDYSOFT 1889', 190, 354, '#5a5578', 1);
-  drawText('NO BATTERIES.', 190, 366, '#5a5578', 1);
-  drawText('NO REGRETS.', 190, 376, '#5a5578', 1);
+  drawText('SCAN TO PLAY', 172, 288, '#000000', 1);
+  drawText('ANY PHONE.', 178, 297, '#000000', 1);
+  /* ---- bottom strip (on the field) ---- */
+  px(14, 334, 74, 40, '#ffffff');                    /* barcode */
+  let bxx = 18; const seed = [3, 1, 2, 1, 1, 3, 1, 2, 2, 1, 3, 1, 1, 2, 1, 3, 2, 1, 1, 2, 3, 1];
+  seed.forEach((w2, i) => { if (i % 2 === 0) px(bxx, 338, w2, 24, '#000000'); bxx += w2 + 1; });
+  drawText('1 8 8 9 0 7 1 2', 20, 364, '#000000', 1);
+  fillEll(96, 336, 132, 372, COL.gold); G.strokeEll(96, 336, 132, 372, '#8a6a1e');  /* seal */
+  drawText('SEAL', 106, 344, '#5a3c0a', 1);
+  drawText('OF', 111, 351, '#5a3c0a', 1);
+  drawText('QUALITY', 100, 358, '#5a3c0a', 1);
+  drawText('MODEL NO. DBA-1889', 142, 338, '#f6f6fa', 1);
+  drawText('THE DOWNTON DADDIES CO.', 142, 348, '#c9b6e6', 1);
+  drawText('(C) 1889 DADDYSOFT', 142, 358, '#c9b6e6', 1);
+  fillEll(208, 364, 260, 378, '#c8102e');
+  drawTextO('DADDYSOFT', 211, 368, '#ffffff', '#8a0a1e', 1);
+  drawTextO('MADE FOR LANE ALLISON - THE GREATEST DADDY OF ALL', centerXAt(G, 'MADE FOR LANE ALLISON - THE GREATEST DADDY OF ALL', 1, 135), 381, COL.gold, '#1a0f2e', 1);
   fs.writeFileSync(path.join(OUT, 'cover-back.png'), encodePNG(cv.buf, W, H, SCALE));
   console.log('  print/cover-back.png (1350x1950 @300dpi = 4.5x6.5in)');
 }

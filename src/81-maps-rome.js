@@ -409,7 +409,7 @@ function romeVictory() {
     { say: ['HERSCHEL', 'NOT BAD, KID. NOW WATCH THIS.'] },
     { narr: 'HERSCHEL LEARNED BOTH HIPS!' },
     { narr: 'FLUX GEAR GET! ( 1 OF 4 )' },
-    { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH DODGE CITY.'] },
+    { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH THE OLD WEST.'] },
     { do: function () { saveGame(false); } }
   ], { onDone: function () { travelChoose('rome'); } });
 }

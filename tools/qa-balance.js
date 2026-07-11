@@ -35,11 +35,12 @@ function sweep(name, spec, mkParty) {
 
 console.log('BALANCE SWEEP — naive strategy, single attempt, ' + TRIALS + ' trials each');
 const res = {};
-res.maximvs = sweep('MC MAXIMVS (lv5)', { enemies: [{ boss: 'maximvs' }], crowdStart: 0 }, () => party(['samuel', 'herschel'], 5));
-res.jake = sweep('RATTLESNAKE JAKE (lv8)', { enemies: [{ boss: 'jake' }], crowdStart: 0 }, () => party(['samuel', 'herschel', 'william'], 8));
-res.rex = sweep('DISCO REX (lv11)', { enemies: [{ boss: 'rex' }], crowdStart: 0 }, () => party(['samuel', 'herschel', 'william', 'rosalind'], 11));
-res.snob1 = sweep('SNOBBINGTON P1 (lv13)', { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 10 }, { enemy: 'gerald', level: 10 }], crowdStart: -20 }, () => party(['samuel', 'herschel', 'william', 'rosalind'], 13));
-res.snob2 = sweep('FINAL DRAFT P2 (lv14)', { enemies: [{ boss: 'snob2' }], crowdStart: 100 }, () => party(['samuel', 'herschel', 'william', 'rosalind'], 14, true));
+res.maximvs = sweep('MC MAXIMVS (lv7)', { enemies: [{ boss: 'maximvs' }], crowdStart: 0 }, () => party(['samuel', 'herschel'], 7));
+res.robbery = sweep('METAPHOR ROBBERY (lv7)', { enemies: [{ enemy: 'gerald', level: 7 }, { enemy: 'bandit', level: 7 }], crowdStart: 0 }, () => party(['samuel', 'herschel'], 7));
+res.jake = sweep('RATTLESNAKE JAKE (lv10)', { enemies: [{ boss: 'jake' }], crowdStart: 0 }, () => party(['samuel', 'herschel', 'william'], 10));
+res.rex = sweep('DISCO REX (lv13)', { enemies: [{ boss: 'rex' }], crowdStart: 0 }, () => party(['samuel', 'herschel', 'william', 'rosalind'], 13));
+res.snob1 = sweep('SNOBBINGTON P1 (lv15)', { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 12 }, { enemy: 'gerald', level: 12 }], crowdStart: -20 }, () => party(['samuel', 'herschel', 'william', 'rosalind'], 15));
+res.snob2 = sweep('FINAL DRAFT P2 (lv15)', { enemies: [{ boss: 'snob2' }], crowdStart: 100 }, () => party(['samuel', 'herschel', 'william', 'rosalind'], 15, true));
 res.heckler = sweep('TUTORIAL HECKLER (lv1)', { enemies: [{ boss: 'heckler_boss' }], crowdStart: -10 }, () => party(['samuel'], 1));
 
 console.log('\nsummary:', JSON.stringify(res));

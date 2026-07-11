@@ -7,13 +7,15 @@ advanceUntil(h, isWorld, 6000);
 // full party + all "seen/arrived/joined/beaten" flags so onEnter cutscenes/bosses don't fire
 G.Game.party = [G.makeFighter('samuel', 15), G.makeFighter('herschel', 15), G.makeFighter('william', 15), G.makeFighter('rosalind', 15)];
 ['act0_intro','act0_tutorial','rome_unlocked','rome_arrived_seen','rome_done','maximvs_beaten','herschel_joined',
- 'dodge_unlocked','dodge_arrived_seen','dodge_done','jake_beaten','william_joined',
+ 'dodge_unlocked','west_arrived_seen','drygulch_seen','train_at_station','ticket_bought','train_departed',
+ 'robbery_started','train_robbery_done','train_arrived','dodge_city_reached','dodge_press','dodge_done','jake_beaten','william_joined',
  'nyc_unlocked','nyc_arrived_seen','nyc_done','rex_beaten','rosalind_joined',
  'london_unlocked','finale_arrived','editor1_beaten','editor2_beaten','lobby_clear','snob1_beaten','finale_done','game_complete',
  'babbage_moved'].forEach(f => G.setFlag(f));
 const spawns = {
   manor: [7, 8], bakersrow: [9, 5], theatre: [7, 8],
   forum: [8, 5], marketroad: [9, 4], kitchens: [7, 7], arena: [6, 8],
+  desertspawn: [3, 4], drygulch: [8, 5], station: [7, 4], traincar: [7, 3], baggagecar: [3, 3], mainstreet: [10, 6],
   theatredistrict: [9, 5], finalstage: [7, 8]
 };
 let n = 0;

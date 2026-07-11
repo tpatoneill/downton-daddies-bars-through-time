@@ -176,7 +176,11 @@ var ENEMIES = {
   bookmaker: { name: 'BOOKMAKER', spr: 'bookmaker', type: 'WORDPLAY', moves: ['weakword', 'scriptread'], base: { HYPE: 40, FLOW: 16, POISE: 12, TEMPO: 12, gH: 3.9, gF: 2.2, gP: 1.7, gT: 1.7 }, xp: 30, money: 40 },
   superfan:  { name: 'MAXIMVS SUPERFAN', spr: 'superfan', type: 'HEART', moves: ['weakheart', 'heckle'], base: { HYPE: 46, FLOW: 15, POISE: 12, TEMPO: 12, gH: 4.3, gF: 2.1, gP: 1.7, gT: 1.7 }, xp: 28, money: 22 },
   critic:    { name: 'THEATER CRITIC', spr: 'critic', type: 'WORDPLAY', moves: ['weakword', 'redpen'], base: { HYPE: 44, FLOW: 17, POISE: 13, TEMPO: 12, gH: 4.2, gF: 2.3, gP: 1.8, gT: 1.7 }, xp: 34, money: 30 },
-  goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 }
+  goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 },
+  bandit:    { name: 'TRAIN BANDIT', spr: 'bandit', type: 'ROAST', moves: ['weakroast', 'heckle'], base: { HYPE: 42, FLOW: 14, POISE: 12, TEMPO: 11, gH: 4.0, gF: 2.0, gP: 1.7, gT: 1.6 }, xp: 26, money: 22 },
+  prospector:{ name: 'GRIZZLED PROSPECTOR', spr: 'prospector', type: 'FLEX', moves: ['weakflex', 'scriptread'], base: { HYPE: 44, FLOW: 13, POISE: 13, TEMPO: 9, gH: 4.2, gF: 1.9, gP: 1.9, gT: 1.4 }, xp: 24, money: 20 },
+  granny:    { name: 'QUICK-DRAW GRANNY', spr: 'granny', type: 'HEART', moves: ['weakheart', 'heckle'], base: { HYPE: 40, FLOW: 15, POISE: 12, TEMPO: 14, gH: 3.9, gF: 2.1, gP: 1.7, gT: 2.0 }, xp: 28, money: 24 },
+  cardsharp: { name: 'CARD SHARP', spr: 'cardsharp', type: 'WORDPLAY', moves: ['weakword', 'scriptread'], base: { HYPE: 40, FLOW: 16, POISE: 12, TEMPO: 12, gH: 3.9, gF: 2.2, gP: 1.7, gT: 1.7 }, xp: 30, money: 30 }
 };
 
 /* pre-fight one-liners shown after the battle-intro transition (Pokemon-style).
@@ -211,7 +215,11 @@ var TAUNTS = {
   superfan: ['MAXIMVS! MAX-I-MVS!', 'YOU ARE NOT WORTHY OF HIS ARENA!'],
   critic: ['I GAVE YOUR LAST VERSE ONE STAR.', 'IMPRESS ME. FEW DO.'],
   goblinhex: ['A HEX UPON YOUR BARS!', 'ABRA-CADABRA-YOU-LOSE!', 'I CURSED YOUR RHYME SCHEME!'],
-  goblinbrute: ['BRUTE SMASH YOUR RHYMES!', 'BRUTE NO LIKE YOUR FACE-WORDS!', 'WORDS HARD. SMASH EASY!']
+  goblinbrute: ['BRUTE SMASH YOUR RHYMES!', 'BRUTE NO LIKE YOUR FACE-WORDS!', 'WORDS HARD. SMASH EASY!'],
+  bandit: ['HANDS UP. RHYMES OUT.', 'THIS IS A STICK-UP. OF BARS.', 'THE ORDER PAYS ME BY THE VERSE.'],
+  prospector: ['I STRUCK GOLD! AND ATTITUDE!', 'THESE HILLS TAUGHT ME TO SPIT.', 'GERTRUDE SAYS YOU LOSE.'],
+  granny: ['I KNIT FASTER THAN YOU RAP.', 'MY DENTURES HAVE BETTER FLOW.', 'BACK IN MY DAY WE BATTLED UPHILL.'],
+  cardsharp: ['I DEAL IN DEFEAT, FRIEND.', 'THE ODDS? STACKED. BY ME.', "READ 'EM AND WEEP, DADDY."]
 };
 function pickTaunt(id) {
   var own = TAUNTS[id] || [];
@@ -225,6 +233,7 @@ var ENC_POOLS = {
   rome:    ['orator', 'senator', 'gerald', 'legionary'],
   hypogeum:['beasthandler', 'trainee', 'legionary'],
   west:    ['tumbleweed', 'auctioneer', 'gerald'],
+  desert:  ['tumbleweed', 'bandit', 'prospector'],
   disco:   ['discofan', 'gerald'],
   goblin:  ['goblin']
 };

@@ -203,3 +203,38 @@ Screenshots: screenshots/rome2-*.png.
   confirm ("UNSAVED PROGRESS IS LOST") that returns to the title screen.
 - New suite `tools/qa-slots.js` (6 checks). Full regression green: slots 6 · p1 10 · p2 10 ·
   p4 7 · loss 2 · dist 7 · full 8.
+## Update — OLD WEST OVERHAUL: "The 3:10 to Dodge" (owner request)
+- **Era renamed OLD WEST 1878** (dated label like ROME 74 AD; 1878 = Dodge's cattle-boom peak).
+- **You now spawn in the High Desert** (new wild-scrub encounter zone + desert pool: Tumbleweed
+  Poet, Train Bandit, Grizzled Prospector) and walk east into **DRY GULCH**, a new frontier town
+  (general store, phonograph, the horse quest, and locals who hype Dodge City and foreshadow the
+  smiling sheriff).
+- **The train**: at Dry Gulch Station you buy a 25-shilling ticket (a repeatable porter chore
+  pays 8s a load, so going broke can't soft-lock you), then board the 3:10 — with a full
+  side-view **pull-in/departure animation** (loco, tender, two cars, ties scrolling, smoke,
+  brake hiss) reused for arrivals, departures, and free return rides both ways.
+- **Walkable train, 4 side quests**: the seat-4B Quick-Draw Granny duel, the Card Sharp's
+  lucky-marble recovery, the snake-oil testimonial (honesty wins), and Gertrude the
+  emotional-support rock in the mail-car crates.
+- **Required task**: the train will not stop until you foil the GREAT METAPHOR ROBBERY —
+  Gerald + a Train Bandit, a 2-enemy battle in the mail car (loss-path safe: they wait for a
+  rematch). Then the conductor pulls into Dodge and **William joins on the platform** (kept
+  near-verbatim, bumped to lv 7).
+- **Front Street, Dodge City rebuilt** as a 21x13 town: depot platform, false-front facades,
+  station alley, 3 patrol trainers (Wanted Outlaw, Card Sharp, Quick-Draw Granny), deputy/
+  undertaker/Gerald gags, Dodge Mercantile, drifting tumbleweed. **The Saloon is now gated**
+  on destroying the duel-card press in the Silver Mine (Rome-style objective); the mine's old
+  back-door warp to the saloon is boarded up. Jake's fight/poem beats untouched.
+- **4 new battle sprites + walkers** (bandit, prospector, granny, cardsharp) in the hires
+  painter style; new tiles (rails, platform, train interior, facades, desert scrub); traincar
+  battle backdrop with scrolling mesas; windows scroll desert while the train is en route.
+- **3 golden mustaches kept** (one relocated to the mail car; total still 12).
+- DEV menu: OLD WEST spawns the full era from the desert; new DODGE CITY (POST-TRAIN) entry
+  skips the train for fast boss-path testing. Old saves inside the era break (accepted).
+- QA: qa-full walks the whole new leg (ticket gate broke-path, porter chore, granny duel,
+  robbery, mustache, arrival, press gate, Jake); shots-phase3 rewritten (11 renders);
+  balance sweep updated to the current level curve + the robbery fight (83% naive-win, OK band).
+  Note: the buffed era bosses still read HARD under the sweep's naive no-items strategy
+  (Jake 2% at lv10) — winnable with beat-timing + tea per qa-full, but flagged for tuning.
+All suites green: p1 10 - p2 10 - p4 7 - loss 2 - swag 5 - dist 7 - full 9.
+Screenshots: screenshots/p3-*.png, west-enemy-*.png, map-*.png.

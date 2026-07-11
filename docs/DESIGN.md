@@ -47,7 +47,7 @@ Each era is a compact region — roughly one town map, one route, one small dung
 
 **ROME, 74 AD.** Forum plaza (town), Market Road (route — wild cyphers vs Street Orators and Gossiping Senators), Colosseum Kitchens (dungeon — Herschel is found here, put to work *again*), Arena floor (boss). The Scripted Order is distributing "approved verse scrolls" and shutting down the Forum's open cypher — all rhymes must be submitted in writing, in triplicate.
 
-**DODGE CITY, 1875.** Main Street (town — William has been sheriff for an hour, having smiled), Dusty Trail (route — Tumbleweed Poets, Cattle Auctioneers), the Silver Mine (dungeon — the Order is printing scripted "duel dialogue" cards down there), Saloon showdown (boss).
+**THE OLD WEST, 1878.** The engine overshoots Dodge by a desert. The High Desert (spawn — wild scrub, a cow skull that has seen things), Dry Gulch (frontier town — the locals talk up Dodge City and its smiling new sheriff), Dry Gulch Station (buy a 25-shilling ticket for the 3:10; a repeatable porter chore means nobody soft-locks broke), the 3:10 to Dodge (walkable train — side quests: the seat-4B granny duel, the lucky marble, the tonic testimonial, Gertrude the emotional-support rock; the conductor will not stop until the GREAT METAPHOR ROBBERY in the mail car is foiled — Gerald and a Train Bandit, 2-on-party), Front Street, Dodge City (detailed town — William has been sheriff for an hour, having smiled; patrol opponents; the Saloon is barred until the duel-card press falls), Dusty Trail (route — Tumbleweed Poets, Cattle Auctioneers), the Silver Mine (dungeon — the Order is printing scripted "duel dialogue" cards down there; destroying the press opens the Saloon), Saloon showdown (boss).
 
 **NEW YORK, 1977.** Back Alley (arrival), Club Inferno dance floor (town-equivalent, NPC-dense, best jokes-per-square-tile in the game), the Boiler Room (dungeon), Rooftop (boss under the stars). Rosalind has already reverse-engineered the DJ booth and identified the disco ball as a perfect temporal lens. The Order is replacing the club's DJs with a pre-programmed "Automatic Playlist" (they invented the algorithm, the monsters).
 
@@ -69,7 +69,7 @@ Sample kit: Opening Bar (basic), Double Entendre (Wordplay, chance to Fluster), 
 Highest Hype and Poise, lowest Tempo (the hips). Control and counterplay.
 Sample kit: Cane Whack, War Story (puts enemy to "Bored" — sleep analog), Back In My Day (Roast), Grumble Stance (counters the next attack), Kitchen Duty (small party heal + cures status; he was a kitchen soldier, healing via aggressive stew), Both Hips (huge Roast damage, hurts himself — "WORTH IT.").
 
-### WILLIAM — The Charmer (Heart/Support). Joins in Dodge City, ~lv 6.
+### WILLIAM — The Charmer (Heart/Support). Joins in Dodge City, ~lv 7.
 Buffs, debuffs, sustain. Fragile but game-warping.
 Sample kit: Devastating Wink (Heart, chance to Charm — enemy may skip a turn admiring him), Hair Flip (party evasion up), Royal Decree (enemy Flow down), Smolder (Heart damage), Noblesse Oblige (big single-ally heal), Crown Jewel (Flex nuke he learns very late, because even his violence is fabulous).
 

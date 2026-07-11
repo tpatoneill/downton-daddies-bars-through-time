@@ -4,7 +4,7 @@
    levels at each era boundary (stands in for the grinding a real player does; the
    balance sweep validates that on-curve fights are winnable-not-free). */
 const Q = require('./qa.js');
-const { loadGame, advanceUntil, isWorld, isBattle, walkTo, autoBattle, interactAt, walkToNextMap, trek, pickTravel, sceneName } = Q;
+const { loadGame, advanceUntil, isWorld, isBattle, walkTo, walkStep, autoBattle, interactAt, walkToNextMap, trek, pickTravel, sceneName } = Q;
 function assert(c, m) { if (!c) throw new Error('ASSERT FAILED: ' + m); }
 let PASS = 0; function ok(m) { PASS++; console.log('  ok  ' + m); }
 const h = loadGame(); const { G } = h;
@@ -67,18 +67,66 @@ assert(onMap(MAZE, () => {                                  // capstan puzzle
 levelParty(7);
 const TO_GATE = ['forum', 'grounds', 'arcades', 'hypogeum', 'stands', 'gateoflife'];
 assert(beatBoss(TO_GATE, 'arena', 'maximvs'), 'buffed Maximvs beaten');  // OBJECTIVE 2
-pickTravel(h, 'DODGE'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'to dodge');
+pickTravel(h, 'OLD WEST'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'to the old west');
 assert(G.hasFlag('rome_done') && G.Game.parts >= 1, 'Rome complete, part 1');
 ok('ROME MAZE: Herschel + pass, capstan, Gate of Life, buffed Maximvs, Flux Gear');
 
-// ---- Dodge City ----
-assert(G.Game.map === 'mainstreet', 'in Dodge mainstreet, got ' + G.Game.map);
+// ---- The Old West: desert -> Dry Gulch -> the 3:10 to Dodge ----
+assert(G.Game.map === 'desertspawn', 'in the High Desert, got ' + G.Game.map);
+levelParty(8);
+assert(trek(h, ['desertspawn', 'drygulch', 'station']), 'reach Dry Gulch station');
+// boarding is gated on a ticket: try broke, get turned away
+G.Game.money = 10;
+walkTo(h, 7, 3); h.step(2, 20); walkStep(h, 'up'); advanceUntil(h, isWorld, 4000, 'no-ticket turnaway');
+assert(G.Game.map === 'station' && !G.hasFlag('ticket_bought'), 'boarding blocked without a ticket');
+// the stationmaster refuses a broke daddy, the porter pays for honest work
+walkTo(h, 11, 5); interactAt(h, 11, 4); pickTravel(h, 'BUY TICKET'); advanceUntil(h, isWorld, 4000, 'too broke');
+assert(!G.hasFlag('ticket_bought'), 'no sale at 10 shillings');
+const moneyBefore = G.Game.money;
+walkTo(h, 3, 5); interactAt(h, 3, 6); advanceUntil(h, isWorld, 4000, 'porter chore');
+assert(G.Game.money === moneyBefore + 8, 'porter chore pays 8');
+// now buy it for real
+G.Game.money = 40;
+walkTo(h, 11, 5); interactAt(h, 11, 4); pickTravel(h, 'BUY TICKET'); advanceUntil(h, isWorld, 4000, 'ticket bought');
+assert(G.hasFlag('ticket_bought') && G.Game.money === 15, 'ticket bought for 25');
+// board: departure scene + train ride animation
+walkTo(h, 7, 3); h.step(2, 20); walkStep(h, 'up'); advanceUntil(h, isWorld, 12000, 'the 3:10 departs');
+assert(G.Game.map === 'traincar' && G.hasFlag('train_departed'), 'aboard and rolling');
+// the conductor will not stop while the Order robs his mail
+walkTo(h, 2, 3); interactAt(h, 1, 3); advanceUntil(h, isWorld, 4000, 'conductor refuses');
+assert(!G.hasFlag('train_arrived'), 'no stop before the robbery is handled');
+// side quest: the seat 4B granny duel
+interactAt(h, 2, 2); advanceUntil(h, g => isBattle(g), 6000, 'granny seat duel'); autoBattle(h, { onBeat: true });
+advanceUntil(h, isWorld, 5000, 'granny beaten');
+assert(G.hasFlag('q_granny'), 'seat 4B settled with bars');
+// the required task: the Great Metaphor Robbery (2-enemy battle in the mail car)
+walkToNextMap(h, 'baggagecar');
+if (!G.hasFlag('train_robbery_done')) { advanceUntil(h, g => isBattle(g), 8000, 'robbery'); autoBattle(h, { onBeat: true }); advanceUntil(h, isWorld, 6000, 'robbery done'); }
+assert(G.hasFlag('train_robbery_done'), 'Great Metaphor Robbery foiled');
+// the relocated mustache hides behind the crates
+walkTo(h, 10, 5); advanceUntil(h, isWorld, 4000, 'mail car mustache');
+assert(G.hasFlag('stache_dodge') && G.Game.mustaches >= 1, 'mail-car mustache collected');
+// tell the conductor -> arrival animation -> Dodge City, where William joins
+assert(trek(h, ['baggagecar', 'traincar']), 'back to the passenger car');
+walkTo(h, 2, 3); interactAt(h, 1, 3); advanceUntil(h, isWorld, 15000, 'pull into Dodge');
+assert(G.Game.map === 'mainstreet', 'arrived at Front Street, got ' + G.Game.map);
 assert(G.Game.party.length === 3 && G.Game.party[2].id === 'william', 'William joined on arrival');
+ok('OLD WEST: desert, Dry Gulch, ticket gate, porter chore, the 3:10, granny duel, robbery foiled, William joins');
+
+// ---- Dodge City: the saloon is gated on the press ----
 levelParty(10);
-assert(beatBoss(['mainstreet', 'dustytrail', 'silvermine'], 'saloon', 'jake'), 'Jake beaten'); // Jake on onEnter
+walkTo(h, 6, 5); h.step(2, 20); walkStep(h, 'up'); advanceUntil(h, isWorld, 4000, 'saloon barred');
+assert(G.Game.map === 'mainstreet' && !G.hasFlag('dodge_press'), 'saloon barred before the press falls');
+assert(onMap(['mainstreet', 'dustytrail', 'silvermine'], () => {
+  walkTo(h, 7, 2); if (G.Game.map !== 'silvermine') return false;
+  interactAt(h, 7, 3); advanceUntil(h, g => isBattle(g), 6000, 'press battle'); autoBattle(h, { onBeat: true });
+  advanceUntil(h, isWorld, 6000, 'press down');
+  return G.hasFlag('dodge_press');
+}), 'press destroyed -> saloon opens');
+assert(beatBoss(['silvermine', 'dustytrail', 'mainstreet'], 'saloon', 'jake'), 'Jake beaten'); // Jake on onEnter
 pickTravel(h, 'NEW YORK'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'to nyc');
 assert(G.hasFlag('dodge_done') && G.Game.parts >= 2, 'Dodge complete, part 2');
-ok('DODGE: William joins, Jake down, Chrono Coil');
+ok('DODGE CITY: press gate, Jake down, Chrono Coil');
 
 // ---- New York ----
 assert(G.Game.party.length === 4 && G.Game.party[3].id === 'rosalind', 'Rosalind joined on arrival');

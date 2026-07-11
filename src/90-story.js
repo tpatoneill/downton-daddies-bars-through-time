@@ -242,7 +242,8 @@ function debugParty(ids, level) {
 var DEV_VISITS = [
   { label: 'LONDON ACT 0', era: 'act0' },
   { label: 'ROME', era: 'rome' },
-  { label: 'DODGE CITY', era: 'dodge' },
+  { label: 'OLD WEST', era: 'dodge' },
+  { label: 'DODGE CITY (POST-TRAIN)', era: 'dodgecity' },
   { label: 'NEW YORK', era: 'nyc' },
   { label: 'GOBLIN REALM', era: 'goblin' },
   { label: 'LONDON FINALE', era: 'finale' }
@@ -259,28 +260,40 @@ function debugVisit(era) {
     debugParty(['samuel'], 4);
     F(['act0_tutorial', 'rome_unlocked']); Game.parts = 0;
     Game.map = 'forum'; Game.px = 8; Game.py = 9; Game.dir = 'up';
-  } else if (era === 'dodge') {   /* William joins on arrival */
+  } else if (era === 'dodge') {   /* the full era from the desert spawn */
     debugParty(['samuel', 'herschel'], 7);
     F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined', 'dodge_unlocked']);
     Game.parts = 1;
-    Game.map = 'mainstreet'; Game.px = 8; Game.py = 9; Game.dir = 'up';
+    Game.map = 'desertspawn'; Game.px = 3; Game.py = 4; Game.dir = 'right';
+  } else if (era === 'dodgecity') { /* skip the train: William joins on the platform */
+    debugParty(['samuel', 'herschel'], 7);
+    F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
+       'dodge_unlocked', 'west_arrived_seen', 'drygulch_seen', 'train_at_station', 'ticket_bought',
+       'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived']);
+    Game.parts = 1;
+    Game.map = 'mainstreet'; Game.px = 8; Game.py = 2; Game.dir = 'down';
   } else if (era === 'nyc') {     /* Rosalind joins on arrival */
     debugParty(['samuel', 'herschel', 'william'], 10);
     F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
-       'dodge_unlocked', 'dodge_arrived_seen', 'dodge_done', 'jake_beaten', 'william_joined', 'nyc_unlocked']);
+       'dodge_unlocked', 'west_arrived_seen', 'drygulch_seen', 'train_at_station', 'ticket_bought',
+       'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived', 'dodge_city_reached',
+       'dodge_press', 'dodge_done', 'jake_beaten', 'william_joined', 'nyc_unlocked']);
     Game.parts = 2;
     Game.map = 'backalley'; Game.px = 6; Game.py = 5; Game.dir = 'up';
   } else if (era === 'goblin') {  /* plays the Rex outro -> malfunction -> arrival chain */
     debugParty(['samuel', 'herschel', 'william', 'rosalind'], 11);
     F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
-       'dodge_unlocked', 'dodge_arrived_seen', 'dodge_done', 'jake_beaten', 'william_joined',
+       'dodge_unlocked', 'west_arrived_seen', 'drygulch_seen', 'train_at_station', 'ticket_bought',
+       'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived', 'dodge_city_reached',
+       'dodge_press', 'dodge_done', 'jake_beaten', 'william_joined',
        'nyc_unlocked', 'nyc_arrived_seen', 'nyc_done', 'rex_beaten', 'rosalind_joined']);
     Game.parts = 3;
     Game.map = 'rooftop'; Game.px = 6; Game.py = 6; Game.dir = 'up';
     nycVictory(); return;
   } else {                        /* finale: full level from the occupied district */
     debugParty(['samuel', 'herschel', 'william', 'rosalind'], 14);
-    F(['act0_tutorial', 'rome_arrived_seen', 'rome_done', 'herschel_joined', 'dodge_arrived_seen', 'dodge_done',
+    F(['act0_tutorial', 'rome_arrived_seen', 'rome_done', 'herschel_joined', 'west_arrived_seen', 'drygulch_seen', 'train_at_station', 'ticket_bought',
+       'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived', 'dodge_city_reached', 'dodge_press', 'dodge_done',
        'william_joined', 'nyc_arrived_seen', 'nyc_done', 'rosalind_joined', 'goblin_arrived', 'goblin_done',
        'pedro_beaten', 'london_unlocked', 'trueform']);
     Game.parts = 4;

@@ -137,3 +137,30 @@ function newGame() {
   gotoWorld();
 }
 function continueGame() { if (loadGame()) gotoWorld(); else newGame(); }
+
+/* ---- DEV: skip straight to late-game states (title screen, behind SELECT) ---- */
+function debugParty(level) {
+  Game.party = [makeFighter('samuel', level), makeFighter('herschel', level), makeFighter('william', level), makeFighter('rosalind', level)];
+  Game.activeIdx = 0; Game.money = 200; Game.mustaches = 0; Game.parts = 3;
+  Game.items = { earlgrey: 5, strongtea: 3, crumpet: 2, sparestache: 2, lozenge: 3 };
+  Game.drip = {}; Game.playtime = 0; Game.started = true;
+  ['act0_intro', 'act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
+   'dodge_unlocked', 'dodge_arrived_seen', 'dodge_done', 'jake_beaten', 'william_joined',
+   'nyc_unlocked', 'nyc_arrived_seen', 'nyc_done', 'rex_beaten', 'rosalind_joined'].forEach(function (f) { setFlag(f); });
+  for (var k in Maps) Maps[k]._entered = false;
+}
+function debugSkip(where) {
+  Game.flags = {};
+  if (where === 'goblin') {
+    debugParty(11); setFlag('goblin_arrived');
+    Game.map = 'goblinrealm'; Game.px = 8; Game.py = 8; Game.dir = 'up';
+    gotoWorld();
+  } else { /* finale (already revealed, at the theatre) */
+    debugParty(14);
+    ['goblin_done', 'london_unlocked', 'trueform', 'editor1_beaten', 'editor2_beaten', 'lobby_clear'].forEach(function (f) { setFlag(f); });
+    Game.parts = 3;
+    Game.party[0].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];
+    Game.map = 'finalstage'; Game.px = 7; Game.py = 11; Game.dir = 'up'; /* onEnter starts Snobbington */
+    gotoWorld();
+  }
+}

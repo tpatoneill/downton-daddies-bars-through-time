@@ -104,6 +104,40 @@ function save(buf, file) {
   console.log('  print/' + file + ' (1350x1950 @300dpi = 4.5x6.5in)');
 }
 
+/* ---------- external hero art (PNG/JPEG from an image generator) ---------- */
+const SCRATCH = '/private/tmp/claude-501/-Users-pationeill-Desktop-dd-advance-kit/c9853315-07c0-48fc-8efd-b6efac7ce17c/scratchpad/node_modules';
+function loadImage(p2) {
+  const b = fs.readFileSync(p2);
+  if (p2.match(/\.png$/i)) { const { PNG } = require(SCRATCH + '/pngjs'); const img = PNG.sync.read(b); return { w: img.width, h: img.height, data: img.data }; }
+  const jpeg = require(SCRATCH + '/jpeg-js'); const img = jpeg.decode(b, { maxMemoryUsageInMB: 1024 }); return { w: img.width, h: img.height, data: img.data };
+}
+function findArt() {
+  const cands = [process.env.ART,
+    '/Users/pationeill/Downloads/cover-art.png', '/Users/pationeill/Downloads/cover-art.jpg',
+    '/Users/pationeill/Downloads/cover-art.jpeg', '/Users/pationeill/Downloads/cover-art 2.png'].filter(Boolean);
+  for (const c of cands) if (fs.existsSync(c)) return c;
+  return null;
+}
+/* cover-fit `img` into buffer region (bilinear), cropping overflow centered */
+function coverBlit(buf, img, x0, y0, rw, rh) {
+  const sc = Math.max(rw / img.w, rh / img.h);
+  const cw = rw / sc, ch = rh / sc;                 // source crop size
+  const cx0 = (img.w - cw) / 2, cy0 = (img.h - ch) / 2;
+  for (let y = 0; y < rh; y++) for (let x = 0; x < rw; x++) {
+    const sx = cx0 + x / sc, sy = cy0 + y / sc;
+    const x1 = Math.min(img.w - 1, Math.floor(sx)), y1 = Math.min(img.h - 1, Math.floor(sy));
+    const x2 = Math.min(img.w - 1, x1 + 1), y2 = Math.min(img.h - 1, y1 + 1);
+    const fx = sx - x1, fy = sy - y1;
+    const di = ((y0 + y) * W + (x0 + x)) * 4;
+    for (let c = 0; c < 3; c++) {
+      const a = img.data[(y1 * img.w + x1) * 4 + c] * (1 - fx) + img.data[(y1 * img.w + x2) * 4 + c] * fx;
+      const b2 = img.data[(y2 * img.w + x1) * 4 + c] * (1 - fx) + img.data[(y2 * img.w + x2) * 4 + c] * fx;
+      buf[di + c] = a * (1 - fy) + b2 * fy;
+    }
+    buf[di + 3] = 255;
+  }
+}
+
 /* ---------- the glittery Emerald-style field (smooth, purple) ---------- */
 function field(K, cx, cy) {
   K.vgrad(0, 0, W, H, '#4a3080', '#241543');
@@ -289,7 +323,17 @@ console.log('composing front cover (smooth cartoon style)...');
 {
   const buf = makeBuf(); const K = kit(buf);
   const BAND = 150 * SS, CX = BAND + (W - BAND) / 2;
-  field(K, CX, 1150 * SS);
+  const artPath = findArt();
+  if (artPath) {
+    console.log('  hero art: ' + artPath);
+    coverBlit(buf, loadImage(artPath), BAND, 0, W - BAND, H);
+    /* soft scrims so the logo + bottom chrome pop over the painting */
+    for (let y = 0; y < 380 * SS; y++) { const a = 0.34 * (1 - y / (380 * SS)); K.rect(BAND, y, W - BAND, 1, '#1a0f2e', a); }
+    for (let y = 0; y < 220 * SS; y++) { const a = 0.4 * (y / (220 * SS)); K.rect(BAND, H - 220 * SS + y, W - BAND, 1, '#1a0f2e', a); }
+  } else {
+    console.log('  (no Downloads/cover-art.png yet — using the drawn field as placeholder)');
+    field(K, CX, 1150 * SS);
+  }
   /* vertical silver band */
   for (let x = 0; x < BAND; x++) { const t = x / BAND, v = Math.round(148 + 70 * Math.sin(t * Math.PI)); const c = [v, v, v + 10]; for (let y = 0; y < H; y++) K.set(x, y, c); }
   K.rect(BAND, 0, 5 * SS, H, INK);
@@ -311,16 +355,9 @@ console.log('composing front cover (smooth cartoon style)...');
   K.bubble('DOWNTON', CX - K.bubbleW('DOWNTON', 13 * SS) / 2, 66 * SS, 13 * SS, gold, navy, 5 * SS, 16 * SS);
   K.bubble('DADDIES', CX - K.bubbleW('DADDIES', 13 * SS) / 2, 172 * SS, 13 * SS, gold, navy, 5 * SS, 16 * SS);
   K.bubble('BARS THROUGH TIME', CX - K.bubbleW('BARS THROUGH TIME', 5.4 * SS) / 2, 292 * SS, 5.4 * SS, '#ffffff', navy, 3 * SS, 0);
-  /* ---- ALL FOUR DADS (smooth chibi cartoons) ---- */
-  drawHerschel(K, 265 * SS, 1575 * SS, 250 * SS);
-  drawRosalind(K, 1150 * SS, 1580 * SS, 235 * SS);
-  drawWilliam(K, 515 * SS, 1645 * SS, 265 * SS);
-  drawSamuel(K, 815 * SS, 1690 * SS, 315 * SS);
-  drawGoblin(K, 205 * SS, 1698 * SS, 130 * SS);
-  drawGoblin(K, 1255 * SS, 1690 * SS, 120 * SS);
-  /* confetti */
-  for (let i = 0; i < 22; i++) { const x = BAND + ((i * 379 + 71) % (W - BAND - 60)) + 30, y = 430 * SS + ((i * 257 + 43) % (560 * SS));
-    K.rrect(x, y, 9 * SS, 5 * SS, 2 * SS, ['#e05f8f', '#e2b23e', '#349c8e', '#8b5cf6', '#4ff0ff'][i % 5], 0.95); }
+  /* (hero art carries the characters; dads drawn in code only when no art exists) */
+  if (!artPath) { drawHerschel(K, 265 * SS, 1575 * SS, 250 * SS); drawRosalind(K, 1150 * SS, 1580 * SS, 235 * SS);
+    drawWilliam(K, 515 * SS, 1645 * SS, 265 * SS); drawSamuel(K, 815 * SS, 1690 * SS, 315 * SS); }
   /* gold 100% BIRTHDAY badge */
   K.circle(1215 * SS, 1180 * SS, 92 * SS, '#8a6a1e'); K.circle(1215 * SS, 1180 * SS, 86 * SS, gold);
   K.ring(1215 * SS, 1180 * SS, 72 * SS, 3 * SS, '#8a6a1e');

@@ -3859,9 +3859,11 @@ function debugParty(level) {
 function debugSkip(where) {
   Game.flags = {};
   if (where === 'goblin') {
-    debugParty(11); setFlag('goblin_arrived');
-    Game.map = 'goblinrealm'; Game.px = 8; Game.py = 8; Game.dir = 'up';
-    gotoWorld();
+    /* start exactly at the end of the NYC (Rex) boss fight: plays the mirror-ball
+       donation + the engine-malfunction cutscenes, then lands in the Goblin Realm */
+    debugParty(11);
+    Game.map = 'rooftop'; Game.px = 6; Game.py = 6; Game.dir = 'up';
+    nycVictory();
   } else { /* finale (already revealed, at the theatre) */
     debugParty(14);
     ['goblin_done', 'london_unlocked', 'trueform', 'editor1_beaten', 'editor2_beaten', 'lobby_clear'].forEach(function (f) { setFlag(f); });

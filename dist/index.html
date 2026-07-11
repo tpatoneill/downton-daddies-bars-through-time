@@ -1767,7 +1767,7 @@ function makeBattle(spec, onEnd) {
     activeIdx: Math.max(0, firstLivingIdx(Game.party)),
     targetIdx: 0,
     crowd: spec.crowdStart || 0, usedShow: false,
-    revealPending: false, revealDone: false,
+    revealPending: false, revealDone: false, superFX: null,
     phase: 'intro', menuIdx: 0, moveIdx: 0, itemIdx: 0, switchIdx: 0,
     queue: [], qi: 0, msg: '', msgT: 0, autoMsgT: 0,
     aimT: 0, aimHit: false, pendingMove: null,
@@ -1902,6 +1902,8 @@ function makeBattle(spec, onEnd) {
           var sc = m.pow * typeMult(m.type, tgt.type) + Math.random() * 5; if (sc > bestScore) { bestScore = sc; best = e.moves[i]; } }
         return pick(best || e.moves[0]);
       };
+      /* every boss unleashes its screen-shaking SUPER every 4th turn */
+      if (e.superMove && e.turnCount >= 3 && e.turnCount % 4 === 0) return pick(e.superMove);
       if (ai === 'maximvs' && e.turnCount <= 3) return pick('flexstack'); /* three escalating self-buffs */
       if (ai === 'rex' && this.crowd < -20 && e.turnCount % 2 === 0) return pick('mirrorball'); /* heals via crowd */
       if (ai === 'snob1' && e.turnCount % 3 === 0) return pick('rewrite');
@@ -1938,6 +1940,8 @@ function makeBattle(spec, onEnd) {
         if (accRoll > (move.acc || 1) * evaSt) { this.crowdSwing(f, -3); return f.name + "'S " + move.name + ' MISSED!'; }
       }
       var lines = [f.name + ' USES ' + move.name + '!'];
+      /* signature SUPER move -> screen-shaking animation overlay */
+      if (move.fx) { this.superFX = { kind: move.fx, name: move.name, t: 0, dur: 1.5, color: TYPECOL[move.type] || COL.white }; this.shake = 1.5; this.flash = 0.5; sfx('boom'); sfx('showstopper'); }
       this.crowdSwing(f, Math.abs(move.crowd || 0));
       /* damage */
       if (move.pow) {
@@ -2172,6 +2176,7 @@ function makeBattle(spec, onEnd) {
     /* ---------- update / draw ---------- */
     update: function (dt) {
       this.animT += dt;
+      if (this.superFX) { this.superFX.t += dt; if (this.superFX.t >= this.superFX.dur) this.superFX = null; }
       if (this.hitFlash > 0) this.hitFlash -= dt;
       if (this.shake > 0) this.shake -= dt;
       if (this.flash > 0) this.flash -= dt;
@@ -2217,6 +2222,33 @@ function makeBattle(spec, onEnd) {
       else if (this.phase === 'aim') this.drawAim();
       else if (this.phase === 'resolve') this.drawMsg();
       else if (this.phase === 'result') this.drawResult();
+      /* boss SUPER animation overlays everything */
+      if (this.superFX) this.drawSuperFX();
+    },
+    drawSuperFX: function () {
+      var s = this.superFX, p = s.t / s.dur; /* 0..1 */
+      var i, k;
+      /* colored flash, brightest at the start */
+      ctx.globalAlpha = 0.6 * (1 - p);
+      cls(s.color); ctx.globalAlpha = 1;
+      /* type-flavored particles */
+      if (s.kind === 'finalword') {                       /* Snobbington: black redaction bars + scribbles */
+        for (i = 0; i < 6; i++) { var by = ((s.t * 260 + i * 34) % 190) | 0; px(0, by, 240, 6, COL.black); }
+        for (i = 0; i < 10; i++) { var rx = (i * 53 + (s.t * 40 | 0)) % 236; px(rx, 30 + (i * 13) % 100, 18, 3, '#c63a46'); }
+      } else if (s.kind === 'flex') {                     /* Maximvs: expanding gold rings */
+        for (i = 0; i < 4; i++) { var sz = ((p * 260 + i * 55) % 240) | 0, cx = 120, cy = 80;
+          px(cx - sz / 2, cy - sz / 2, sz, 2, COL.gold); px(cx - sz / 2, cy + sz / 2, sz, 2, COL.gold);
+          px(cx - sz / 2, cy - sz / 2, 2, sz, COL.gold); px(cx + sz / 2, cy - sz / 2, 2, sz, COL.gold); }
+      } else if (s.kind === 'roast') {                    /* Jake: rising embers */
+        for (i = 0; i < 26; i++) { var ex = (i * 37) % 240, ey = 160 - ((s.t * 200 + i * 43) % 170); px(ex, ey, 3, 3, i % 2 ? COL.gold : COL.red); }
+      } else if (s.kind === 'heart') {                    /* Rex / Pedro: floating hearts */
+        for (i = 0; i < 16; i++) { var hx = (i * 61) % 232, hy = 150 - ((s.t * 150 + i * 51) % 150);
+          px(hx, hy + 1, 6, 4, COL.pink); px(hx + 1, hy, 2, 2, COL.pink); px(hx + 4, hy, 2, 2, COL.pink); px(hx + 2, hy + 5, 2, 2, COL.pink); }
+      }
+      /* the move name, big and shaking */
+      var jx = ((Math.random() - 0.5) * 6) | 0;
+      centerTextO(s.name, 66 + (((s.t * 20) | 0) % 2), COL.white, COL.black, 2);
+      if (p < 0.5) centerTextO('!!', 92, s.color, COL.black, 2);
     },
     drawHPBox: function (f, x, y, isPlayer) {
       if (!f) return;
@@ -2386,6 +2418,12 @@ var MOVES = {
   approved:    { name: 'APPROVED VERSE', type: 'WORDPLAY', pow: 58, acc: .95, tgt: 'enemy', crowd: 4, desc: '' },
   finaldraft:  { name: 'FINAL DRAFT', type: 'WORDPLAY', pow: 84, acc: .9, tgt: 'enemy', crit: .1, crowd: 8, desc: '' },
   rewrite:     { name: 'REWRITE HISTORY', type: 'WORDPLAY', pow: 66, acc: .95, tgt: 'enemy', crowd: 6, eff: { status: 'FLUSTERED', chance: .3 }, desc: '' },
+  finalword:   { name: 'THE FINAL WORD', type: 'WORDPLAY', pow: 120, acc: .95, tgt: 'enemy', crit: .1, crowd: 10, eff: { pierce: true }, fx: 'finalword', desc: 'AN UNANSWERABLE EDIT.' },
+  /* --- boss SUPER moves (screen-shaking signature abilities, one per boss) --- */
+  thumbsdown:  { name: 'THUMBS DOWN', type: 'FLEX', pow: 100, acc: .95, tgt: 'enemy', crit: .05, crowd: 12, fx: 'flex', desc: '' },
+  gravelstorm: { name: 'GRAVEL STORM', type: 'ROAST', pow: 100, acc: .95, tgt: 'enemy', crowd: 12, eff: { status: 'SHOOK', chance: .6 }, fx: 'roast', desc: '' },
+  lastdance:   { name: 'LAST DANCE', type: 'HEART', pow: 100, acc: .95, tgt: 'enemy', crowd: 12, eff: { healFromCrowd: true }, fx: 'heart', desc: '' },
+  revolucion:  { name: 'REVOLUCION!', type: 'HEART', pow: 96, acc: .95, tgt: 'enemy', crowd: 12, fx: 'heart', desc: '' },
   understudy:  { name: 'PERFECT COPY', type: 'CLASSIC', pow: 70, acc: .95, tgt: 'enemy', crowd: 4, eff: { pierce: true }, desc: '' }
 };
 
@@ -2493,19 +2531,19 @@ var ENC_POOLS = {
 var BOSSES = {
   heckler_boss: { enemyId: 'heckler', name: 'THE HECKLER', level: 1, hpMul: 1.4, ai: 'basic', crowd: -10,
     type: 'CLASSIC', spr: 'heckler', moves: ['heckle'] },
-  maximvs: { name: 'MC MAXIMVS', spr: 'maximvs', type: 'FLEX', level: 5, ai: 'maximvs', crowd: 0,
+  maximvs: { name: 'MC MAXIMVS', spr: 'maximvs', type: 'FLEX', level: 5, ai: 'maximvs', crowd: 0, super: 'thumbsdown',
     base: { HYPE: 122, FLOW: 19, POISE: 15, TEMPO: 12 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
-  jake: { name: 'RATTLESNAKE JAKE', spr: 'jake', type: 'ROAST', level: 8, ai: 'jake', crowd: 0,
+  jake: { name: 'RATTLESNAKE JAKE', spr: 'jake', type: 'ROAST', level: 8, ai: 'jake', crowd: 0, super: 'gravelstorm',
     base: { HYPE: 238, FLOW: 35, POISE: 21, TEMPO: 19 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
-  rex: { name: 'DISCO REX', spr: 'rex', type: 'HEART', level: 11, ai: 'rex', crowd: 0,
+  rex: { name: 'DISCO REX', spr: 'rex', type: 'HEART', level: 11, ai: 'rex', crowd: 0, super: 'lastdance',
     base: { HYPE: 400, FLOW: 52, POISE: 29, TEMPO: 24 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
-  snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10,
-    base: { HYPE: 186, FLOW: 31, POISE: 23, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
-  snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
+  snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10, super: 'finalword',
+    base: { HYPE: 330, FLOW: 35, POISE: 25, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0 },
+  snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100, super: 'finalword',
     base: { HYPE: 372, FLOW: 53, POISE: 31, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
-  pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0,
+  pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0, super: 'revolucion',
     base: { HYPE: 250, FLOW: 34, POISE: 22, TEMPO: 18 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
-  understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0,
+  understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0, super: 'finalword',
     base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
 };
 
@@ -2526,7 +2564,7 @@ function makeBoss(bossId) {
   var f = { id: bossId, name: b.name, type: b.type, spr: b.spr, sprOpt: b.sprOpt, level: b.level, xp: 0,
     maxHP: b.base.HYPE, hp: b.base.HYPE, baseFLOW: b.base.FLOW, basePOISE: b.base.POISE, baseTEMPO: b.base.TEMPO,
     stage: { FLOW: 0, POISE: 0, TEMPO: 0, EVA: 0 }, status: null, statusT: 0, counter: false, hotT: 0, hotFrac: 0,
-    moves: b.moves.slice(), isEnemy: true, isBoss: true, ai: b.ai, bossId: bossId,
+    moves: b.moves.slice(), isEnemy: true, isBoss: true, ai: b.ai, bossId: bossId, superMove: b.super,
     xpYield: b.xp, moneyYield: b.money, turnCount: 0, fainted: false };
   return f;
 }
@@ -3459,7 +3497,9 @@ function snobbingtonFight() {
     { say: ['SNOBBINGTON', 'LEAVE, OR FACE ME.'] },
     { say: ['SAMUEL', 'A RAP BATTLE?'] },
     { say: ['SNOBBINGTON', "REGRETTABLY, YES. THEM'S THE RULES."] },
-    { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 10 }, { enemy: 'gerald', level: 10 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -10 }; },
+    { say: ['SNOBBINGTON', 'NO GOONS. NO SCRIPT. JUST ME —'] },
+    { say: ['SNOBBINGTON', 'AND MY MASTERPIECE. BEHOLD!'] },
+    { battle: function () { return { enemies: [{ boss: 'snob1' }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -10 }; },
       onResult: function (r) { if (r.win) setFlag('snob1_beaten'); } }
   ], { onDone: function () { if (hasFlag('snob1_beaten')) snobEscalate(); else gotoWorld(); } });
 }

@@ -123,3 +123,15 @@ Restructured the endgame per the owner's new story:
 - QA: `qa-full` extended through the new act (mid-fight reveal + P Diddy/50 Cent verbatim), `qa-phase4`
   updated for the new finale. All suites green: phase1 10 · phase2 7 · phase4 7 · loss 2 · full 8 · dist 7.
   Screenshots: `screenshots/gob-*.png`.
+
+## Update — Solo Snobbington + boss SUPER abilities (owner request)
+- **Snobbington now fights SOLO** in phase 1 (removed the two Gerald goons) and is buffed
+  (330 HYPE) so he's a real threat alone.
+- **Every era boss has a signature SUPER move** with a screen-shaking animation, unleashed
+  roughly every 4th turn: Maximvs THUMBS DOWN (gold rings), Jake GRAVEL STORM (embers),
+  Rex LAST DANCE (hearts, self-heal), Pedro REVOLUCION! (hearts), Snobbington THE FINAL WORD
+  (redaction bars + scribbles, 120 pow, pierces buffs). Animation tinted to the move's type.
+- New battle FX system (`superFX`) + AI hook (`superMove`, fired on a 4-turn cadence).
+Screenshots: `screenshots/super-0*.png`. All suites green (phase4/full/dist).
+
+(PENDING owner confirm: the era-specific patrolling forced-fight locals + no-heal attrition.)

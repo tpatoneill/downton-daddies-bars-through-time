@@ -44,9 +44,9 @@ walkTo(h, 9, 1); advanceUntil(h, g => isWorld(g) || isBattle(g) || sceneName(g) 
 advanceUntil(h, isBattle, 6000, 'snob phase 1');
 assert(isBattle(G), 'Snobbington phase 1 started');
 const p1 = G.getScene();
-assert(p1.enemies[0].bossId === 'snob1' && p1.enemies.length === 3, 'snob1 + 2 goons');
+assert(p1.enemies[0].bossId === 'snob1' && p1.enemies.length === 1, 'Snobbington fights SOLO');
 autoBattle(h, { onBeat: true });
-ok('Snobbington phase 1 (with two goons) defeated');
+ok('Snobbington phase 1 (solo) defeated');
 
 // Snobbington escalates (no Samuel reveal here — she's already True Form) -> phase 2
 advanceUntil(h, isBattle, 8000, 'escalate + phase 2');

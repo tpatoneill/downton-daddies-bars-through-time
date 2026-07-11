@@ -67,6 +67,12 @@ var MOVES = {
   approved:    { name: 'APPROVED VERSE', type: 'WORDPLAY', pow: 58, acc: .95, tgt: 'enemy', crowd: 4, desc: '' },
   finaldraft:  { name: 'FINAL DRAFT', type: 'WORDPLAY', pow: 84, acc: .9, tgt: 'enemy', crit: .1, crowd: 8, desc: '' },
   rewrite:     { name: 'REWRITE HISTORY', type: 'WORDPLAY', pow: 66, acc: .95, tgt: 'enemy', crowd: 6, eff: { status: 'FLUSTERED', chance: .3 }, desc: '' },
+  finalword:   { name: 'THE FINAL WORD', type: 'WORDPLAY', pow: 120, acc: .95, tgt: 'enemy', crit: .1, crowd: 10, eff: { pierce: true }, fx: 'finalword', desc: 'AN UNANSWERABLE EDIT.' },
+  /* --- boss SUPER moves (screen-shaking signature abilities, one per boss) --- */
+  thumbsdown:  { name: 'THUMBS DOWN', type: 'FLEX', pow: 100, acc: .95, tgt: 'enemy', crit: .05, crowd: 12, fx: 'flex', desc: '' },
+  gravelstorm: { name: 'GRAVEL STORM', type: 'ROAST', pow: 100, acc: .95, tgt: 'enemy', crowd: 12, eff: { status: 'SHOOK', chance: .6 }, fx: 'roast', desc: '' },
+  lastdance:   { name: 'LAST DANCE', type: 'HEART', pow: 100, acc: .95, tgt: 'enemy', crowd: 12, eff: { healFromCrowd: true }, fx: 'heart', desc: '' },
+  revolucion:  { name: 'REVOLUCION!', type: 'HEART', pow: 96, acc: .95, tgt: 'enemy', crowd: 12, fx: 'heart', desc: '' },
   understudy:  { name: 'PERFECT COPY', type: 'CLASSIC', pow: 70, acc: .95, tgt: 'enemy', crowd: 4, eff: { pierce: true }, desc: '' }
 };
 
@@ -174,19 +180,19 @@ var ENC_POOLS = {
 var BOSSES = {
   heckler_boss: { enemyId: 'heckler', name: 'THE HECKLER', level: 1, hpMul: 1.4, ai: 'basic', crowd: -10,
     type: 'CLASSIC', spr: 'heckler', moves: ['heckle'] },
-  maximvs: { name: 'MC MAXIMVS', spr: 'maximvs', type: 'FLEX', level: 5, ai: 'maximvs', crowd: 0,
+  maximvs: { name: 'MC MAXIMVS', spr: 'maximvs', type: 'FLEX', level: 5, ai: 'maximvs', crowd: 0, super: 'thumbsdown',
     base: { HYPE: 122, FLOW: 19, POISE: 15, TEMPO: 12 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
-  jake: { name: 'RATTLESNAKE JAKE', spr: 'jake', type: 'ROAST', level: 8, ai: 'jake', crowd: 0,
+  jake: { name: 'RATTLESNAKE JAKE', spr: 'jake', type: 'ROAST', level: 8, ai: 'jake', crowd: 0, super: 'gravelstorm',
     base: { HYPE: 238, FLOW: 35, POISE: 21, TEMPO: 19 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
-  rex: { name: 'DISCO REX', spr: 'rex', type: 'HEART', level: 11, ai: 'rex', crowd: 0,
+  rex: { name: 'DISCO REX', spr: 'rex', type: 'HEART', level: 11, ai: 'rex', crowd: 0, super: 'lastdance',
     base: { HYPE: 400, FLOW: 52, POISE: 29, TEMPO: 24 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
-  snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10,
-    base: { HYPE: 186, FLOW: 31, POISE: 23, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
-  snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
+  snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10, super: 'finalword',
+    base: { HYPE: 330, FLOW: 35, POISE: 25, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0 },
+  snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100, super: 'finalword',
     base: { HYPE: 372, FLOW: 53, POISE: 31, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
-  pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0,
+  pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0, super: 'revolucion',
     base: { HYPE: 250, FLOW: 34, POISE: 22, TEMPO: 18 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
-  understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0,
+  understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0, super: 'finalword',
     base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
 };
 
@@ -207,7 +213,7 @@ function makeBoss(bossId) {
   var f = { id: bossId, name: b.name, type: b.type, spr: b.spr, sprOpt: b.sprOpt, level: b.level, xp: 0,
     maxHP: b.base.HYPE, hp: b.base.HYPE, baseFLOW: b.base.FLOW, basePOISE: b.base.POISE, baseTEMPO: b.base.TEMPO,
     stage: { FLOW: 0, POISE: 0, TEMPO: 0, EVA: 0 }, status: null, statusT: 0, counter: false, hotT: 0, hotFrac: 0,
-    moves: b.moves.slice(), isEnemy: true, isBoss: true, ai: b.ai, bossId: bossId,
+    moves: b.moves.slice(), isEnemy: true, isBoss: true, ai: b.ai, bossId: bossId, superMove: b.super,
     xpYield: b.xp, moneyYield: b.money, turnCount: 0, fainted: false };
   return f;
 }

@@ -48,7 +48,7 @@ function makeBattle(spec, onEnd) {
     activeIdx: Math.max(0, firstLivingIdx(Game.party)),
     targetIdx: 0,
     crowd: spec.crowdStart || 0, usedShow: false,
-    revealPending: false, revealDone: false,
+    revealPending: false, revealDone: false, superFX: null,
     phase: 'intro', menuIdx: 0, moveIdx: 0, itemIdx: 0, switchIdx: 0,
     queue: [], qi: 0, msg: '', msgT: 0, autoMsgT: 0,
     aimT: 0, aimHit: false, pendingMove: null,
@@ -183,6 +183,8 @@ function makeBattle(spec, onEnd) {
           var sc = m.pow * typeMult(m.type, tgt.type) + Math.random() * 5; if (sc > bestScore) { bestScore = sc; best = e.moves[i]; } }
         return pick(best || e.moves[0]);
       };
+      /* every boss unleashes its screen-shaking SUPER every 4th turn */
+      if (e.superMove && e.turnCount >= 3 && e.turnCount % 4 === 0) return pick(e.superMove);
       if (ai === 'maximvs' && e.turnCount <= 3) return pick('flexstack'); /* three escalating self-buffs */
       if (ai === 'rex' && this.crowd < -20 && e.turnCount % 2 === 0) return pick('mirrorball'); /* heals via crowd */
       if (ai === 'snob1' && e.turnCount % 3 === 0) return pick('rewrite');
@@ -219,6 +221,8 @@ function makeBattle(spec, onEnd) {
         if (accRoll > (move.acc || 1) * evaSt) { this.crowdSwing(f, -3); return f.name + "'S " + move.name + ' MISSED!'; }
       }
       var lines = [f.name + ' USES ' + move.name + '!'];
+      /* signature SUPER move -> screen-shaking animation overlay */
+      if (move.fx) { this.superFX = { kind: move.fx, name: move.name, t: 0, dur: 1.5, color: TYPECOL[move.type] || COL.white }; this.shake = 1.5; this.flash = 0.5; sfx('boom'); sfx('showstopper'); }
       this.crowdSwing(f, Math.abs(move.crowd || 0));
       /* damage */
       if (move.pow) {
@@ -453,6 +457,7 @@ function makeBattle(spec, onEnd) {
     /* ---------- update / draw ---------- */
     update: function (dt) {
       this.animT += dt;
+      if (this.superFX) { this.superFX.t += dt; if (this.superFX.t >= this.superFX.dur) this.superFX = null; }
       if (this.hitFlash > 0) this.hitFlash -= dt;
       if (this.shake > 0) this.shake -= dt;
       if (this.flash > 0) this.flash -= dt;
@@ -498,6 +503,33 @@ function makeBattle(spec, onEnd) {
       else if (this.phase === 'aim') this.drawAim();
       else if (this.phase === 'resolve') this.drawMsg();
       else if (this.phase === 'result') this.drawResult();
+      /* boss SUPER animation overlays everything */
+      if (this.superFX) this.drawSuperFX();
+    },
+    drawSuperFX: function () {
+      var s = this.superFX, p = s.t / s.dur; /* 0..1 */
+      var i, k;
+      /* colored flash, brightest at the start */
+      ctx.globalAlpha = 0.6 * (1 - p);
+      cls(s.color); ctx.globalAlpha = 1;
+      /* type-flavored particles */
+      if (s.kind === 'finalword') {                       /* Snobbington: black redaction bars + scribbles */
+        for (i = 0; i < 6; i++) { var by = ((s.t * 260 + i * 34) % 190) | 0; px(0, by, 240, 6, COL.black); }
+        for (i = 0; i < 10; i++) { var rx = (i * 53 + (s.t * 40 | 0)) % 236; px(rx, 30 + (i * 13) % 100, 18, 3, '#c63a46'); }
+      } else if (s.kind === 'flex') {                     /* Maximvs: expanding gold rings */
+        for (i = 0; i < 4; i++) { var sz = ((p * 260 + i * 55) % 240) | 0, cx = 120, cy = 80;
+          px(cx - sz / 2, cy - sz / 2, sz, 2, COL.gold); px(cx - sz / 2, cy + sz / 2, sz, 2, COL.gold);
+          px(cx - sz / 2, cy - sz / 2, 2, sz, COL.gold); px(cx + sz / 2, cy - sz / 2, 2, sz, COL.gold); }
+      } else if (s.kind === 'roast') {                    /* Jake: rising embers */
+        for (i = 0; i < 26; i++) { var ex = (i * 37) % 240, ey = 160 - ((s.t * 200 + i * 43) % 170); px(ex, ey, 3, 3, i % 2 ? COL.gold : COL.red); }
+      } else if (s.kind === 'heart') {                    /* Rex / Pedro: floating hearts */
+        for (i = 0; i < 16; i++) { var hx = (i * 61) % 232, hy = 150 - ((s.t * 150 + i * 51) % 150);
+          px(hx, hy + 1, 6, 4, COL.pink); px(hx + 1, hy, 2, 2, COL.pink); px(hx + 4, hy, 2, 2, COL.pink); px(hx + 2, hy + 5, 2, 2, COL.pink); }
+      }
+      /* the move name, big and shaking */
+      var jx = ((Math.random() - 0.5) * 6) | 0;
+      centerTextO(s.name, 66 + (((s.t * 20) | 0) % 2), COL.white, COL.black, 2);
+      if (p < 0.5) centerTextO('!!', 92, s.color, COL.black, 2);
     },
     drawHPBox: function (f, x, y, isPlayer) {
       if (!f) return;

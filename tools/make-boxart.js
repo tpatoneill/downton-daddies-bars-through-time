@@ -424,8 +424,9 @@ const qrm = QR.create(URL, { errorCorrectionLevel: 'M' }).modules;
   /* bullets */
   const feats = ['FOUR PLAYABLE DADDIES.', 'CRAWL THE COLOSSEUM.', 'WIN THE CROWD.', '12 GOLDEN MUSTACHES.'];
   feats.forEach((f, i) => { K.circle(104 * SS, (668 + i * 44) * SS, 7 * SS, gold); K.ptext(f, 124 * SS, (656 + i * 44) * SS, 4.4 * SS, '#e8e0f8'); });
-  /* William (smooth cartoon) in the character slot */
-  drawWilliam(K, 330 * SS, 1500 * SS, 220 * SS);
+  /* character slot: the painted back-art carries its own decorations; only draw
+     the cartoon William when we're on the plain drawn field */
+  if (!backArt) drawWilliam(K, 330 * SS, 1500 * SS, 220 * SS);
   K.ptext('THE FRONT LINE OF RAP BATTLING!', 92 * SS, 1566 * SS, 4 * SS, gold);
   /* right column: 2 pixel screenshots + QR */
   function frame(x, y, w2, h2) { K.rrect(x - 10 * SS, y - 10 * SS, w2 + 20 * SS, h2 + 20 * SS, 8 * SS, '#ffffff'); K.rect(x - 3 * SS, y - 3 * SS, w2 + 6 * SS, h2 + 6 * SS, '#000000'); }

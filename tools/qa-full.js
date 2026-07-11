@@ -68,12 +68,26 @@ for (let i = 0; i < nycChain.length - 1; i++) walkToNextMap(h, nycChain[i]);
 enterBossMap(nycChain[nycChain.length - 1]);               // Rex on onEnter
 assert(isBattle(G) && G.getScene().enemies[0].bossId === 'rex', 'Rex fight');
 autoBattle(h, { onBeat: true });
-pickTravel(h, 'STAGE'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'to finale');
-assert(G.hasFlag('nyc_done') && G.hasFlag('london_unlocked') && G.Game.parts >= 3, 'NYC complete, part 3');
-ok('NYC: Rosalind joins, Rex down, Time Crystal');
+// after Rex: nycVictory -> the engine malfunctions -> stranded in the Goblin Realm
+advanceUntil(h, isWorld, 14000, 'to goblin realm');
+assert(G.Game.map === 'goblinrealm', 'stranded in the Goblin Realm, got ' + G.Game.map);
+assert(G.hasFlag('nyc_done') && !G.hasFlag('london_unlocked'), 'London NOT unlocked until the engine is fixed');
+ok('NYC: Rex down, Time Crystal -> engine malfunction -> Goblin Realm');
 
-// ---- Finale ----
-assert(G.Game.map === 'theatredistrict', 'at theatre district, got ' + G.Game.map);
+// ---- Goblin Realm: Pedro + the mid-battle wig reveal ----
+levelParty(12);
+walkTo(h, 8, 2); interactAt(h, 8, 1);                       // talk to Pedro -> fight
+advanceUntil(h, isBattle, 6000, 'pedro');
+assert(isBattle(G) && G.getScene().enemies[0].bossId === 'pedro', 'Pedro fight');
+autoBattle(h, { onBeat: true });                            // includes the mid-fight wig reveal interrupt
+assert(G.hasFlag('trueform'), 'the wig fell -> True Form mid-battle');
+assert(G.Game.party[0].moves.includes('nomoredis'), 'learned NO MORE DISGUISE at the reveal');
+advanceUntil(h, isWorld, 12000, 'to london');              // pedroAfter (number/spark) -> travel to London
+assert(G.hasFlag('goblin_done') && G.hasFlag('london_unlocked'), 'engine repaired, London unlocked');
+assert(G.Game.map === 'theatredistrict', 'arrived at theatre district, got ' + G.Game.map);
+ok('GOBLIN REALM: Pedro, EXTREMELY-shocked wig reveal, True Form, number-spark fix');
+
+// ---- Finale (Samuel already True Form) ----
 levelParty(14);
 walkTo(h, 8, 4); interactAt(h, 8, 3); advanceUntil(h, g => isWorld(g) || isBattle(g), 3000); if (isBattle(G)) { autoBattle(h, {}); advanceUntil(h, isWorld, 3000); }
 walkTo(h, 9, 4); interactAt(h, 9, 3); advanceUntil(h, g => isWorld(g) || isBattle(g), 3000); if (isBattle(G)) { autoBattle(h, {}); advanceUntil(h, isWorld, 3000); }
@@ -81,15 +95,19 @@ assert(G.hasFlag('lobby_clear'), 'editors cleared');
 walkTo(h, 9, 1); advanceUntil(h, isBattle, 6000, 'snob1');
 assert(isBattle(G) && G.getScene().enemies[0].bossId === 'snob1', 'Snobbington phase 1');
 autoBattle(h, { onBeat: true });
-advanceUntil(h, isBattle, 8000, 'snob2');
-assert(G.hasFlag('trueform'), 'True Form');
-assert(G.Game.party[0].moves.includes('nomoredis'), 'NO MORE DISGUISE learned');
+advanceUntil(h, isBattle, 8000, 'snob2');                   // snobEscalate bridge -> FINAL DRAFT
 assert(G.getScene().enemies[0].bossId === 'snob2' && G.getScene().crowd >= 100, 'phase 2 + crowd 100');
 autoBattle(h, { onBeat: true });
 let guard = 0; while (!(G.getScene() && G.getScene().phase === 'credits') && guard++ < 400) { h.tap('a'); h.step(3, 25); }
 assert(G.hasFlag('finale_done') && G.hasFlag('game_complete'), 'finale complete');
 assert(G.getScene() && (G.getScene().phase === 'credits' || G.getScene().phase === 'bow'), 'birthday sequence');
-ok('FINALE: editors, Snobbington 2-phase, reveal, True Form, birthday');
+ok('FINALE: editors, Snobbington 2-phase, P Diddy unmask + 50 Cent hook, birthday');
+// the new finale beats are present verbatim
+const dist = require('fs').readFileSync(require('path').join(__dirname, '..', 'dist', 'index.html'), 'utf8');
+assert(dist.indexOf('MEDDLING DADDIES') >= 0, 'P Diddy Scooby-Doo line present');
+assert(dist.indexOf("50 CENT") >= 0 && dist.indexOf('FROM THE FUTURE') >= 0, '50 Cent future-mission hook present');
+assert(dist.indexOf('PEDRO GARCIA') >= 0 && dist.indexOf("MEXICO'S INDEPENDENCE FROM THE US") >= 0, "Pedro's bio verbatim");
+ok('new story beats present verbatim (P Diddy, 50 Cent, Pedro bio)');
 
 // ---- save/load mid-nothing roundtrip on final state ----
 G.saveGame(true); const parts = G.Game.parts; G.Game.parts = 0; assert(G.loadGame() && G.Game.parts === parts, 'save/load roundtrip');

@@ -235,7 +235,8 @@ function rexFight() {
   ], { onDone: function () { if (hasFlag('rex_beaten')) nycVictory(); else gotoWorld(); } });
 }
 function nycRewards() {
-  setFlag('rex_beaten'); setFlag('nyc_done'); setFlag('london_unlocked'); gainPart('TIME CRYSTAL');
+  /* London unlocks only AFTER the Goblin Realm detour repairs the engine. */
+  setFlag('rex_beaten'); setFlag('nyc_done'); gainPart('TIME CRYSTAL');
 }
 function nycVictory() {
   Cutscene.play([
@@ -252,8 +253,8 @@ function nycVictory() {
     { narr: 'HIS BOUNCERS THROW THE AUTOMATIC PLAYLIST IN A DUMPSTER.' },
     { narr: 'TIME CRYSTAL GET! ( 3 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH HOME.'] },
-    { say: ['BABBAGE', 'LONDON AWAITS.'] }
-  ], { onDone: function () { healParty(); saveGame(false); travelChoose('disco'); } });
+    { say: ['BABBAGE', 'PLOTTING A COURSE FOR LONDON...'] }
+  ], { onDone: function () { healParty(); saveGame(false); goblinMalfunction(); } });
 }
 
 /* ---------------- register NYC as a travel destination ---------------- */

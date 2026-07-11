@@ -5,6 +5,11 @@
 
 var SHOP_FINALE = ['strongtea', 'crumpet', 'lozenge', 'sparestache', 'drip:heartlocket'];
 
+/* new finale speakers (sprites come from 31-sprites-extra.js) */
+SPEAKERS['P DIDDY'] = { spr: SPR.pdiddy, f: 240 };
+SPEAKERS['50 CENT'] = { spr: SPR.fiftycent, f: 200 };
+SPEAKERS['PEDRO'] = { spr: SPR.pedro, f: 196 };
+
 function drawBarricade(x, y) { px(x, y + 3, TS, 10, '#3a3244'); px(x, y + 3, TS, 2, '#4a4258');
   px(x + 2, y + 6, 3, 6, COL.purple); px(x + 8, y + 6, 3, 6, COL.purple); px(x + 5, y, 2, TS, '#5a4a6a'); }
 function drawMarquee(x, y) { px(x, y, TS, 12, '#5a2038'); px(x + 1, y + 1, TS - 2, 8, COL.gold);
@@ -106,31 +111,24 @@ function snobbingtonFight() {
     { say: ['SNOBBINGTON', "REGRETTABLY, YES. THEM'S THE RULES."] },
     { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 10 }, { enemy: 'gerald', level: 10 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -10 }; },
       onResult: function (r) { if (r.win) setFlag('snob1_beaten'); } }
-  ], { onDone: function () { if (hasFlag('snob1_beaten')) revealScene(); else gotoWorld(); } });
+  ], { onDone: function () { if (hasFlag('snob1_beaten')) snobEscalate(); else gotoWorld(); } });
 }
 
-/* THE REVEAL — sacred. Kept verbatim. */
-function revealScene() {
+/* Samuel was already revealed + powered up back in the Goblin Realm, so the
+   between-phase beat is Snobbington's OWN escalation and the crowd is all Daddies. */
+function snobEscalate() {
   Cutscene.play([
-    { bg: 'stage' }, { stop: true }, { sfx: 'whoosh' },
-    { narr: 'THE CROWD IS ELECTRIC! BUT THEN... A GUST OF WIND!' },
+    { bg: 'stage' }, { stop: true },
+    { say: ['SNOBBINGTON', 'SO THE GREAT SAMUEL IS A WOMAN.'] },
+    { say: ['SNOBBINGTON', 'HOW DELIGHTFULLY OFF-SCRIPT.'] },
+    { say: ['SAMUEL', "AND YOU'RE STILL GOING TO LOSE."] },
     { sfx: 'reveal' },
-    { narr: "SAMUEL'S MUSTACHE... FALLS." },
-    { say: ['CROWD', 'GASP!'] },
-    { say: ['SNOBBINGTON', 'A WOMAN?! HA! THE GREAT SAMUEL, A FRAUD!'] },
-    { say: ['SAMUEL', 'NO. THE MUSTACHE WAS THE COSTUME.'] },
-    { say: ['SAMUEL', 'THE BARS WERE ALWAYS MINE.'] },
-    { say: ['HERSCHEL', 'WE KNEW, LASS. WE ALWAYS KNEW.'] },
-    { say: ['WILLIAM', 'IT WAS CROOKED EVERY SINGLE DAY.'] },
-    { say: ['ROSALIND', 'FINISH HIM, SAMUEL.'] },
-    { say: ['SAMUEL', 'WITH PLEASURE.'] },
-    { do: function () { transformSamuel(); } },
+    { narr: 'SNOBBINGTON TEARS OPEN HIS COAT — THE FINAL DRAFT!' },
     { music: 'finale' },
-    { narr: 'THE CROWD CHANTS HER NAME! SAMUEL RISES TO HER TRUE FORM!' },
-    { narr: 'SAMUEL LEARNED NO MORE DISGUISE!' },
+    { narr: 'BUT THE CROWD IS ALL DADDIES NOW! THE METER SLAMS IN HER FAVOR!' },
     { battle: function () { return { enemies: [{ boss: 'snob2' }], music: 'finale', canFlee: false, bg: 'stage', crowdStart: 100 }; },
       onResult: function (r) { if (r.win) setFlag('finale_done'); } }
-  ], { onDone: function () { if (hasFlag('finale_done')) finaleVictory(); else gotoWorld(); } });
+  ], { onDone: function () { if (hasFlag('finale_done')) pDiddyUnmask(); else gotoWorld(); } });
 }
 
 /* True Form: mustache-free sprite (keyed on 'trueform' flag), stat jump, ultimate. */
@@ -153,15 +151,25 @@ function transformSamuel() {
   jingle('level');
 }
 
-function finaleVictory() {
+/* THE SCOOBY-DOO UNMASK + the 50 Cent future-mission hook. */
+function pDiddyUnmask() {
   Cutscene.play([
     { bg: 'stage' },
-    { say: ['SNOBBINGTON', 'I... I YIELD. THE THEATRE IS YOURS.'] },
-    { say: ['SNOBBINGTON', 'YOUR BARS ARE... SUBLIME.'] },
-    { say: ['SAMUEL', 'THEY WERE ALWAYS SUBLIME.'] },
-    { say: ['SAMUEL', 'I JUST STOPPED HIDING IT.'] },
+    { say: ['SNOBBINGTON', 'IMPOSSIBLE! MY... MY FINAL DRAFT!'] },
+    { sfx: 'reveal' },
+    { narr: 'SAMUEL YANKS OFF HIS MASK. THE WHOLE THEATRE GASPS.' },
+    { narr: 'LORD SNOBBINGTON WAS... P DIDDY?!' },
+    { say: ['P DIDDY', "AND I WOULD'VE GOTTEN AWAY WITH IT TOO,"] },
+    { say: ['P DIDDY', "IF IT WEREN'T FOR YOU MEDDLING DADDIES!"] },
+    { sfx: 'whoosh' },
+    { narr: 'THEN THE TIME MACHINE ROARS. A FIGURE STEPS OUT.' },
+    { say: ['50 CENT', 'DADDIES. YOU TOOK DOWN P DIDDY.'] },
+    { say: ['50 CENT', 'I CAME FROM THE FUTURE. WE NEED YOU.'] },
+    { say: ['50 CENT', "THE MISSION? IT ISN'T WRITTEN YET."] },
+    { say: ['SAMUEL', "THEN WE'LL FREESTYLE IT."] },
+    { say: ['HERSCHEL', 'MY HIP SAYS NO. WE GO ANYWAY.'] },
     { do: function () { setFlag('game_complete'); gainPart('MASTER SPRING'); healParty(); saveGame(false); } },
-    { narr: 'THE DOWNTON DADDIES ARE HOME. AND THE SHOW GOES ON. FOREVER.' }
+    { narr: 'THE DADDIES PILE INTO THE MACHINE. ONE MORE JUMP...' }
   ], { onDone: function () { setScene(makeBirthday()); } });
 }
 
@@ -229,9 +237,9 @@ function makeBirthday() {
       centerTextO('ONE WEEK LATER...', 20, COL.gold, COL.black);
       /* a beginner freestyle class; Snobbington in the front row, hating it */
       panel(20, 40, 200, 90, COL.cream, COL.black);
-      SPR.snob(40, 60);
+      SPR.pdiddy(40, 60);
       drawText('BEGINNER FREESTYLE CLASS', 90, 52, COL.black);
-      var lines = ['SNOBBINGTON SITS IN THE FRONT ROW.', 'HE HATES IT. HE IS TERRIBLE AT IT.', 'HE IS COMING BACK NEXT WEEK.'];
+      var lines = ['P DIDDY SITS IN THE FRONT ROW.', 'HE HATES IT. HE IS TERRIBLE AT IT.', 'HE IS COMING BACK NEXT WEEK.'];
       for (var i = 0; i < lines.length; i++) drawText(lines[i], 90, 74 + i * 12, COL.black);
       if (Math.floor(this.t * 2) % 2) centerText('PRESS START', 140, COL.red);
     }

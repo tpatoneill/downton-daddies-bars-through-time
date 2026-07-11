@@ -157,7 +157,8 @@ var ENEMIES = {
   auctioneer:{ name: 'CATTLE AUCTIONEER', spr: 'cowboy', type: 'ROAST', moves: ['weakroast', 'weakword'], base: { HYPE: 28, FLOW: 13, POISE: 9, TEMPO: 11, gH: 3.4, gF: 2.1, gP: 1.5, gT: 1.7 }, xp: 19, money: 12 },
   discofan:  { name: 'DISCO REGULAR', spr: 'dancer', type: 'HEART', moves: ['weakheart', 'weakflex'], base: { HYPE: 32, FLOW: 14, POISE: 11, TEMPO: 12, gH: 3.8, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 22, money: 14 },
   gerald:    { name: 'GERALD', spr: 'gerald', type: 'CLASSIC', moves: ['scriptread', 'weakword', 'heckle'], base: { HYPE: 30, FLOW: 12, POISE: 12, TEMPO: 9, gH: 3.6, gF: 1.9, gP: 1.9, gT: 1.4 }, xp: 20, money: 15 },
-  editor:    { name: 'ORDER EDITOR', spr: 'editor', type: 'WORDPLAY', moves: ['redpen', 'approved', 'scriptread'], base: { HYPE: 40, FLOW: 15, POISE: 14, TEMPO: 11, gH: 4.2, gF: 2.4, gP: 2.2, gT: 1.8 }, xp: 40, money: 30 }
+  editor:    { name: 'ORDER EDITOR', spr: 'editor', type: 'WORDPLAY', moves: ['redpen', 'approved', 'scriptread'], base: { HYPE: 40, FLOW: 15, POISE: 14, TEMPO: 11, gH: 4.2, gF: 2.4, gP: 2.2, gT: 1.8 }, xp: 40, money: 30 },
+  goblin:    { name: 'CACKLING GOBLIN', spr: 'goblin', type: 'ROAST', moves: ['heckle', 'weakroast'], base: { HYPE: 30, FLOW: 15, POISE: 10, TEMPO: 14, gH: 3.6, gF: 2.3, gP: 1.6, gT: 2.0 }, xp: 24, money: 13 }
 };
 
 /* era encounter pools: mapId enc uses one of these */
@@ -165,7 +166,8 @@ var ENC_POOLS = {
   london:  ['heckler'],
   rome:    ['orator', 'senator', 'gerald'],
   west:    ['tumbleweed', 'auctioneer', 'gerald'],
-  disco:   ['discofan', 'gerald']
+  disco:   ['discofan', 'gerald'],
+  goblin:  ['goblin']
 };
 
 /* ---------- bosses ---------- */
@@ -182,6 +184,8 @@ var BOSSES = {
     base: { HYPE: 186, FLOW: 31, POISE: 23, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
   snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
     base: { HYPE: 372, FLOW: 53, POISE: 31, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
+  pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0,
+    base: { HYPE: 250, FLOW: 34, POISE: 22, TEMPO: 18 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
   understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0,
     base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
 };

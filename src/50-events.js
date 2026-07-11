@@ -59,9 +59,14 @@ var Cutscene = {
     else if (st.do) { st.do(); if (this.mode === 'idle' && scene === this) this.next(); }
     else if (st.battle) {
       var self = this, spec = (typeof st.battle === 'function') ? st.battle() : st.battle;
+      /* a battle may run a nested cutscene mid-fight (e.g. the wig reveal), which reuses
+         this singleton. Snapshot our queue and restore it after the fight so we resume
+         the RIGHT script instead of whatever the interrupt left behind. */
+      var sSteps = this.steps, sI = this.i, sDone = this.onDone, sBg = this.bg;
       this.mode = 'battle';
       startBattle(spec, function (res) {
         if (st.onResult) st.onResult(res);
+        self.steps = sSteps; self.i = sI; self.onDone = sDone; self.bg = sBg;
         setScene(self);
         self.mode = 'idle';
         self.next();

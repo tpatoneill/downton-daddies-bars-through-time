@@ -919,6 +919,184 @@ function drawWalker(name, dir, frame, x, y) {
 }
 
 
+/* ===== 31-sprites-extra.js ===== */
+/* sprites-extra.js — additional battle/dialogue sprites + overworld walkers.
+   Appends to the global SPR registry and WALK registry from 30-sprites.js.
+   Reuses painter(), the shared body primitives, and the shared palette consts. */
+
+/* Goblin — small mischievous cave goblin, ~40px tall (clearly shorter than a Daddy). */
+SPR.goblin = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var GB = '#5aa84a', GBs = '#3f7f36', GBk = '#2e5f28', YE = '#f0d838';
+  /* tiny horn nubs */
+  g.p(cx - 6, 19, 2, 3, sBEs); g.p(cx + 4, 19, 2, 3, sBEs);
+  g.p(cx - 6, 19, 2, 1, sK); g.p(cx + 4, 19, 2, 1, sK);
+  /* big pointy ears */
+  g.p(cx - 15, 27, 6, 3, GB); g.p(cx - 18, 26, 3, 2, GB); g.p(cx - 18, 25, 2, 1, GBk);
+  g.p(cx - 15, 29, 6, 1, GBs);
+  g.p(cx + 9, 27, 6, 3, GB); g.p(cx + 15, 26, 3, 2, GB); g.p(cx + 16, 25, 2, 1, GBk);
+  g.p(cx + 9, 29, 6, 1, GBs);
+  /* head */
+  g.ell(cx - 9, 21, cx + 9, 37, GB, GBk);
+  g.p(cx - 6, 35, 12, 1, GBs);
+  /* big round yellow eyes, tiny pupils */
+  g.ell(cx - 7, 24, cx - 2, 29, YE, sK);
+  g.ell(cx + 2, 24, cx + 7, 29, YE, sK);
+  g.p(cx - 4, 26, 1, 1, sK); g.p(cx + 4, 26, 1, 1, sK);
+  /* wide devilish grin with fangs */
+  g.p(cx - 6, 32, 12, 1, sK);
+  g.p(cx - 7, 31, 1, 1, sK); g.p(cx + 6, 31, 1, 1, sK);
+  g.p(cx - 5, 33, 10, 2, GBk);
+  g.p(cx - 4, 33, 1, 2, sWH); g.p(cx - 1, 33, 1, 2, sWH); g.p(cx + 3, 33, 1, 2, sWH);
+  /* raggedy tunic with jagged hem */
+  g.p(cx - 8, 38, 16, 10, '#8a6a3c');
+  g.p(cx - 8, 38, 16, 1, sK); g.p(cx - 8, 38, 1, 10, sK); g.p(cx + 7, 38, 1, 10, sK);
+  g.p(cx + 4, 39, 3, 9, '#6a4e2a');
+  g.p(cx - 8, 48, 3, 2, '#8a6a3c'); g.p(cx - 2, 48, 3, 2, '#8a6a3c'); g.p(cx + 4, 48, 3, 2, '#8a6a3c');
+  g.p(cx - 8, 49, 3, 1, sK); g.p(cx - 2, 49, 3, 1, sK); g.p(cx + 4, 49, 3, 1, sK);
+  /* rope belt */
+  g.p(cx - 8, 43, 16, 1, '#5a462a');
+  /* skinny arms with grabby claws */
+  var s, ax;
+  for (s = -1; s <= 1; s += 2) {
+    ax = s < 0 ? cx - 12 : cx + 9;
+    g.p(ax, 39, 3, 9, GB);
+    g.p(ax + (s < 0 ? 0 : 2), 39, 1, 9, GBk);
+    g.p(ax, 48, 3, 2, GB);
+    g.p(ax, 49, 1, 1, sK); g.p(ax + 2, 49, 1, 1, sK);
+  }
+  /* short legs, bare toed feet */
+  g.p(cx - 6, 50, 4, 7, GB); g.p(cx + 2, 50, 4, 7, GB);
+  g.p(cx - 6, 50, 1, 7, GBk); g.p(cx + 5, 50, 1, 7, GBk);
+  g.p(cx - 8, 57, 7, 2, GB); g.p(cx + 1, 57, 7, 2, GB);
+  g.p(cx - 8, 58, 7, 1, sK); g.p(cx + 1, 58, 7, 1, sK);
+  g.p(cx - 8, 57, 1, 1, sK); g.p(cx + 7, 57, 1, 1, sK);
+};
+
+/* Pedro Garcia — revolutionary baker. Peaked cap, bandolier, apron, baguette. */
+SPR.pedro = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var OL = '#6a7a3c', OLs = '#4e5c2c', OLh = '#82944c', BAG = '#d8a860', BAGs = '#b07830';
+  /* military peaked cap with gold star */
+  g.p(cx - 9, 5, 18, 7, OL);
+  g.p(cx - 9, 5, 18, 1, sK); g.p(cx - 9, 5, 1, 7, sK); g.p(cx + 8, 5, 1, 7, sK);
+  g.p(cx - 8, 6, 2, 5, OLh);
+  g.p(cx - 9, 10, 18, 2, OLs);
+  g.p(cx - 7, 12, 14, 2, '#3a4420'); g.p(cx - 7, 13, 14, 1, sK);
+  g.p(cx - 1, 7, 3, 3, sGD);
+  var ytop = _face(g, cx, 16), ey = ytop + 6;
+  /* black hair at the temples */
+  g.p(cx - 9, ytop + 1, 2, 6, sBK); g.p(cx + 7, ytop + 1, 2, 6, sBK);
+  _eyes(g, cx, ey, false, 1);
+  /* thick black mustache, warm smile beneath */
+  g.p(cx - 6, ytop + 11, 12, 3, sBK);
+  g.p(cx - 7, ytop + 13, 2, 2, sBK); g.p(cx + 5, ytop + 13, 2, 2, sBK);
+  g.p(cx - 2, ytop + 15, 4, 1, sK);
+  var sh = ytop + 17;
+  _coatBody(g, cx, sh, 53, OL, OLs, OLh, sWH, false);
+  /* white baker's apron */
+  g.p(cx - 8, sh + 6, 16, 14, sWH);
+  g.p(cx - 8, sh + 6, 16, 1, sK); g.p(cx - 8, sh + 6, 1, 14, sK); g.p(cx + 7, sh + 6, 1, 14, sK);
+  g.p(cx + 4, sh + 8, 2, 11, '#d8d8e0');
+  g.p(cx - 5, sh + 1, 1, 5, sWH); g.p(cx + 4, sh + 1, 1, 5, sWH);
+  /* bandolier of bullets crossed over the chest */
+  var i;
+  for (i = 0; i < 5; i++) {
+    g.p(cx - 9 + i * 4, sh + 8 - i * 2, 4, 3, '#8a5a2c');
+    g.p(cx - 8 + i * 4, sh + 9 - i * 2, 1, 2, sGD);
+    g.p(cx - 6 + i * 4, sh + 9 - i * 2, 1, 2, sGD);
+  }
+  /* rolled sleeves: olive upper arm, bare forearm */
+  var s, ax, x0;
+  for (s = -1; s <= 1; s += 2) {
+    ax = cx + s * 13 + (s < 0 ? 0 : -1); x0 = s > 0 ? ax : ax - 4;
+    g.p(x0, sh + 1, 5, 8, OL);
+    g.p(x0, sh + 1, 5, 1, sK);
+    g.p(x0 + (s < 0 ? 0 : 4), sh + 1, 1, 8, sK);
+    g.p(x0 + (s < 0 ? 4 : 0), sh + 1, 1, 8, sK);
+    g.p(x0, sh + 8, 5, 1, OLs);
+    g.p(x0 + 1, sh + 9, 3, 8, sSK);
+    g.p(x0 + 1, sh + 15, 3, 2, sSD);
+  }
+  /* baguette tucked at his side */
+  g.p(cx + 16, sh + 3, 3, 17, BAG);
+  g.p(cx + 16, sh + 3, 3, 1, sK); g.p(cx + 16, sh + 19, 3, 1, sK);
+  g.p(cx + 16, sh + 3, 1, 17, sK); g.p(cx + 18, sh + 3, 1, 17, sK);
+  g.p(cx + 17, sh + 6, 1, 1, BAGs); g.p(cx + 17, sh + 10, 1, 1, BAGs); g.p(cx + 17, sh + 14, 1, 1, BAGs);
+  _legs(g, cx, 53);
+};
+
+/* Slick music mogul — dark shades, glossy navy suit, gold chain, smirk. */
+SPR.pdiddy = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var NV = '#1e2a4a', NVs = '#141c34', NVh = '#31456f';
+  var ytop = _face(g, cx, 10), ey = ytop + 6;
+  /* close-cropped hair */
+  g.p(cx - 8, ytop - 2, 16, 3, sBK);
+  g.p(cx - 9, ytop, 2, 4, sBK); g.p(cx + 7, ytop, 2, 4, sBK);
+  /* dark sunglasses with a cool glint */
+  g.p(cx - 8, ey - 1, 7, 4, sK); g.p(cx + 1, ey - 1, 7, 4, sK);
+  g.p(cx - 1, ey, 2, 1, sK);
+  g.p(cx - 7, ey, 2, 1, '#5a5a72'); g.p(cx + 2, ey, 2, 1, '#5a5a72');
+  /* confident smirk + trim goatee */
+  g.p(cx - 2, ytop + 13, 5, 1, sK); g.p(cx + 3, ytop + 12, 1, 1, sK);
+  g.p(cx - 3, ytop + 15, 6, 1, sBK);
+  var sh = ytop + 17;
+  _coatBody(g, cx, sh, 53, NV, NVs, NVh, '#16161e');
+  /* glossy sheen streaks */
+  g.p(cx - 9, sh + 3, 1, 12, NVh); g.p(cx + 6, sh + 5, 1, 10, '#3d548a');
+  /* subtle gold chain over the dark shirt */
+  g.p(cx - 3, sh + 2, 1, 2, sGD); g.p(cx + 2, sh + 2, 1, 2, sGD);
+  g.p(cx - 2, sh + 4, 4, 1, sGD); g.p(cx - 1, sh + 5, 2, 2, sGD);
+  _arms(g, cx, sh, 17, NV);
+  /* pocket square */
+  g.p(cx + 7, sh + 6, 3, 2, sWH);
+  _legs(g, cx, 53);
+};
+
+/* Muscular rapper — do-rag, white tank, big arms, calm tough expression. */
+SPR.fiftycent = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var DR = '#2a2a3a', DRh = '#3c3c54';
+  var ytop = _face(g, cx, 13), ey = ytop + 5;
+  /* do-rag hugging the skull, tie tail at the back */
+  g.p(cx - 9, 8, 18, 7, DR);
+  g.p(cx - 9, 8, 18, 1, sK); g.p(cx - 9, 8, 1, 7, sK); g.p(cx + 8, 8, 1, 7, sK);
+  g.p(cx - 8, 9, 2, 5, DRh);
+  g.p(cx + 9, 12, 3, 6, DR); g.p(cx + 10, 18, 2, 3, DR);
+  g.p(cx + 11, 12, 1, 6, sK);
+  _eyes(g, cx, ey, true, 2);
+  g.p(cx - 3, ytop + 12, 6, 1, sK); /* calm flat mouth */
+  var sh = ytop + 16;
+  /* broad tank-top torso */
+  g.p(cx - 15, sh, 30, 24, sWH);
+  g.p(cx - 15, sh, 30, 1, sK); g.p(cx - 15, sh + 23, 30, 1, sK);
+  g.p(cx - 15, sh, 1, 24, sK); g.p(cx + 14, sh, 1, 24, sK);
+  g.p(cx + 10, sh + 1, 4, 22, '#d8d8e0');
+  g.p(cx - 14, sh + 1, 2, 22, '#ffffff');
+  /* small gold chain */
+  g.p(cx - 4, sh + 1, 1, 2, sGD); g.p(cx + 3, sh + 1, 1, 2, sGD);
+  g.p(cx - 3, sh + 3, 2, 1, sGD); g.p(cx + 1, sh + 3, 2, 1, sGD);
+  g.p(cx - 1, sh + 4, 2, 2, sGD);
+  /* big sleeveless arms */
+  var s, x0;
+  for (s = -1; s <= 1; s += 2) {
+    x0 = s < 0 ? cx - 21 : cx + 15;
+    g.ell(x0, sh - 1, x0 + 6, sh + 6, sSK, sK);
+    g.p(x0 + 1, sh + 5, 5, 11, sSK);
+    g.p(x0 + (s < 0 ? 0 : 5), sh + 5, 1, 11, sK);
+    g.p(x0 + (s < 0 ? 5 : 1), sh + 5, 1, 11, sK);
+    g.p(x0 + (s < 0 ? 1 : 4), sh + 7, 1, 6, sSD);
+    g.p(x0 + 1, sh + 16, 4, 3, sSK); g.p(x0 + 1, sh + 18, 4, 1, sSD);
+  }
+  _legs(g, cx, 53);
+};
+
+/* ---- overworld walkers ---- */
+defWalker('goblin', {hat: '#3f7f36', hair: '#5aa84a', coat: '#3f7f36', coatd: '#2e5f28', mous: '#2e5f28', accent: '#f0d838', hatShow: false});
+defWalker('pedro', {hat: '#6a7a3c', hair: sBK, coat: '#6a7a3c', coatd: '#4e5c2c', mous: sBK, accent: sGD});
+
+
 /* ===== 35-tiles.js ===== */
 /* tiles.js — 16x16 terrain tiles. Each entry: { solid, enc, draw(x,y,frame) }.
    Interactable objects (signs, machine, NPCs) are a separate map layer, not tiles. */
@@ -1320,9 +1498,14 @@ var Cutscene = {
     else if (st.do) { st.do(); if (this.mode === 'idle' && scene === this) this.next(); }
     else if (st.battle) {
       var self = this, spec = (typeof st.battle === 'function') ? st.battle() : st.battle;
+      /* a battle may run a nested cutscene mid-fight (e.g. the wig reveal), which reuses
+         this singleton. Snapshot our queue and restore it after the fight so we resume
+         the RIGHT script instead of whatever the interrupt left behind. */
+      var sSteps = this.steps, sI = this.i, sDone = this.onDone, sBg = this.bg;
       this.mode = 'battle';
       startBattle(spec, function (res) {
         if (st.onResult) st.onResult(res);
+        self.steps = sSteps; self.i = sI; self.onDone = sDone; self.bg = sBg;
         setScene(self);
         self.mode = 'idle';
         self.next();
@@ -1546,6 +1729,7 @@ function makeBattle(spec, onEnd) {
     activeIdx: Math.max(0, firstLivingIdx(Game.party)),
     targetIdx: 0,
     crowd: spec.crowdStart || 0, usedShow: false,
+    revealPending: false, revealDone: false,
     phase: 'intro', menuIdx: 0, moveIdx: 0, itemIdx: 0, switchIdx: 0,
     queue: [], qi: 0, msg: '', msgT: 0, autoMsgT: 0,
     aimT: 0, aimHit: false, pendingMove: null,
@@ -1735,6 +1919,8 @@ function makeBattle(spec, onEnd) {
         }
         tgt.hp = Math.max(0, tgt.hp - r.dmg);
         this.hitFlash = 0.25; this.shake = r.crit ? 0.4 : 0.2;
+        /* scripted mid-battle reveal (e.g. Samuel's wig): fire once when the marked foe drops below the threshold */
+        if (this.spec.reveal && !this.revealDone && tgt.isEnemy && tgt.hp > 0 && tgt.hp / maxHPd(tgt) <= this.spec.reveal.hpFrac) this.revealPending = true;
         if (act.onBeat) lines.push('ON BEAT! +30%');
         if (r.crit) { sfx('crit'); lines.push('A CRITICAL BAR!'); this.crowdSwing(f, 6); }
         else sfx('hit');
@@ -1804,8 +1990,16 @@ function makeBattle(spec, onEnd) {
     },
     /* ---------- event playback ---------- */
     pushMsg: function (t) { this.queue.push({ fn: function () { return t; } }); },
+    doReveal: function () {
+      var self = this;
+      this.revealDone = true; this.revealPending = false;
+      this.phase = 'paused';
+      this.crowd = Math.min(100, this.crowd + 90); this.flash = 0.7; sfx('reveal');
+      this.spec.reveal.fn(function () { setScene(self); self.phase = 'resolve'; self.runEvent(); });
+    },
     runEvent: function () {
       if (this.checkEnd()) return;
+      if (this.revealPending && !this.revealDone) { this.doReveal(); return; }
       if (this.qi >= this.queue.length) { this.afterRound(); return; }
       var ev = this.queue[this.qi];
       var out = ev.fn();
@@ -2244,7 +2438,8 @@ var ENEMIES = {
   auctioneer:{ name: 'CATTLE AUCTIONEER', spr: 'cowboy', type: 'ROAST', moves: ['weakroast', 'weakword'], base: { HYPE: 28, FLOW: 13, POISE: 9, TEMPO: 11, gH: 3.4, gF: 2.1, gP: 1.5, gT: 1.7 }, xp: 19, money: 12 },
   discofan:  { name: 'DISCO REGULAR', spr: 'dancer', type: 'HEART', moves: ['weakheart', 'weakflex'], base: { HYPE: 32, FLOW: 14, POISE: 11, TEMPO: 12, gH: 3.8, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 22, money: 14 },
   gerald:    { name: 'GERALD', spr: 'gerald', type: 'CLASSIC', moves: ['scriptread', 'weakword', 'heckle'], base: { HYPE: 30, FLOW: 12, POISE: 12, TEMPO: 9, gH: 3.6, gF: 1.9, gP: 1.9, gT: 1.4 }, xp: 20, money: 15 },
-  editor:    { name: 'ORDER EDITOR', spr: 'editor', type: 'WORDPLAY', moves: ['redpen', 'approved', 'scriptread'], base: { HYPE: 40, FLOW: 15, POISE: 14, TEMPO: 11, gH: 4.2, gF: 2.4, gP: 2.2, gT: 1.8 }, xp: 40, money: 30 }
+  editor:    { name: 'ORDER EDITOR', spr: 'editor', type: 'WORDPLAY', moves: ['redpen', 'approved', 'scriptread'], base: { HYPE: 40, FLOW: 15, POISE: 14, TEMPO: 11, gH: 4.2, gF: 2.4, gP: 2.2, gT: 1.8 }, xp: 40, money: 30 },
+  goblin:    { name: 'CACKLING GOBLIN', spr: 'goblin', type: 'ROAST', moves: ['heckle', 'weakroast'], base: { HYPE: 30, FLOW: 15, POISE: 10, TEMPO: 14, gH: 3.6, gF: 2.3, gP: 1.6, gT: 2.0 }, xp: 24, money: 13 }
 };
 
 /* era encounter pools: mapId enc uses one of these */
@@ -2252,7 +2447,8 @@ var ENC_POOLS = {
   london:  ['heckler'],
   rome:    ['orator', 'senator', 'gerald'],
   west:    ['tumbleweed', 'auctioneer', 'gerald'],
-  disco:   ['discofan', 'gerald']
+  disco:   ['discofan', 'gerald'],
+  goblin:  ['goblin']
 };
 
 /* ---------- bosses ---------- */
@@ -2269,6 +2465,8 @@ var BOSSES = {
     base: { HYPE: 186, FLOW: 31, POISE: 23, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0, minions: 2 },
   snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100,
     base: { HYPE: 372, FLOW: 53, POISE: 31, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
+  pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0,
+    base: { HYPE: 250, FLOW: 34, POISE: 22, TEMPO: 18 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
   understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0,
     base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
 };
@@ -3084,7 +3282,8 @@ function rexFight() {
   ], { onDone: function () { if (hasFlag('rex_beaten')) nycVictory(); else gotoWorld(); } });
 }
 function nycRewards() {
-  setFlag('rex_beaten'); setFlag('nyc_done'); setFlag('london_unlocked'); gainPart('TIME CRYSTAL');
+  /* London unlocks only AFTER the Goblin Realm detour repairs the engine. */
+  setFlag('rex_beaten'); setFlag('nyc_done'); gainPart('TIME CRYSTAL');
 }
 function nycVictory() {
   Cutscene.play([
@@ -3101,8 +3300,8 @@ function nycVictory() {
     { narr: 'HIS BOUNCERS THROW THE AUTOMATIC PLAYLIST IN A DUMPSTER.' },
     { narr: 'TIME CRYSTAL GET! ( 3 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH HOME.'] },
-    { say: ['BABBAGE', 'LONDON AWAITS.'] }
-  ], { onDone: function () { healParty(); saveGame(false); travelChoose('disco'); } });
+    { say: ['BABBAGE', 'PLOTTING A COURSE FOR LONDON...'] }
+  ], { onDone: function () { healParty(); saveGame(false); goblinMalfunction(); } });
 }
 
 /* ---------------- register NYC as a travel destination ---------------- */
@@ -3117,6 +3316,11 @@ registerEra({ id: 'nyc', label: 'NEW YORK 1977', unlockFlag: 'nyc_unlocked',
    The reveal lines are SACRED — kept verbatim from DESIGN.md / v1. */
 
 var SHOP_FINALE = ['strongtea', 'crumpet', 'lozenge', 'sparestache', 'drip:heartlocket'];
+
+/* new finale speakers (sprites come from 31-sprites-extra.js) */
+SPEAKERS['P DIDDY'] = { spr: SPR.pdiddy, f: 240 };
+SPEAKERS['50 CENT'] = { spr: SPR.fiftycent, f: 200 };
+SPEAKERS['PEDRO'] = { spr: SPR.pedro, f: 196 };
 
 function drawBarricade(x, y) { px(x, y + 3, TS, 10, '#3a3244'); px(x, y + 3, TS, 2, '#4a4258');
   px(x + 2, y + 6, 3, 6, COL.purple); px(x + 8, y + 6, 3, 6, COL.purple); px(x + 5, y, 2, TS, '#5a4a6a'); }
@@ -3219,31 +3423,24 @@ function snobbingtonFight() {
     { say: ['SNOBBINGTON', "REGRETTABLY, YES. THEM'S THE RULES."] },
     { battle: function () { return { enemies: [{ boss: 'snob1' }, { enemy: 'gerald', level: 10 }, { enemy: 'gerald', level: 10 }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -10 }; },
       onResult: function (r) { if (r.win) setFlag('snob1_beaten'); } }
-  ], { onDone: function () { if (hasFlag('snob1_beaten')) revealScene(); else gotoWorld(); } });
+  ], { onDone: function () { if (hasFlag('snob1_beaten')) snobEscalate(); else gotoWorld(); } });
 }
 
-/* THE REVEAL — sacred. Kept verbatim. */
-function revealScene() {
+/* Samuel was already revealed + powered up back in the Goblin Realm, so the
+   between-phase beat is Snobbington's OWN escalation and the crowd is all Daddies. */
+function snobEscalate() {
   Cutscene.play([
-    { bg: 'stage' }, { stop: true }, { sfx: 'whoosh' },
-    { narr: 'THE CROWD IS ELECTRIC! BUT THEN... A GUST OF WIND!' },
+    { bg: 'stage' }, { stop: true },
+    { say: ['SNOBBINGTON', 'SO THE GREAT SAMUEL IS A WOMAN.'] },
+    { say: ['SNOBBINGTON', 'HOW DELIGHTFULLY OFF-SCRIPT.'] },
+    { say: ['SAMUEL', "AND YOU'RE STILL GOING TO LOSE."] },
     { sfx: 'reveal' },
-    { narr: "SAMUEL'S MUSTACHE... FALLS." },
-    { say: ['CROWD', 'GASP!'] },
-    { say: ['SNOBBINGTON', 'A WOMAN?! HA! THE GREAT SAMUEL, A FRAUD!'] },
-    { say: ['SAMUEL', 'NO. THE MUSTACHE WAS THE COSTUME.'] },
-    { say: ['SAMUEL', 'THE BARS WERE ALWAYS MINE.'] },
-    { say: ['HERSCHEL', 'WE KNEW, LASS. WE ALWAYS KNEW.'] },
-    { say: ['WILLIAM', 'IT WAS CROOKED EVERY SINGLE DAY.'] },
-    { say: ['ROSALIND', 'FINISH HIM, SAMUEL.'] },
-    { say: ['SAMUEL', 'WITH PLEASURE.'] },
-    { do: function () { transformSamuel(); } },
+    { narr: 'SNOBBINGTON TEARS OPEN HIS COAT — THE FINAL DRAFT!' },
     { music: 'finale' },
-    { narr: 'THE CROWD CHANTS HER NAME! SAMUEL RISES TO HER TRUE FORM!' },
-    { narr: 'SAMUEL LEARNED NO MORE DISGUISE!' },
+    { narr: 'BUT THE CROWD IS ALL DADDIES NOW! THE METER SLAMS IN HER FAVOR!' },
     { battle: function () { return { enemies: [{ boss: 'snob2' }], music: 'finale', canFlee: false, bg: 'stage', crowdStart: 100 }; },
       onResult: function (r) { if (r.win) setFlag('finale_done'); } }
-  ], { onDone: function () { if (hasFlag('finale_done')) finaleVictory(); else gotoWorld(); } });
+  ], { onDone: function () { if (hasFlag('finale_done')) pDiddyUnmask(); else gotoWorld(); } });
 }
 
 /* True Form: mustache-free sprite (keyed on 'trueform' flag), stat jump, ultimate. */
@@ -3266,15 +3463,25 @@ function transformSamuel() {
   jingle('level');
 }
 
-function finaleVictory() {
+/* THE SCOOBY-DOO UNMASK + the 50 Cent future-mission hook. */
+function pDiddyUnmask() {
   Cutscene.play([
     { bg: 'stage' },
-    { say: ['SNOBBINGTON', 'I... I YIELD. THE THEATRE IS YOURS.'] },
-    { say: ['SNOBBINGTON', 'YOUR BARS ARE... SUBLIME.'] },
-    { say: ['SAMUEL', 'THEY WERE ALWAYS SUBLIME.'] },
-    { say: ['SAMUEL', 'I JUST STOPPED HIDING IT.'] },
+    { say: ['SNOBBINGTON', 'IMPOSSIBLE! MY... MY FINAL DRAFT!'] },
+    { sfx: 'reveal' },
+    { narr: 'SAMUEL YANKS OFF HIS MASK. THE WHOLE THEATRE GASPS.' },
+    { narr: 'LORD SNOBBINGTON WAS... P DIDDY?!' },
+    { say: ['P DIDDY', "AND I WOULD'VE GOTTEN AWAY WITH IT TOO,"] },
+    { say: ['P DIDDY', "IF IT WEREN'T FOR YOU MEDDLING DADDIES!"] },
+    { sfx: 'whoosh' },
+    { narr: 'THEN THE TIME MACHINE ROARS. A FIGURE STEPS OUT.' },
+    { say: ['50 CENT', 'DADDIES. YOU TOOK DOWN P DIDDY.'] },
+    { say: ['50 CENT', 'I CAME FROM THE FUTURE. WE NEED YOU.'] },
+    { say: ['50 CENT', "THE MISSION? IT ISN'T WRITTEN YET."] },
+    { say: ['SAMUEL', "THEN WE'LL FREESTYLE IT."] },
+    { say: ['HERSCHEL', 'MY HIP SAYS NO. WE GO ANYWAY.'] },
     { do: function () { setFlag('game_complete'); gainPart('MASTER SPRING'); healParty(); saveGame(false); } },
-    { narr: 'THE DOWNTON DADDIES ARE HOME. AND THE SHOW GOES ON. FOREVER.' }
+    { narr: 'THE DADDIES PILE INTO THE MACHINE. ONE MORE JUMP...' }
   ], { onDone: function () { setScene(makeBirthday()); } });
 }
 
@@ -3342,13 +3549,158 @@ function makeBirthday() {
       centerTextO('ONE WEEK LATER...', 20, COL.gold, COL.black);
       /* a beginner freestyle class; Snobbington in the front row, hating it */
       panel(20, 40, 200, 90, COL.cream, COL.black);
-      SPR.snob(40, 60);
+      SPR.pdiddy(40, 60);
       drawText('BEGINNER FREESTYLE CLASS', 90, 52, COL.black);
-      var lines = ['SNOBBINGTON SITS IN THE FRONT ROW.', 'HE HATES IT. HE IS TERRIBLE AT IT.', 'HE IS COMING BACK NEXT WEEK.'];
+      var lines = ['P DIDDY SITS IN THE FRONT ROW.', 'HE HATES IT. HE IS TERRIBLE AT IT.', 'HE IS COMING BACK NEXT WEEK.'];
       for (var i = 0; i < lines.length; i++) drawText(lines[i], 90, 74 + i * 12, COL.black);
       if (Math.floor(this.t * 2) % 2) centerText('PRESS START', 140, COL.red);
     }
   };
+}
+
+
+/* ===== 85-maps-goblin.js ===== */
+/* 85-maps-goblin.js — THE GOBLIN REALM (inserted between New York and the London
+   finale). The engine — jammed with stowaway goblins — misfires and strands the
+   Daddies here. They meet Pedro Garcia, battle him, and MID-FIGHT Samuel's wig
+   flies off: she's revealed to be a woman (team EXTREMELY shocked) and rises to
+   her True Form. Pedro gets her number; the spark repairs the machine; on to London. */
+
+/* eerie green-realm backdrop (used for cutscenes + the Pedro battle) */
+BGS.goblin = function () {
+  cls('#122016');
+  px(0, 0, 240, 70, '#1c3324');
+  px(40, 12, 16, 16, '#7ec86a'); px(180, 20, 12, 12, '#a0e080'); /* two sickly moons */
+  for (var i = 0; i < 30; i++) { var sx = (i * 53) % 240, sy = (i * 29) % 60; px(sx, sy, 1, 1, '#8fd868'); }
+  /* twisted tree silhouettes */
+  var tx = [16, 70, 150, 210];
+  for (var t = 0; t < tx.length; t++) { px(tx[t] + 4, 60, 4, 46, '#0e1a10'); fillEll(tx[t] - 6, 44, tx[t] + 16, 70, '#16281a'); }
+  px(0, 104, 240, 56, '#0e1710'); /* ground */
+};
+
+/* ================= GOBLIN REALM (single map) ================= */
+registerMap('goblinrealm', {
+  banner: 'THE GOBLIN REALM', music: 'west', encPool: 'goblin',
+  grid: [
+    '#################',
+    '#ggggggggggggggg#',
+    '#ggTgggttgggTggg#',
+    '#gggggttttgggggg#',
+    '#ggttggggggttggg#',
+    '#ggttggggggttggg#',
+    '#gggggttttgggggg#',
+    '#ggTgggttgggTggg#',
+    '#ggggggggggggggg#',
+    '#ggggggggggggggg#',
+    '#################'
+  ],
+  warps: [],
+  objs: [
+    { x: 8, y: 1, solid: true, spr: 'pedro', dir: 'down', flag: 'pedro_beaten',
+      onInteract: function () { pedroFight(); } },
+    { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
+    { x: 5, y: 4, solid: true, spr: 'goblin', dir: 'right', onInteract: function () { say([['GOBLIN', 'HEE HEE! WELCOME TO OUR REALM!'], ['GOBLIN', 'WE RODE YOUR MACHINE FOR FREE!'], ['GOBLIN', 'NO REFUNDS! HEE HEE HEE!']]); } },
+    { x: 11, y: 5, solid: true, spr: 'goblin', dir: 'left', onInteract: function () { say([['GOBLIN', 'THE BAKER MAN GUARDS THE HILL.'], ['GOBLIN', 'HE IS VERY HANDSOME. WE HATE IT.']]); } },
+    { x: 13, y: 8, mustache: true, flag: 'stache_goblin', onInteract: function (o) { collectMustache(o, 'stache_goblin'); } }
+  ],
+  onEnter: function () { if (!hasFlag('goblin_arrived')) { /* arrival handled by goblinMalfunction */ } }
+});
+
+/* ================= story: the malfunction ================= */
+function goblinMalfunction() {
+  Cutscene.play([
+    { bg: 'disco' },
+    { narr: 'THE DADDIES PILE INTO THE MACHINE, HOMEWARD FOR LONDON.' },
+    { say: ['ROSALIND', 'SETTING COURSE FOR 1889 AND— WAIT.'] },
+    { say: ['ROSALIND', 'WHAT ARE THOSE... IN THE GEARS?'] },
+    { narr: 'SOMETHING GREEN IS TANGLED IN THE FLUX GEARS. SOMETHING GRINNING.' },
+    { say: ['HERSCHEL', 'GOBLINS. WHY IS IT ALWAYS GOBLINS.'] },
+    { say: ['SAMUEL', 'HOLD ON, DADDIES!'] },
+    { do: function () { playBoom(function () { Cutscene.next(); }); } },
+    { bg: 'goblin' }, { music: 'west' },
+    { narr: 'THE MACHINE LURCHES OFF COURSE... AND SPITS THEM OUT SOMEWHERE ELSE.' },
+    { do: function () { Game.map = 'goblinrealm'; Game.px = 8; Game.py = 9; Game.dir = 'up'; setFlag('goblin_arrived'); saveGame(false); } }
+  ], { onDone: function () { goblinArrive(); } });
+}
+function goblinArrive() {
+  Cutscene.play([
+    { bg: 'goblin' },
+    { narr: 'A STRANGE GREEN REALM. GOBLINS EVERYWHERE. AND ONE MAN ON THE HILL.' },
+    { say: ['SAMUEL', 'THE ENGINE IS DEAD. WE NEED A SPARK.'] },
+    { say: ['ROSALIND', 'OR A MIRACLE. IDEALLY WITH VOLTAGE.'] },
+    { say: ['WILLIAM', 'WHO IS THAT... BAKER?'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+
+/* ================= story: Pedro ================= */
+function pedroFight() {
+  if (hasFlag('pedro_beaten')) { say([['PEDRO', 'GO WELL, MI CORAZON. AND CALL ME.'], ['PEDRO', 'SOMEHOW.']]); return; }
+  Cutscene.play([
+    { bg: 'goblin' }, { music: 'boss' },
+    { say: ['PEDRO', 'ALTO! I AM PEDRO GARCIA.'] },
+    { say: ['PEDRO', 'A BAKER BY TRADE, A REVOLUTIONARY'] },
+    { say: ['PEDRO', 'BY HEART. I WAS AGAINST THE MONARCH.'] },
+    { say: ['PEDRO', 'I SERVED IN THE MILITARY IN MEXICO.'] },
+    { say: ['PEDRO', 'I HELPED THE REVOLUTION DURING'] },
+    { say: ['PEDRO', "MEXICO'S INDEPENDENCE FROM THE US."] },
+    { say: ['PEDRO', 'I AM DETERMINED TO MAKE A'] },
+    { say: ['PEDRO', 'DIFFERENCE IN ENGLAND.'] },
+    { say: ['SAMUEL', 'THAT IS... A LOT OF HISTORY.'] },
+    { say: ['SAMUEL', "LET'S SETTLE IT WITH BARS."] },
+    { say: ['PEDRO', 'CON GUSTO. EN GARD— I MEAN, DROP IT.'] },
+    { battle: function () { return { enemies: [{ boss: 'pedro' }], music: 'boss', canFlee: false, bg: 'goblin', crowdStart: 0, reveal: { hpFrac: 0.55, fn: pedroReveal } }; },
+      onResult: function (r) { if (r.win) setFlag('pedro_beaten'); } }
+  ], { onDone: function () { if (hasFlag('pedro_beaten')) pedroAfter(); else gotoWorld(); } });
+}
+
+/* THE WIG REVEAL — fired mid-battle by the reveal hook. Team EXTREMELY shocked. */
+function pedroReveal(resume) {
+  Cutscene.play([
+    { bg: 'goblin' }, { stop: true }, { sfx: 'reveal' },
+    { narr: "MID-VERSE, SAMUEL'S WIG FLIES OFF. IT HITS THE FLOOR. SILENCE." },
+    { narr: 'EVEN THE GOBLINS STOP GRINNING.' },
+    { say: ['HERSCHEL', 'A... A WOMAN?!'] },
+    { say: ['HERSCHEL', 'I FOUGHT IN THREE WARS. I WAS'] },
+    { say: ['HERSCHEL', 'NOT READY FOR THIS.'] },
+    { say: ['WILLIAM', 'A WOMAN?! AND STILL BETTER HAIR'] },
+    { say: ['WILLIAM', 'THAN— NO. I REFUSE TO ACCEPT IT.'] },
+    { say: ['ROSALIND', 'MY INSTRUMENTS DETECTED NOTHING!'] },
+    { say: ['ROSALIND', 'I MUST RECALIBRATE MY ENTIRE LIFE!'] },
+    { say: ['HERSCHEL', '...I NEED TO SIT DOWN.'] },
+    { say: ['SAMUEL', 'THE WIG WAS THE COSTUME.'] },
+    { say: ['SAMUEL', 'THE BARS WERE ALWAYS MINE.'] },
+    { do: function () { transformSamuel(); } },
+    { music: 'boss' },
+    { narr: 'SAMUEL RISES TO HER TRUE FORM! SHE LEARNED NO MORE DISGUISE!' },
+    { say: ['PEDRO', 'SENORITA... YOU CONTAIN MULTITUDES.'] },
+    { say: ['PEDRO', "AND EXCELLENT BARS. LET'S FINISH."] }
+  ], { onDone: function () { resume(); } });
+}
+
+/* AFTER the fight: Pedro shoots his shot, gets the number, the spark fixes the engine. */
+function pedroAfter() {
+  Cutscene.play([
+    { bg: 'goblin' },
+    { say: ['PEDRO', 'A WOMAN WHO OUT-RAPS MY ENTIRE'] },
+    { say: ['PEDRO', 'GOBLIN ARMY... CAN I GET YOUR NUMBER?'] },
+    { say: ['HERSCHEL', "IT'S 1889. WHAT NUMBER."] },
+    { choice: { who: 'SAMUEL', q: 'YOUR MOVE, SAMUEL:',
+      opts: ["I DON'T DATE MEN I JUST BEAT.", "YOU BAKE? I'M STARVING.", 'SAY THAT AGAIN. SLOWER.'],
+      cb: function (idx) {} } },
+    { narr: 'SHE SCRIBBLES A NUMBER DOWN. THEIR FINGERS TOUCH.' },
+    { sfx: 'sparkle' },
+    { narr: 'A SPARK LEAPS BETWEEN THEM — AND INTO THE DEAD MACHINE!' },
+    { say: ['ROSALIND', "THE ENGINE'S ALIVE! A SPARK IS,"] },
+    { say: ['ROSALIND', 'APPARENTLY, A POWER SOURCE.'] },
+    { say: ['ROSALIND', 'ALSO — WHAT IS A "PHONE NUMBER"?'] },
+    { say: ['PEDRO', 'GO. MAKE YOUR DIFFERENCE IN ENGLAND.'] },
+    { say: ['PEDRO', 'AND CALL ME. SOMEHOW.'] },
+    { say: ['SAMUEL', 'I WILL. ...SOMEHOW.'] },
+    { do: function () { setFlag('goblin_done'); setFlag('london_unlocked'); healParty(); saveGame(false); } },
+    { narr: 'THE DADDIES BOARD THE MENDED MACHINE — LONDON AT LAST!' }
+  ], { onDone: function () { playTravel('LONDON 1889', function () {
+        Game.map = 'theatredistrict'; Game.px = 9; Game.py = 5; Game.dir = 'up'; saveGame(false); gotoWorld();
+      }); } });
 }
 
 

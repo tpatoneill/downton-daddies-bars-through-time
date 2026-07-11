@@ -12,11 +12,13 @@ console.log('PHASE 4 QA — Finale + Birthday');
 h.step(70, 33); h.tap('start'); h.step(3); h.tap('a'); h.step(6);
 advanceUntil(h, isWorld, 6000, 'opening');
 
-// assemble the full, leveled party + finale-ready flags
+// assemble the full, leveled party + finale-ready flags. Samuel is ALREADY in True
+// Form here (the reveal happened back in the Goblin Realm), so give her nomoredis.
 G.Game.party = [G.makeFighter('samuel', 15), G.makeFighter('herschel', 15), G.makeFighter('william', 15), G.makeFighter('rosalind', 15)];
-['act0_tutorial', 'rome_unlocked', 'rome_done', 'dodge_unlocked', 'dodge_done', 'nyc_unlocked', 'nyc_done', 'london_unlocked',
- 'herschel_joined', 'william_joined', 'rosalind_joined'].forEach(f => G.setFlag(f));
-ok('assembled full party (all 4 Daddies, lv15) + london_unlocked');
+['act0_tutorial', 'rome_done', 'dodge_done', 'nyc_done', 'goblin_done', 'london_unlocked', 'trueform',
+ 'herschel_joined', 'william_joined', 'rosalind_joined', 'pedro_beaten'].forEach(f => G.setFlag(f));
+G.Game.party[0].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];
+ok('assembled full party (all 4 Daddies, lv15), Samuel already True Form');
 
 // jump to the theatre district and trigger arrival
 G.Game.map = 'theatredistrict'; G.Game.px = 9; G.Game.py = 5; G.Game.dir = 'up'; G.setScene(G.World);
@@ -46,21 +48,15 @@ assert(p1.enemies[0].bossId === 'snob1' && p1.enemies.length === 3, 'snob1 + 2 g
 autoBattle(h, { onBeat: true });
 ok('Snobbington phase 1 (with two goons) defeated');
 
-// THE REVEAL -> True Form -> phase 2
-advanceUntil(h, isBattle, 8000, 'reveal + phase 2');
-assert(G.hasFlag('trueform'), 'Samuel transformed to True Form');
-const sam = G.Game.party.find(f => f.id === 'samuel');
-assert(sam.moves.indexOf('nomoredis') >= 0, 'learned NO MORE DISGUISE');
-assert(sam.moves.indexOf('mustache') < 0, 'Mustache Twirl replaced (by Hat Tip)');
-ok('THE REVEAL: True Form + NO MORE DISGUISE + Hat Tip');
+// Snobbington escalates (no Samuel reveal here — she's already True Form) -> phase 2
+advanceUntil(h, isBattle, 8000, 'escalate + phase 2');
 const p2 = G.getScene();
 assert(p2.enemies[0].bossId === 'snob2', 'phase 2 is FINAL DRAFT');
 assert(p2.crowd >= 100, 'crowd slammed to +100 in her favor (' + p2.crowd + ')');
 autoBattle(h, { onBeat: true });
 ok('Snobbington phase 2 (FINAL DRAFT) defeated');
 
-// finale victory -> birthday sequence
-advanceUntil(h, g => sceneName(g) === 'other' || g.getScene && false, 8000, 'to birthday');
+// P Diddy unmask + 50 Cent hook -> birthday sequence
 let guard = 0;
 while (!(G.getScene() && G.getScene().phase === 'credits') && guard++ < 400) { h.tap('a'); h.step(3, 25); }
 assert(G.hasFlag('finale_done'), 'finale_done flag set');
@@ -68,11 +64,11 @@ assert(G.hasFlag('game_complete'), 'game_complete flag set');
 const bd = G.getScene();
 assert(bd && (bd.phase === 'credits' || bd.phase === 'bow'), 'birthday sequence reached (phase ' + (bd && bd.phase) + ')');
 ok('birthday sequence reached');
-// config name present
+// config + new finale beats present
 const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'dist', 'index.html'), 'utf8');
 assert(src.indexOf("BIRTHDAY_NAME = 'LANE ALLISON'") >= 0, "config has BIRTHDAY_NAME = 'LANE ALLISON'");
-assert(src.indexOf('WE KNEW, LASS. WE ALWAYS KNEW.') >= 0, 'sacred reveal line present verbatim');
-assert(src.indexOf('IT WAS CROOKED EVERY SINGLE DAY.') >= 0, 'sacred reveal line present verbatim');
-ok('config + sacred reveal lines verbatim');
+assert(src.indexOf('MEDDLING DADDIES') >= 0, 'P Diddy Scooby-Doo unmask line present');
+assert(src.indexOf('50 CENT') >= 0 && src.indexOf('FROM THE FUTURE') >= 0, '50 Cent future-mission hook present');
+ok('config + P Diddy unmask + 50 Cent hook verbatim');
 
 console.log('\nPHASE 4 QA PASSED — ' + PASS + ' checks. ✔');

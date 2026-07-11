@@ -120,7 +120,13 @@ function autoBattle(h, opts) {
   const { G } = h;
   opts = opts || {};
   let guard = 0;
-  while (isBattle(G) && guard++ < 8000) {
+  while (guard++ < 8000) {
+    // a scripted mid-battle reveal pauses the fight into a cutscene, then resumes it —
+    // advance any such interrupt and keep fighting
+    if (!isBattle(G)) {
+      if (G.getScene() === G.Cutscene) { h.tap('a'); h.step(2, 20); continue; }
+      break;
+    }
     const b = G.getScene();
     if (b.phase === 'intro') { h.tap('a'); h.step(1, 20); continue; }
     if (b.phase === 'menu') {

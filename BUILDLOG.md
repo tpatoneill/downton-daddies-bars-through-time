@@ -103,3 +103,23 @@ Screenshots: `screenshots/p4-*.png`.
 ### The deliverable
 `dist/index.html` — one self-contained file, works offline, touch + keyboard, saves to localStorage
 (in-memory fallback). Build with `node build.js`; test with `node tools/qa-*.js`.
+
+## Update — The Goblin Realm act + finale rework (owner request)
+Restructured the endgame per the owner's new story:
+- **New act: THE GOBLIN REALM** (`85-maps-goblin.js`), inserted between New York and London.
+  Homeward from NYC the engine — jammed with stowaway **goblins** (new enemy + sprite) — misfires
+  and strands the Daddies. They meet **PEDRO GARCIA** (bio verbatim), battle him, and **mid-fight
+  Samuel's wig flies off** — the team is EXTREMELY shocked — and she rises to her **True Form**
+  (the reveal + NO MORE DISGUISE moved here from the finale). Pedro **gets her number**, the spark
+  repairs the machine, and they warp to London. Pedro is a one-scene character (not playable).
+- **New battle tech:** a scripted **mid-battle reveal** hook (`spec.reveal`) that pauses the fight
+  into a cutscene and resumes it — plus a fix to the cutscene/battle bridge so a nested mid-fight
+  cutscene can't clobber the enclosing script (save/restore of the Cutscene queue).
+- **Finale reworked** (`84`): Samuel now arrives already revealed; Snobbington's own **FINAL DRAFT**
+  escalation bridges the two phases; and on defeat the **Scooby-Doo unmask** reveals him as
+  **P DIDDY** ("…IF IT WEREN'T FOR YOU MEDDLING DADDIES!"), then **50 CENT** steps out of the machine
+  with a from-the-future mission hook → confetti **"HAPPY BIRTHDAY LANE ALLISON!"** (no death).
+- **New sprites** (Fable 5, `31-sprites-extra.js`): goblin, Pedro, P Diddy, 50 Cent (+ walkers).
+- QA: `qa-full` extended through the new act (mid-fight reveal + P Diddy/50 Cent verbatim), `qa-phase4`
+  updated for the new finale. All suites green: phase1 10 · phase2 7 · phase4 7 · loss 2 · full 8 · dist 7.
+  Screenshots: `screenshots/gob-*.png`.

@@ -48,6 +48,7 @@ function makeBattle(spec, onEnd) {
     activeIdx: Math.max(0, firstLivingIdx(Game.party)),
     targetIdx: 0,
     crowd: spec.crowdStart || 0, usedShow: false,
+    revealPending: false, revealDone: false,
     phase: 'intro', menuIdx: 0, moveIdx: 0, itemIdx: 0, switchIdx: 0,
     queue: [], qi: 0, msg: '', msgT: 0, autoMsgT: 0,
     aimT: 0, aimHit: false, pendingMove: null,
@@ -237,6 +238,8 @@ function makeBattle(spec, onEnd) {
         }
         tgt.hp = Math.max(0, tgt.hp - r.dmg);
         this.hitFlash = 0.25; this.shake = r.crit ? 0.4 : 0.2;
+        /* scripted mid-battle reveal (e.g. Samuel's wig): fire once when the marked foe drops below the threshold */
+        if (this.spec.reveal && !this.revealDone && tgt.isEnemy && tgt.hp > 0 && tgt.hp / maxHPd(tgt) <= this.spec.reveal.hpFrac) this.revealPending = true;
         if (act.onBeat) lines.push('ON BEAT! +30%');
         if (r.crit) { sfx('crit'); lines.push('A CRITICAL BAR!'); this.crowdSwing(f, 6); }
         else sfx('hit');
@@ -306,8 +309,16 @@ function makeBattle(spec, onEnd) {
     },
     /* ---------- event playback ---------- */
     pushMsg: function (t) { this.queue.push({ fn: function () { return t; } }); },
+    doReveal: function () {
+      var self = this;
+      this.revealDone = true; this.revealPending = false;
+      this.phase = 'paused';
+      this.crowd = Math.min(100, this.crowd + 90); this.flash = 0.7; sfx('reveal');
+      this.spec.reveal.fn(function () { setScene(self); self.phase = 'resolve'; self.runEvent(); });
+    },
     runEvent: function () {
       if (this.checkEnd()) return;
+      if (this.revealPending && !this.revealDone) { this.doReveal(); return; }
       if (this.qi >= this.queue.length) { this.afterRound(); return; }
       var ev = this.queue[this.qi];
       var out = ev.fn();

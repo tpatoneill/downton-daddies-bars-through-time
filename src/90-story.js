@@ -225,31 +225,64 @@ function newGame() {
 }
 function continueGame() { if (loadGame()) gotoWorld(); else newGame(); }
 
-/* ---- DEV: skip straight to late-game states (title screen, behind SELECT) ---- */
-function debugParty(level) {
-  Game.party = [makeFighter('samuel', level), makeFighter('herschel', level), makeFighter('william', level), makeFighter('rosalind', level)];
-  Game.activeIdx = 0; Game.money = 200; Game.mustaches = 0; Game.parts = 3;
+/* ---- DEV: visit any era to test its level (title screen, behind SELECT) ----
+   Each visit recreates the party/flags/items for THAT point in the story, so
+   joins, arrival cutscenes, and bosses all behave naturally. */
+function debugParty(ids, level) {
+  Game.party = [];
+  for (var i = 0; i < ids.length; i++) Game.party.push(makeFighter(ids[i], level));
+  Game.activeIdx = 0; Game.money = 200; Game.mustaches = 0;
   Game.items = { earlgrey: 5, strongtea: 3, crumpet: 2, sparestache: 2, lozenge: 3 };
   Game.drip = {}; Game.playtime = 0; Game.started = true;
-  ['act0_intro', 'act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
-   'dodge_unlocked', 'dodge_arrived_seen', 'dodge_done', 'jake_beaten', 'william_joined',
-   'nyc_unlocked', 'nyc_arrived_seen', 'nyc_done', 'rex_beaten', 'rosalind_joined'].forEach(function (f) { setFlag(f); });
+  setFlag('act0_intro'); /* never replay the opening in dev */
   for (var k in Maps) Maps[k]._entered = false;
 }
-function debugSkip(where) {
+var DEV_VISITS = [
+  { label: 'LONDON ACT 0', era: 'act0' },
+  { label: 'ROME', era: 'rome' },
+  { label: 'DODGE CITY', era: 'dodge' },
+  { label: 'NEW YORK', era: 'nyc' },
+  { label: 'GOBLIN REALM', era: 'goblin' },
+  { label: 'LONDON FINALE', era: 'finale' }
+];
+function debugVisit(era) {
   Game.flags = {};
-  if (where === 'goblin') {
-    /* start exactly at the end of the NYC (Rex) boss fight: plays the mirror-ball
-       donation + the engine-malfunction cutscenes, then lands in the Goblin Realm */
-    debugParty(11);
-    Game.map = 'rooftop'; Game.px = 6; Game.py = 6; Game.dir = 'up';
-    nycVictory();
-  } else { /* finale (already revealed, at the theatre) */
-    debugParty(14);
-    ['goblin_done', 'london_unlocked', 'trueform', 'editor1_beaten', 'editor2_beaten', 'lobby_clear'].forEach(function (f) { setFlag(f); });
+  var F = function (list) { for (var i = 0; i < list.length; i++) setFlag(list[i]); };
+  if (era === 'act0') {           /* solo lv1: tutorial + manor testable from scratch */
+    debugParty(['samuel'], 1);
+    Game.parts = 0;
+    Game.map = 'manor'; Game.px = 7; Game.py = 9; Game.dir = 'up';
+  } else if (era === 'rome') {    /* arrival cutscene + Herschel join play naturally */
+    debugParty(['samuel'], 4);
+    F(['act0_tutorial', 'rome_unlocked']); Game.parts = 0;
+    Game.map = 'forum'; Game.px = 8; Game.py = 9; Game.dir = 'up';
+  } else if (era === 'dodge') {   /* William joins on arrival */
+    debugParty(['samuel', 'herschel'], 7);
+    F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined', 'dodge_unlocked']);
+    Game.parts = 1;
+    Game.map = 'mainstreet'; Game.px = 8; Game.py = 9; Game.dir = 'up';
+  } else if (era === 'nyc') {     /* Rosalind joins on arrival */
+    debugParty(['samuel', 'herschel', 'william'], 10);
+    F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
+       'dodge_unlocked', 'dodge_arrived_seen', 'dodge_done', 'jake_beaten', 'william_joined', 'nyc_unlocked']);
+    Game.parts = 2;
+    Game.map = 'backalley'; Game.px = 6; Game.py = 5; Game.dir = 'up';
+  } else if (era === 'goblin') {  /* plays the Rex outro -> malfunction -> arrival chain */
+    debugParty(['samuel', 'herschel', 'william', 'rosalind'], 11);
+    F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
+       'dodge_unlocked', 'dodge_arrived_seen', 'dodge_done', 'jake_beaten', 'william_joined',
+       'nyc_unlocked', 'nyc_arrived_seen', 'nyc_done', 'rex_beaten', 'rosalind_joined']);
     Game.parts = 3;
+    Game.map = 'rooftop'; Game.px = 6; Game.py = 6; Game.dir = 'up';
+    nycVictory(); return;
+  } else {                        /* finale: full level from the occupied district */
+    debugParty(['samuel', 'herschel', 'william', 'rosalind'], 14);
+    F(['act0_tutorial', 'rome_arrived_seen', 'rome_done', 'herschel_joined', 'dodge_arrived_seen', 'dodge_done',
+       'william_joined', 'nyc_arrived_seen', 'nyc_done', 'rosalind_joined', 'goblin_arrived', 'goblin_done',
+       'pedro_beaten', 'london_unlocked', 'trueform']);
+    Game.parts = 4;
     Game.party[0].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];
-    Game.map = 'finalstage'; Game.px = 7; Game.py = 11; Game.dir = 'up'; /* onEnter starts Snobbington */
-    gotoWorld();
+    Game.map = 'theatredistrict'; Game.px = 9; Game.py = 5; Game.dir = 'up';
   }
+  gotoWorld();
 }

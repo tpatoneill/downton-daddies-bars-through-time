@@ -122,6 +122,23 @@ function findBackArt() {
     '/Users/pationeill/Downloads/back-art.png', '/Users/pationeill/Downloads/back-art.jpg',
     '/Users/pationeill/Downloads/back-art.jpeg', '/Users/pationeill/Downloads/back-art 2.png']);
 }
+function findCharArt() {
+  return findFile([process.env.CHARART,
+    '/Users/pationeill/Downloads/character-art.png', '/Users/pationeill/Downloads/character-art 2.png']);
+}
+/* alpha-aware contain-fit blit (for transparent character cutouts) */
+function spriteBlit(buf, img, x0, y0, rw, rh) {
+  const sc = Math.min(rw / img.w, rh / img.h);
+  const dw = Math.round(img.w * sc), dh = Math.round(img.h * sc);
+  const ox = x0 + Math.round((rw - dw) / 2), oy = y0 + rh - dh; // bottom-aligned
+  for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
+    const sx = Math.min(img.w - 1, Math.floor(x / sc)), sy = Math.min(img.h - 1, Math.floor(y / sc));
+    const si = (sy * img.w + sx) * 4, a = (img.data[si + 3] === undefined ? 255 : img.data[si + 3]) / 255;
+    if (a < 0.04) continue;
+    const di = ((oy + y) * W + (ox + x)) * 4;
+    for (let c = 0; c < 3; c++) buf[di + c] = img.data[si + c] * a + buf[di + c] * (1 - a);
+  }
+}
 /* cover-fit `img` into buffer region (bilinear), cropping overflow centered */
 function coverBlit(buf, img, x0, y0, rw, rh) {
   const sc = Math.max(rw / img.w, rh / img.h);
@@ -348,10 +365,10 @@ console.log('composing front cover (smooth cartoon style)...');
   {
     const tmp = makeBuf(); const T = kit(tmp);
     T.rect(0, 0, 1400 * SS, 80 * SS, '#ff00ff');
-    const w1 = T.bubble('ONLY FOR', 0, 6, 4 * SS, '#ffffff', null, 0);
+    const w1 = T.ptext('ONLY FOR', 0, 6, 4 * SS, '#ffffff');
     rotCCW(tmp, w1, 40 * SS, K, 56 * SS, 8 * SS, '#ff00ff');
     T.rect(0, 0, 1400 * SS, 80 * SS, '#ff00ff');
-    const w2 = T.bubble('DADDYBOY ADVANCE', 0, 6, 10 * SS, '#22224a', null, 0);
+    const w2 = T.ptext('DADDYBOY ADVANCE', 0, 6, 10 * SS, '#22224a');
     rotCCW(tmp, w2, 66 * SS, K, 34 * SS, 200 * SS, '#ff00ff');
   }
   /* arched bubbly logo */
@@ -362,16 +379,11 @@ console.log('composing front cover (smooth cartoon style)...');
   /* (hero art carries the characters; dads drawn in code only when no art exists) */
   if (!artPath) { drawHerschel(K, 265 * SS, 1575 * SS, 250 * SS); drawRosalind(K, 1150 * SS, 1580 * SS, 235 * SS);
     drawWilliam(K, 515 * SS, 1645 * SS, 265 * SS); drawSamuel(K, 815 * SS, 1690 * SS, 315 * SS); }
-  /* gold 100% BIRTHDAY badge */
-  K.circle(1215 * SS, 1180 * SS, 92 * SS, '#8a6a1e'); K.circle(1215 * SS, 1180 * SS, 86 * SS, gold);
-  K.ring(1215 * SS, 1180 * SS, 72 * SS, 3 * SS, '#8a6a1e');
-  K.bubble('100%', 1215 * SS - K.bubbleW('100%', 4.6 * SS) / 2, 1148 * SS, 4.6 * SS, navy, null, 0);
-  K.bubble('BIRTHDAY', 1215 * SS - K.bubbleW('BIRTHDAY', 3.2 * SS) / 2, 1192 * SS, 3.2 * SS, navy, null, 0);
   /* ESRB-style rating box: E for EVERYONE */
   K.rrect(190 * SS, 1700 * SS, 132 * SS, 180 * SS, 8 * SS, '#ffffff');
   K.rrect(196 * SS, 1706 * SS, 120 * SS, 168 * SS, 6 * SS, '#000000');
   K.rrect(200 * SS, 1710 * SS, 112 * SS, 128 * SS, 4 * SS, '#ffffff');
-  K.bubble('E', 234 * SS, 1730 * SS, 17 * SS, '#000000', null, 0);
+  K.ptext('E', 238 * SS, 1726 * SS, 22 * SS, '#000000');
   K.ptext('EVERYONE', 212 * SS, 1849 * SS, 3.2 * SS, '#ffffff');
   /* company + publisher */
   K.ptext('THE DOWNTON DADDIES COMPANY', CX - K.ptextW('THE DOWNTON DADDIES COMPANY', 4 * SS) / 2, 1892 * SS, 4 * SS, '#f6f4fa');
@@ -424,9 +436,10 @@ const qrm = QR.create(URL, { errorCorrectionLevel: 'M' }).modules;
   /* bullets */
   const feats = ['FOUR PLAYABLE DADDIES.', 'CRAWL THE COLOSSEUM.', 'WIN THE CROWD.', '12 GOLDEN MUSTACHES.'];
   feats.forEach((f, i) => { K.circle(104 * SS, (668 + i * 44) * SS, 7 * SS, gold); K.ptext(f, 124 * SS, (656 + i * 44) * SS, 4.4 * SS, '#e8e0f8'); });
-  /* character slot: the painted back-art carries its own decorations; only draw
-     the cartoon William when we're on the plain drawn field */
-  if (!backArt) drawWilliam(K, 330 * SS, 1500 * SS, 220 * SS);
+  /* character slot above the caption: generated portrait if present, else cartoon */
+  const charArt = findCharArt();
+  if (charArt) { console.log('  character art: ' + charArt); spriteBlit(buf, loadImage(charArt), 80 * SS, 980 * SS, 600 * SS, 560 * SS); }
+  else if (!backArt) drawWilliam(K, 330 * SS, 1500 * SS, 220 * SS);
   K.ptext('THE FRONT LINE OF RAP BATTLING!', 92 * SS, 1566 * SS, 4 * SS, gold);
   /* right column: 2 pixel screenshots + QR */
   function frame(x, y, w2, h2) { K.rrect(x - 10 * SS, y - 10 * SS, w2 + 20 * SS, h2 + 20 * SS, 8 * SS, '#ffffff'); K.rect(x - 3 * SS, y - 3 * SS, w2 + 6 * SS, h2 + 6 * SS, '#000000'); }

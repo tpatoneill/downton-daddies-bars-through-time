@@ -113,10 +113,10 @@ var World = {
     /* warp? */
     var w = warpAt(m, Game.px, Game.py);
     if (w) { if (w.gate && !hasFlag(w.gate)) { if (w.blocked) w.blocked(); return; } warpTo(w); return; }
-    /* encounter? */
+    /* encounter? (maps set encPool, not enc — this gate was wrong before) */
     var tl = tileAt(m, Game.px, Game.py);
-    if (tl.enc && m.enc) {
-      var rate = m.enc.rate || 0.12;
+    if (tl.enc && m.encPool) {
+      var rate = m.encRate || 0.12;
       if (Math.random() < rate) { startWildBattle(m); return; }
     }
     /* auto-pickup (golden mustaches, etc.) */

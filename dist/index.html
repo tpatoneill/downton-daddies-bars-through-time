@@ -1628,10 +1628,10 @@ var World = {
     /* warp? */
     var w = warpAt(m, Game.px, Game.py);
     if (w) { if (w.gate && !hasFlag(w.gate)) { if (w.blocked) w.blocked(); return; } warpTo(w); return; }
-    /* encounter? */
+    /* encounter? (maps set encPool, not enc — this gate was wrong before) */
     var tl = tileAt(m, Game.px, Game.py);
-    if (tl.enc && m.enc) {
-      var rate = m.enc.rate || 0.12;
+    if (tl.enc && m.encPool) {
+      var rate = m.encRate || 0.12;
       if (Math.random() < rate) { startWildBattle(m); return; }
     }
     /* auto-pickup (golden mustaches, etc.) */
@@ -3180,11 +3180,11 @@ registerMap('marketroad', {
   grid: [
     '###################',
     '#ddddddddddddddddd#',
-    '#dttdddddddddttddd#',
-    '#dttdddddddddttddd#',
-    '#ddddddddddddddddd#',
-    '#dttdddddddddttddd#',
-    '#dttdddddddddttddd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
     '#ddddddddddddddddd#',
     '###################'
   ],
@@ -3382,11 +3382,11 @@ registerMap('dustytrail', {
   grid: [
     '###################',
     '#sssssssssssssssss#',
-    '#sttsssCsssssttsss#',
-    '#sttsssssssssttsss#',
-    '#sssssssssssssssss#',
-    '#sttsssssssCsttsss#',
-    '#sttsssssssssttsss#',
+    '#stttttCttttttttts#',
+    '#sttttttttttttttts#',
+    '#sttttttttttttttts#',
+    '#stttttttttttCttts#',
+    '#sttttttttttttttts#',
     '#sssssssssssssssss#',
     '###################'
   ],
@@ -4146,12 +4146,12 @@ registerMap('goblinrealm', {
   grid: [
     '#################',
     '#ggggggggggggggg#',
-    '#ggTgggttgggTggg#',
-    '#gggggttttgggggg#',
-    '#ggttggggggttggg#',
-    '#ggttggggggttggg#',
-    '#gggggttttgggggg#',
-    '#ggTgggttgggTggg#',
+    '#gTtttttttttttTg#',
+    '#gtttttttttttttg#',
+    '#gtttttttttttttg#',
+    '#gtttttttttttttg#',
+    '#gtttttttttttttg#',
+    '#gTtttttttttttTg#',
     '#ggggggggggggggg#',
     '#ggggggggggggggg#',
     '#################'

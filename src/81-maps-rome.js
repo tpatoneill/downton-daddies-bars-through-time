@@ -47,11 +47,11 @@ registerMap('marketroad', {
   grid: [
     '###################',
     '#ddddddddddddddddd#',
-    '#dttdddddddddttddd#',
-    '#dttdddddddddttddd#',
-    '#ddddddddddddddddd#',
-    '#dttdddddddddttddd#',
-    '#dttdddddddddttddd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
+    '#dtttttttttttttttd#',
     '#ddddddddddddddddd#',
     '###################'
   ],

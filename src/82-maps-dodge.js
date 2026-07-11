@@ -40,11 +40,11 @@ registerMap('dustytrail', {
   grid: [
     '###################',
     '#sssssssssssssssss#',
-    '#sttsssCsssssttsss#',
-    '#sttsssssssssttsss#',
-    '#sssssssssssssssss#',
-    '#sttsssssssCsttsss#',
-    '#sttsssssssssttsss#',
+    '#stttttCttttttttts#',
+    '#sttttttttttttttts#',
+    '#sttttttttttttttts#',
+    '#stttttttttttCttts#',
+    '#sttttttttttttttts#',
     '#sssssssssssssssss#',
     '###################'
   ],

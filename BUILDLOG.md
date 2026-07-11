@@ -152,3 +152,12 @@ Screenshots: `screenshots/super-0*.png`. All suites green (phase4/full/dist).
 - QA: harness made spot/forced-battle aware (auto-resolves trainer/wild fights, leaves bosses to the
   test; retry cap prevents unwinnable-fight hangs). All suites green: phase1 10 · phase2 7 · phase4 7 ·
   loss 2 · full 8 · dist 7. Screenshots: `screenshots/tr-*.png`.
+
+## Fix — Wild tall-grass encounters never fired (+ grass-covered routes)
+- **Critical bug:** the encounter gate checked `m.enc`, but maps set `m.encPool`, so wild grass
+  battles NEVER triggered (since Phase 1). Fixed the gate; wild battles now fire (~12%/grass-step).
+- **Routes are now grass-covered** (Market Road, Dusty Trail, Goblin Realm) so walking a route
+  actually produces wild "street cypher" battles, Pokemon-style, instead of a clear dirt path you
+  could cross battle-free. Trainers' line-of-sight also crosses the grassy lanes now.
+- Raised the QA retry cap (bosses got harder with supers + no-heal; retries heal to full, so they're
+  winnable). All suites green: phase1 10 · phase2 7 · phase4 7 · loss 2 · full 8 · dist 7.

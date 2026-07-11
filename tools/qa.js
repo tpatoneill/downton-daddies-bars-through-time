@@ -166,7 +166,7 @@ function autoBattle(h, opts) {
       h.tap('a'); h.step(3, 20);
       // loss on a boss/story fight retries the same battle; keep playing until we leave battle
       if (!isBattle(G)) return { win: won, fled: fled, lost: b.result.lost };
-      if (!won && ++losses > 8) return { win: false, lost: true, stuck: true }; // avoid infinite retry on an unwinnable fight
+      if (!won && ++losses > 20) return { win: false, lost: true, stuck: true }; // avoid infinite retry on an unwinnable fight
       continue;
     }
     h.step(1, 20);

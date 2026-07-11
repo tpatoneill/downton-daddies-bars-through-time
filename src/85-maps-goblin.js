@@ -22,12 +22,12 @@ registerMap('goblinrealm', {
   grid: [
     '#################',
     '#ggggggggggggggg#',
-    '#ggTgggttgggTggg#',
-    '#gggggttttgggggg#',
-    '#ggttggggggttggg#',
-    '#ggttggggggttggg#',
-    '#gggggttttgggggg#',
-    '#ggTgggttgggTggg#',
+    '#gTtttttttttttTg#',
+    '#gtttttttttttttg#',
+    '#gtttttttttttttg#',
+    '#gtttttttttttttg#',
+    '#gtttttttttttttg#',
+    '#gTtttttttttttTg#',
     '#ggggggggggggggg#',
     '#ggggggggggggggg#',
     '#################'

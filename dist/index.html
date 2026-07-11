@@ -913,6 +913,44 @@ defWalker('roman', {hat: '#c0a058', hair: '#3a2a1a', coat: '#e8e8f0', hatShow: f
 defWalker('cowboy', {hat: '#6e4a2c', hair: '#3a2a1a', coat: '#7a5030'});
 defWalker('discoer', {hat: '#e05f8f', hair: '#2a2028', coat: '#8b3ca8', hatShow: false, accent: '#4ff0ff'});
 
+/* Order Editor — a detailed custom walker (red-banded hat, red glasses, red pen). */
+var EDITOR_WALK_DOWN =
+  "....KKKKKKKK....\n" +
+  "...KHHHHHHHHK...\n" +
+  "...KHBBBBBBHK...\n" +
+  "..KKKKKKKKKKKK..\n" +
+  "...KDDDDDDDDK...\n" +
+  "...KGGSSSSGGK...\n" +
+  "...KSGSSSSGSK...\n" +
+  "...KSSSKKSSSK...\n" +
+  "....KKKKKKKK....\n" +
+  "..KKNNKCCKNNKK..\n" +
+  "..KNNNKCCKNNNKP.\n" +
+  "..KNNNKWWKNNNKP.\n" +
+  "...KNNNNNNNNK...\n" +
+  "...KNKKKKKKNK...\n" +
+  "...KNK....KNK...\n" +
+  "...KKK....KKK...";
+var EDITOR_WALK_UP =
+  "....KKKKKKKK....\n" +
+  "...KHHHHHHHHK...\n" +
+  "...KHBBBBBBHK...\n" +
+  "..KKKKKKKKKKKK..\n" +
+  "...KDDDDDDDDK...\n" +
+  "...KDDDDDDDDK...\n" +
+  "...KDDDDDDDDK...\n" +
+  "...KSSSSSSSSK...\n" +
+  "....KKKKKKKK....\n" +
+  "..KKNNKNNKNNKK..\n" +
+  "..KNNNKNNKNNNKP.\n" +
+  "..KNNNKWWKNNNKP.\n" +
+  "...KNNNNNNNNK...\n" +
+  "...KNKKKKKKNK...\n" +
+  "...KNK....KNK...\n" +
+  "...KKK....KKK...";
+regSimpleWalker('editor', { K: sK, H: '#2c303c', B: '#c63a46', D: '#24242e', G: '#c63a46',
+  S: sSK, C: '#c63a46', N: '#3a3a4a', W: '#f6f6fa', P: '#c63a46' }, EDITOR_WALK_DOWN, EDITOR_WALK_UP);
+
 function drawWalker(name, dir, frame, x, y) {
   var w = WALK[name] || WALK.villager;
   w.draw(dir, frame, x, y);

@@ -4,13 +4,33 @@
    levels at each era boundary (stands in for the grinding a real player does; the
    balance sweep validates that on-curve fights are winnable-not-free). */
 const Q = require('./qa.js');
-const { loadGame, advanceUntil, isWorld, isBattle, walkTo, autoBattle, interactAt, walkToNextMap, pickTravel, sceneName } = Q;
+const { loadGame, advanceUntil, isWorld, isBattle, walkTo, autoBattle, interactAt, walkToNextMap, trek, pickTravel, sceneName } = Q;
 function assert(c, m) { if (!c) throw new Error('ASSERT FAILED: ' + m); }
 let PASS = 0; function ok(m) { PASS++; console.log('  ok  ' + m); }
 const h = loadGame(); const { G } = h;
-function levelParty(n) { G.Game.party.forEach(f => { const nf = G.makeFighter(f.id, n); f.level = n; f.maxHP = nf.maxHP; f.baseFLOW = nf.baseFLOW; f.basePOISE = nf.basePOISE; f.baseTEMPO = nf.baseTEMPO; f.hp = f.maxHP; f.fainted = false; f.moves = nf.moves.slice(); }); }
+function levelParty(n) { G.Game.party.forEach(f => { const nf = G.makeFighter(f.id, n); f.level = n; f.maxHP = nf.maxHP; f.baseFLOW = nf.baseFLOW; f.basePOISE = nf.basePOISE; f.baseTEMPO = nf.baseTEMPO; f.hp = f.maxHP; f.fainted = false; f.moves = nf.moves.slice(); }); G.giveItem('strongtea', 12); /* stands in for shopping */ }
 function useMachineTo(needle) { walkTo(h, 7, 2); interactAt(h, 7, 1); pickTravel(h, needle); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'travel ' + needle); }
 function enterBossMap(target) { const w = G.curMap().warps.find(w => w.to === target); walkTo(h, w.x, w.y); advanceUntil(h, isBattle, 8000, 'boss ' + target); }
+/* run fn on the last map of route; if a wipe respawned us elsewhere, re-trek + retry */
+function onMap(route, fn, tries) {
+  const target = route[route.length - 1];
+  for (let a = 0; a < (tries || 5); a++) {
+    if (G.Game.map !== target && !trek(h, route)) continue;
+    if (fn() !== false) return true;
+  }
+  return false;
+}
+/* trek to a boss map and beat the boss, re-trekking after any wipe-respawn */
+function beatBoss(route, bossMap, bossId, tries) {
+  for (let a = 0; a < (tries || 6); a++) {
+    if (!trek(h, route)) continue;
+    enterBossMap(bossMap);
+    assert(isBattle(G) && G.getScene().enemies[0].bossId === bossId, bossId + ' fight');
+    if (autoBattle(h, { onBeat: true }).win) return true;
+    advanceUntil(h, isWorld, 8000, 'respawn after ' + bossId + ' wipe');
+  }
+  return false;
+}
 
 console.log('FULL PLAYTHROUGH QA');
 
@@ -32,20 +52,21 @@ assert(G.Game.map === 'manor', 'back at manor');
 levelParty(6);
 useMachineTo('ROME');
 assert(G.Game.map === 'forum', 'in Rome forum, got ' + G.Game.map);
-assert(walkToNextMap(h, 'grounds'), 'reach grounds');
-assert(walkToNextMap(h, 'arcades'), 'reach arcades');
-assert(walkToNextMap(h, 'hypogeum'), 'reach hypogeum');
-walkTo(h, 14, 2); interactAt(h, 14, 1); advanceUntil(h, isWorld, 6000);  // OBJECTIVE 1: Herschel
-assert(G.Game.party.length === 2 && G.Game.party[1].id === 'herschel', 'Herschel joined (KITCHEN PASS)');
-walkTo(h, 5, 8); interactAt(h, 6, 8); advanceUntil(h, isWorld, 4000);    // capstan puzzle
-assert(G.hasFlag('rome_capstan'), 'beast lift raised');
+const MAZE = ['forum', 'grounds', 'arcades', 'hypogeum'];
+assert(trek(h, MAZE), 'reach hypogeum');
+assert(onMap(MAZE, () => {                                  // OBJECTIVE 1: Herschel
+  walkTo(h, 14, 2); if (G.Game.map !== 'hypogeum') return false;
+  interactAt(h, 14, 1); advanceUntil(h, isWorld, 6000);
+  return G.Game.party.length === 2 && G.Game.party[1].id === 'herschel';
+}), 'Herschel joined (KITCHEN PASS)');
+assert(onMap(MAZE, () => {                                  // capstan puzzle
+  walkTo(h, 5, 8); if (G.Game.map !== 'hypogeum') return false;
+  interactAt(h, 6, 8); advanceUntil(h, isWorld, 4000);
+  return G.hasFlag('rome_capstan');
+}), 'beast lift raised');
 levelParty(7);
-assert(walkToNextMap(h, 'stands'), 'reach stands');
-assert(walkToNextMap(h, 'gateoflife'), 'reach Gate of Life');
-walkTo(h, 4, 1);                                            // gated warp -> arena (OBJECTIVE 2)
-advanceUntil(h, isBattle, 8000, 'maximvs');
-assert(isBattle(G) && G.getScene().enemies[0].bossId === 'maximvs', 'Maximvs fight');
-autoBattle(h, { onBeat: true });
+const TO_GATE = ['forum', 'grounds', 'arcades', 'hypogeum', 'stands', 'gateoflife'];
+assert(beatBoss(TO_GATE, 'arena', 'maximvs'), 'buffed Maximvs beaten');  // OBJECTIVE 2
 pickTravel(h, 'DODGE'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'to dodge');
 assert(G.hasFlag('rome_done') && G.Game.parts >= 1, 'Rome complete, part 1');
 ok('ROME MAZE: Herschel + pass, capstan, Gate of Life, buffed Maximvs, Flux Gear');
@@ -54,11 +75,7 @@ ok('ROME MAZE: Herschel + pass, capstan, Gate of Life, buffed Maximvs, Flux Gear
 assert(G.Game.map === 'mainstreet', 'in Dodge mainstreet, got ' + G.Game.map);
 assert(G.Game.party.length === 3 && G.Game.party[2].id === 'william', 'William joined on arrival');
 levelParty(10);
-walkToNextMap(h, 'dustytrail');
-walkToNextMap(h, 'silvermine');
-enterBossMap('saloon');                                    // Jake on onEnter
-assert(isBattle(G) && G.getScene().enemies[0].bossId === 'jake', 'Jake fight');
-autoBattle(h, { onBeat: true });
+assert(beatBoss(['mainstreet', 'dustytrail', 'silvermine'], 'saloon', 'jake'), 'Jake beaten'); // Jake on onEnter
 pickTravel(h, 'NEW YORK'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'to nyc');
 assert(G.hasFlag('dodge_done') && G.Game.parts >= 2, 'Dodge complete, part 2');
 ok('DODGE: William joins, Jake down, Chrono Coil');
@@ -68,12 +85,9 @@ assert(G.Game.party.length === 4 && G.Game.party[3].id === 'rosalind', 'Rosalind
 const nycStart = G.Game.map;
 levelParty(13);
 // traverse the NYC chain dynamically (map ids from the era file)
-const nycChain = [];
+const nycChain = [G.Game.map];
 { let cur = G.Game.map, seen = {}; while (cur && !seen[cur]) { seen[cur] = 1; const m = G.Maps[cur]; const nxt = m.warps.find(w => !seen[w.to] && ['clubinferno','boilerroom','rooftop'].includes(w.to)); if (!nxt) break; nycChain.push(nxt.to); cur = nxt.to; } }
-for (let i = 0; i < nycChain.length - 1; i++) walkToNextMap(h, nycChain[i]);
-enterBossMap(nycChain[nycChain.length - 1]);               // Rex on onEnter
-assert(isBattle(G) && G.getScene().enemies[0].bossId === 'rex', 'Rex fight');
-autoBattle(h, { onBeat: true });
+assert(beatBoss(nycChain.slice(0, -1), nycChain[nycChain.length - 1], 'rex'), 'Rex beaten'); // Rex on onEnter
 // after Rex: nycVictory -> the engine malfunctions -> stranded in the Goblin Realm
 advanceUntil(h, isWorld, 14000, 'to goblin realm');
 assert(G.Game.map === 'goblinrealm', 'stranded in the Goblin Realm, got ' + G.Game.map);
@@ -82,10 +96,15 @@ ok('NYC: Rex down, Time Crystal -> engine malfunction -> Goblin Realm');
 
 // ---- Goblin Realm: Pedro + the mid-battle wig reveal ----
 levelParty(13);
-walkTo(h, 8, 2); interactAt(h, 8, 1);                       // talk to Pedro -> fight
-advanceUntil(h, isBattle, 6000, 'pedro');
-assert(isBattle(G) && G.getScene().enemies[0].bossId === 'pedro', 'Pedro fight');
-autoBattle(h, { onBeat: true });                            // includes the mid-fight wig reveal interrupt
+let pedroWin = false;
+for (let att = 0; att < 6 && !pedroWin; att++) {            // respawn checkpoint is this same map
+  walkTo(h, 8, 2); interactAt(h, 8, 1);                     // talk to Pedro -> fight
+  advanceUntil(h, isBattle, 6000, 'pedro');
+  assert(isBattle(G) && G.getScene().enemies[0].bossId === 'pedro', 'Pedro fight');
+  if (autoBattle(h, { onBeat: true }).win) pedroWin = true;  // includes the mid-fight wig reveal interrupt
+  else advanceUntil(h, isWorld, 8000, 'respawn after pedro wipe');
+}
+assert(pedroWin, 'Pedro beaten');
 assert(G.hasFlag('trueform'), 'the wig fell -> True Form mid-battle');
 assert(G.Game.party[0].moves.includes('nomoredis'), 'learned NO MORE DISGUISE at the reveal');
 advanceUntil(h, isWorld, 12000, 'to london');              // pedroAfter (number/spark) -> travel to London
@@ -95,15 +114,27 @@ ok('GOBLIN REALM: Pedro, EXTREMELY-shocked wig reveal, True Form, number-spark f
 
 // ---- Finale (Samuel already True Form) ----
 levelParty(15);
-walkTo(h, 8, 4); interactAt(h, 8, 3); advanceUntil(h, g => isWorld(g) || isBattle(g), 3000); if (isBattle(G)) { autoBattle(h, {}); advanceUntil(h, isWorld, 3000); }
-walkTo(h, 9, 4); interactAt(h, 9, 3); advanceUntil(h, g => isWorld(g) || isBattle(g), 3000); if (isBattle(G)) { autoBattle(h, {}); advanceUntil(h, isWorld, 3000); }
-assert(G.hasFlag('lobby_clear'), 'editors cleared');
-walkTo(h, 9, 1); advanceUntil(h, isBattle, 6000, 'snob1');
-assert(isBattle(G) && G.getScene().enemies[0].bossId === 'snob1', 'Snobbington phase 1');
-autoBattle(h, { onBeat: true });
-advanceUntil(h, isBattle, 8000, 'snob2');                   // snobEscalate bridge -> FINAL DRAFT
-assert(G.getScene().enemies[0].bossId === 'snob2' && G.getScene().crowd >= 100, 'phase 2 + crowd 100');
-autoBattle(h, { onBeat: true });                          // snob2 (FINAL DRAFT)
+function editorFight(x, y) {
+  for (let att = 0; att < 5; att++) {                       // respawn checkpoint is theatredistrict
+    walkTo(h, x, y + 1); if (G.Game.map !== 'theatredistrict') continue;
+    interactAt(h, x, y); advanceUntil(h, g => isWorld(g) || isBattle(g), 3000);
+    if (isBattle(G)) { if (!autoBattle(h, {}).win) { advanceUntil(h, isWorld, 6000); continue; } advanceUntil(h, isWorld, 3000); }
+    return true;
+  }
+  return false;
+}
+assert(editorFight(8, 3) && editorFight(9, 3) && G.hasFlag('lobby_clear'), 'editors cleared');
+let snobDone = false;
+for (let att = 0; att < 6 && !snobDone; att++) {            // a wipe in either phase -> walk back, refight both
+  walkTo(h, 9, 1); advanceUntil(h, isBattle, 6000, 'snob1');
+  assert(isBattle(G) && G.getScene().enemies[0].bossId === 'snob1', 'Snobbington phase 1');
+  if (!autoBattle(h, { onBeat: true }).win) { advanceUntil(h, isWorld, 8000, 'respawn after snob1 wipe'); continue; }
+  advanceUntil(h, isBattle, 8000, 'snob2');                 // snobEscalate bridge -> FINAL DRAFT
+  assert(G.getScene().enemies[0].bossId === 'snob2' && G.getScene().crowd >= 100, 'phase 2 + crowd 100');
+  if (!autoBattle(h, { onBeat: true }).win) { advanceUntil(h, isWorld, 8000, 'respawn after snob2 wipe'); continue; }
+  snobDone = true;
+}
+assert(snobDone, 'both Snobbington phases beaten');
 advanceUntil(h, isWorld, 10000, 'p diddy unmask -> HQ');  // -> control returns near HQ
 assert(G.Game.map === 'bakersrow' && G.hasFlag('finale_done') && !G.hasFlag('game_complete'), 'unmask done -> must walk home to HQ');
 walkTo(h, 9, 1);                                          // into the manor (HQ) -> surprise party + 50 Cent

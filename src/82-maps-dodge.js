@@ -6,7 +6,7 @@ var SHOP_WEST = ['earlgrey', 'strongtea', 'crumpet', 'lozenge', 'sparestache', '
 
 /* ---------------- MAIN STREET (town) ---------------- */
 registerMap('mainstreet', {
-  banner: 'MAIN STREET - DODGE CITY', music: 'west', riftBg: 'west',
+  banner: 'MAIN STREET - DODGE CITY', music: 'west', riftBg: 'west', safe: true,
   grid: [
     '#################',
     '#sssssssssssssss#',

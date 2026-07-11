@@ -12,7 +12,7 @@ function serializeGame() {
   return JSON.stringify({
     v: 2, party: party, activeIdx: Game.activeIdx, flags: Game.flags, items: Game.items,
     drip: Game.drip, money: Game.money, mustaches: Game.mustaches, parts: Game.parts,
-    map: Game.map, px: Game.px, py: Game.py, dir: Game.dir, playtime: Game.playtime
+    map: Game.map, px: Game.px, py: Game.py, dir: Game.dir, checkpoint: Game.checkpoint, playtime: Game.playtime
   });
 }
 function saveGame(loud) {
@@ -43,6 +43,7 @@ function loadGame() {
   Game.activeIdx = o.activeIdx || 0; Game.flags = o.flags || {}; Game.items = o.items || {};
   Game.drip = o.drip || {}; Game.money = o.money || 0; Game.mustaches = o.mustaches || 0; Game.parts = o.parts || 0;
   Game.map = o.map || 'manor'; Game.px = o.px; Game.py = o.py; Game.dir = o.dir || 'down';
+  Game.checkpoint = o.checkpoint || { map: Game.map, px: Game.px, py: Game.py, dir: Game.dir };
   Game.playtime = o.playtime || 0; Game.started = true;
   return true;
 }
@@ -96,42 +97,103 @@ function makePartyScreen(back) {
 }
 function objHas(o, k) { return o && o[k]; }
 
-/* ---------- bag field screen ---------- */
+/* ---------- bag field screen: browse swag, pick a Daddy, apply it ----------
+   Consumables (tea, lozenges, spare mustaches) are USED on a chosen member;
+   DRIP gear (hats, chains, goggles) is EQUIPPED on a chosen member for
+   permanent stat bonuses (HYPE = max HP, FLOW = attack, etc.). */
 function makeBagScreen(back) {
   return {
-    idx: 0,
+    idx: 0, top: 0, mode: 'list', whoIdx: 0, msg: '', msgT: 0,
+    build: function () {
+      var a = [], k;
+      for (k in Game.items) { if (k.indexOf('drip:') === 0) continue; if (Game.items[k] > 0 && ITEMS[k]) a.push(k); }
+      for (k in Game.items) { if (k.indexOf('drip:') === 0 && Game.items[k] > 0 && DRIP[k.slice(5)]) a.push(k); }
+      return a;
+    },
+    def: function (id) { return id.indexOf('drip:') === 0 ? DRIP[id.slice(5)] : ITEMS[id]; },
+    toast: function (m) { this.msg = m; this.msgT = 1.6; },
     onPress: function (k) {
+      if (this.mode === 'who') return this.whoInput(k);
       var list = this.build();
       if (k === 'up') { this.idx = (this.idx + list.length - 1) % Math.max(1, list.length); sfx('cursor'); }
       else if (k === 'down') { this.idx = (this.idx + 1) % Math.max(1, list.length); sfx('cursor'); }
       else if (k === 'b' || k === 'start') { sfx('cancel'); setScene(back); }
-      else if (k === 'a') { sfx('select'); this.useField(list[this.idx]); }
+      else if (k === 'a' && list.length) {
+        var it = ITEMS[list[this.idx]];
+        if (it && it.kind === 'flee') { this.toast('ONLY USEFUL MID-BATTLE.'); sfx('cancel'); return; }
+        sfx('select'); this.mode = 'who'; this.whoIdx = 0;
+      }
     },
-    build: function () { var a = []; for (var id in Game.items) { if (id.indexOf('drip:') === 0) continue; if (Game.items[id] > 0 && ITEMS[id]) a.push(id); } return a; },
-    useField: function (id) {
-      if (!id) return; var it = ITEMS[id];
-      if (it && it.kind === 'heal') { var f = firstDamaged(); if (f) { f.hp = Math.min(maxHPd(f), f.hp + it.amt); takeItem(id); sfx('heal'); } }
-      else if (it && it.kind === 'cure') { var g = firstStatus(); if (g) { g.status = null; takeItem(id); sfx('item'); } }
-      else if (it && it.kind === 'revive') { var d = firstFainted(); if (d) { d.fainted = false; d.hp = Math.round(maxHPd(d) * 0.5); takeItem(id); sfx('heal'); } }
+    whoInput: function (k) {
+      if (k === 'up') { this.whoIdx = (this.whoIdx + Game.party.length - 1) % Game.party.length; sfx('cursor'); }
+      else if (k === 'down') { this.whoIdx = (this.whoIdx + 1) % Game.party.length; sfx('cursor'); }
+      else if (k === 'b' || k === 'start') { this.mode = 'list'; sfx('cancel'); }
+      else if (k === 'a') { this.apply(Game.party[this.whoIdx]); }
     },
-    update: function () {},
+    apply: function (f) {
+      var list = this.build(), id = list[this.idx];
+      if (!id || !f) { this.mode = 'list'; return; }
+      if (id.indexOf('drip:') === 0) {
+        var d = id.slice(5);
+        if (f.drip === d) { f.drip = null; this.toast(f.name + ' TAKES OFF THE ' + DRIP[d].name + '.'); }
+        else { f.drip = d; this.toast(f.name + ' DONS THE ' + DRIP[d].name + '!'); }
+        sfx('item'); this.mode = 'list'; return;
+      }
+      var it = ITEMS[id];
+      if (it.kind === 'heal') {
+        if (f.fainted) { this.toast(f.name + ' NEEDS A SPARE MUSTACHE.'); sfx('cancel'); return; }
+        if (f.hp >= maxHPd(f)) { this.toast(f.name + ' IS ALREADY FULL OF HYPE.'); sfx('cancel'); return; }
+        var heal = Math.min(it.amt, maxHPd(f) - f.hp);
+        f.hp += heal; takeItem(id); sfx('heal'); this.toast(f.name + ' RECOVERED ' + heal + ' HYPE!');
+      } else if (it.kind === 'cure') {
+        if (!f.status) { this.toast(f.name + ' HAS NOTHING TO CURE.'); sfx('cancel'); return; }
+        f.status = null; takeItem(id); sfx('item'); this.toast(f.name + ' FEELS COMPOSED AGAIN.');
+      } else if (it.kind === 'revive') {
+        if (!f.fainted) { this.toast(f.name + ' IS STILL STANDING.'); sfx('cancel'); return; }
+        f.fainted = false; f.hp = Math.round(maxHPd(f) * 0.5); takeItem(id); sfx('heal'); this.toast(f.name + ' IS BACK IN THE CYPHER!');
+      } else { this.toast('NO USE FOR THAT HERE.'); sfx('cancel'); return; }
+      if (itemCount(id) <= 0) this.mode = 'list';
+    },
+    update: function () { if (this.msgT > 0) this.msgT -= 1 / 60; },
     draw: function () {
       cls(COL.night); centerText('SWAG POUCH', 8, COL.gold);
       var list = this.build();
+      if (this.idx >= list.length) this.idx = Math.max(0, list.length - 1);
+      /* keep the cursor inside an 8-row window (drip can overflow one screen) */
+      var ROWS = 8;
+      if (this.idx < this.top) this.top = this.idx;
+      if (this.idx >= this.top + ROWS) this.top = this.idx - ROWS + 1;
       drawText('SHILLINGS: ' + Game.money, 12, 20, COL.white);
       if (list.length === 0) centerText('NOTHING BUT LINT.', 80, COL.stone);
-      for (var i = 0; i < list.length; i++) { var id = list[i];
-        var yy = 32 + i * 12; drawText(ITEMS[id].name + '  x' + Game.items[id], 24, yy, i === this.idx ? COL.gold : COL.white);
-        if (i === this.idx) drawText('>', 14, yy, COL.red); }
-      if (list.length) { panel(6, 138, 228, 16, COL.cream); drawText(ITEMS[list[this.idx]].desc, 12, 143, COL.black); }
-      else centerText('B: BACK', 150, COL.stone);
+      for (var i = this.top; i < list.length && i < this.top + ROWS; i++) {
+        var id = list[i], d = this.def(id), isDrip = id.indexOf('drip:') === 0;
+        var yy = 32 + (i - this.top) * 12;
+        drawText(d.name + (isDrip ? '' : '  x' + Game.items[id]), 24, yy, i === this.idx ? COL.gold : (isDrip ? COL.pink : COL.white));
+        if (i === this.idx) drawText('>', 14, yy, COL.red);
+      }
+      if (this.top > 0) drawText('^', 226, 32, COL.stone);
+      if (this.top + ROWS < list.length) drawText('v', 226, 32 + (ROWS - 1) * 12, COL.stone);
+      if (list.length) { panel(6, 132, 228, 16, COL.cream); drawText(this.def(list[this.idx]).desc, 12, 137, COL.black); }
+      centerText(this.mode === 'who' ? 'A: APPLY   B: BACK' : (list.length ? 'A: USE/EQUIP   B: BACK' : 'B: BACK'), 152, COL.stone);
+      if (this.mode === 'who') this.drawWho(list);
+      if (this.msgT > 0) { panel(30, 66, 180, 20, COL.cream, COL.gold); centerText(this.msg, 73, COL.black); }
+    },
+    drawWho: function (list) {
+      var id = list[this.idx], isDrip = id && id.indexOf('drip:') === 0;
+      var n = Game.party.length;
+      panel(16, 30, 208, n * 22 + 18, COL.cream, COL.gold);
+      centerText(isDrip ? 'WHO WEARS IT?' : 'USE ON WHO?', 36, COL.black);
+      for (var i = 0; i < n; i++) { var f = Game.party[i], yy = 48 + i * 22;
+        drawText(f.name, 34, yy, f.fainted ? COL.red : COL.black);
+        drawText('LV ' + f.level, 108, yy, COL.black);
+        if (f.drip && DRIP[f.drip]) drawText(DRIP[f.drip].name, 140, yy, COL.purple);
+        bar(34, yy + 9, 70, 4, f.hp / maxHPd(f), COL.grass);
+        drawText(f.fainted ? 'OUT COLD' : 'HP ' + f.hp + '/' + maxHPd(f), 108, yy + 8, COL.black);
+        if (i === this.whoIdx) drawText('>', 24, yy, COL.red);
+      }
     }
   };
 }
-function firstDamaged() { for (var i = 0; i < Game.party.length; i++) if (!Game.party[i].fainted && Game.party[i].hp < maxHPd(Game.party[i])) return Game.party[i]; return null; }
-function firstStatus() { for (var i = 0; i < Game.party.length; i++) if (Game.party[i].status) return Game.party[i]; return null; }
-function firstFainted() { for (var i = 0; i < Game.party.length; i++) if (Game.party[i].fainted) return Game.party[i]; return null; }
-
 /* ---------- shop screen ---------- */
 function makeShop(inv, back, title) {
   return {

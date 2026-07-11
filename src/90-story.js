@@ -218,6 +218,7 @@ function newGame() {
   Game.activeIdx = 0; Game.flags = {}; Game.items = {}; Game.drip = {};
   Game.money = 30; Game.mustaches = 0; Game.parts = 0;
   Game.map = 'manor'; Game.px = 7; Game.py = 9; Game.dir = 'up'; Game.playtime = 0; Game.started = true;
+  Game.checkpoint = { map: 'manor', px: 7, py: 9, dir: 'up' };
   giveItem('earlgrey', 3); giveItem('lozenge', 1);
   /* clear any per-map cached entry flags */
   for (var k in Maps) Maps[k]._entered = false;

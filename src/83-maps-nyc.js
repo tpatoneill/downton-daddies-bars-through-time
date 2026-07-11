@@ -19,7 +19,7 @@ function drawDumpster(x, y) { px(x + 1, y + 6, 14, 8, '#3a5a4a'); px(x + 1, y + 
 
 /* ---------------- BACK ALLEY (arrival) ---------------- */
 registerMap('backalley', {
-  banner: 'BACK ALLEY - NEW YORK', music: 'disco',
+  banner: 'BACK ALLEY - NEW YORK', music: 'disco', safe: true,
   grid: [
     'bbbbbbbbbbbbb',
     '#ppppppppppp#',
@@ -43,7 +43,7 @@ registerMap('backalley', {
 
 /* ---------------- CLUB INFERNO (town) ---------------- */
 registerMap('clubinferno', {
-  banner: 'CLUB INFERNO', music: 'disco', riftBg: 'disco',
+  banner: 'CLUB INFERNO', music: 'disco', riftBg: 'disco', safe: true,
   grid: [
     '#################',
     '#fffffffffffffff#',

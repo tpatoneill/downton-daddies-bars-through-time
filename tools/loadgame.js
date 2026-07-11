@@ -19,7 +19,7 @@ function loadGame() {
   let raf = null;
   global.requestAnimationFrame = cb => { raf = cb; };
 
-  const exportList = 'press,release,setScene,Game,newGame,continueGame,frame,Maps,MOVES,CLASSES,BOSSES,ENEMIES,makeFighter,makeEnemy,makeBoss,startBattle,World,Cutscene,Title,Boot,hasFlag,setFlag,saveGame,loadGame,healParty,eff,maxHPd,xpNeed,computeDamage,typeMult,ERAS,gotoWorld,solidAt,warpAt,objAt,curMap,TILES,BGS,SPR,COL';
+  const exportList = 'press,release,setScene,Game,newGame,continueGame,frame,Maps,MOVES,CLASSES,BOSSES,ENEMIES,makeFighter,makeEnemy,makeBoss,startBattle,World,Cutscene,Title,Boot,hasFlag,setFlag,saveGame,loadGame,healParty,eff,maxHPd,xpNeed,computeDamage,typeMult,ERAS,gotoWorld,solidAt,warpAt,objAt,curMap,TILES,BGS,SPR,COL,ITEMS,DRIP,giveItem,takeItem,itemCount';
   const run = new Function(src + `;\nreturn { ${exportList}, getScene: function(){ return scene; }, tnow: function(){ return tnow(); } };`);
   const G = run();
 

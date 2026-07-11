@@ -449,12 +449,12 @@ function makeBattle(spec, onEnd) {
     finish: function () {
       var r = this.result;
       if (r.win || r.fled) { var cb = this.onEnd; Battle = null; cb(r); return; }
-      /* lost: revive party, heal, and either retry (boss) or return */
+      /* lost: revive + full-heal the party, then respawn at the last checkpoint.
+         Any surrounding cutscene script is dropped; boss/trainer fights re-trigger
+         on return because their flags only set on a win. */
       for (var i = 0; i < this.party.length; i++) { this.party[i].fainted = false; this.party[i].hp = maxHPd(this.party[i]); this.party[i].status = null; this.party[i].stage = { FLOW: 0, POISE: 0, TEMPO: 0, EVA: 0 }; }
-      if (this.spec.canFlee === false && !this.spec.wild) {
-        /* boss/story: retry the same fight */
-        var spec = this.spec, onEnd = this.onEnd; Battle = null; startBattle(spec, onEnd);
-      } else { var cb2 = this.onEnd; Battle = null; cb2({ win: false, lost: true }); }
+      Battle = null;
+      respawnAtCheckpoint();
     },
     /* ---------- update / draw ---------- */
     update: function (dt) {

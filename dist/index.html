@@ -1775,6 +1775,7 @@ var Game = {
   parts: 0,         /* time machine parts */
   map: 'manor',
   px: 6, py: 8, dir: 'down',
+  checkpoint: { map: 'manor', px: 7, py: 9, dir: 'up' }, /* where a wiped party respawns */
   playtime: 0,
   started: false
 };
@@ -1837,6 +1838,8 @@ var World = {
   enter: function () {
     this.moving = false; this.menu = null; this.locked = false; this.spot = null;
     var m = curMap();
+    /* safe hubs (towns, the manor) are respawn checkpoints */
+    if (m && m.safe) Game.checkpoint = { map: Game.map, px: Game.px, py: Game.py, dir: Game.dir };
     if (m && m.music) musicStart(m.music);
     this.updateCam(true);
     if (m && m.onEnter) m.onEnter();
@@ -2013,6 +2016,7 @@ var World = {
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) {
       var tl = tileAt(m, tx, ty);
       tl.draw(tx * TS - cx, ty * TS - cy, f & 1);
+      if (warpAt(m, tx, ty)) drawWarpEntrance(m, tx, ty, tx * TS - cx, ty * TS - cy);
     }
     /* objects (behind or in front of player by y) */
     var pyForSort = Game.py;
@@ -2078,6 +2082,28 @@ function drawMustache(x, y) {
   px(x + 1, y + 9, 2, 1, c); px(x + 13, y + 9, 2, 1, c);
   px(x + 6, y + 6, 1, 1, COL.white); px(x + 4, y + 4, 1, 1, COL.white);
 }
+/* every warp gets visible entrance art: a door set into the wall above it when
+   there is one, and always a worn doorstep on the warp tile itself, so no
+   transition is ever an invisible patch of floor */
+function drawWarpEntrance(m, tx, ty, sx, sy) {
+  var aboveKey = tileKeyAt(m, tx, ty - 1);
+  if (aboveKey !== 'A' && (TILES[aboveKey] || TILES['#']).solid) drawDoorInWall(sx, sy - TS);
+  drawDoorstep(sx, sy);
+}
+function drawDoorInWall(x, y) {
+  px(x + 2, y, 12, 16, '#3a2418');                    /* recessed frame */
+  px(x + 3, y + 1, 10, 15, '#1e130c');                /* dark reveal */
+  px(x + 4, y + 2, 8, 14, '#6a4a2a');                 /* wooden double door */
+  px(x + 4, y + 2, 8, 1, '#8a6a3a');
+  px(x + 7, y + 2, 1, 14, '#4a3420');
+  px(x + 5, y + 8, 1, 2, COL.gold); px(x + 9, y + 8, 1, 2, COL.gold); /* handles */
+}
+function drawDoorstep(x, y) {
+  px(x + 2, y + 3, 12, 10, '#c8bca4');                /* pale worn step */
+  px(x + 2, y + 3, 12, 1, '#e8e0cc');
+  px(x + 2, y + 12, 12, 1, '#8a8068');
+  px(x + 4, y + 6, 8, 1, '#a89c84'); px(x + 4, y + 9, 8, 1, '#a89c84'); /* tread lines */
+}
 function drawLocationBanner(txt) {
   var w = textW(txt) + 16;
   panel((240 - w) / 2, 6, w, 16, COL.night, COL.gold);
@@ -2104,6 +2130,24 @@ function warpTo(w) {
 }
 function gotoWorld() { setScene(World); }
 
+/* ---------------- party wipe -> respawn at the last checkpoint ---------------- */
+function respawnAtCheckpoint() {
+  /* a mid-fight trainer walks back to their post so they never block a doorway */
+  if (World._fightingTrainer) { var o = World._fightingTrainer;
+    if (o._anchorx !== undefined) { o.x = o._anchorx; o.y = o._anchory; }
+    World._fightingTrainer = null; }
+  World.spot = null; World.locked = false;
+  var cp = Game.checkpoint || { map: 'manor', px: 7, py: 9, dir: 'up' };
+  Cutscene.play([
+    { narr: 'THE DADDIES ARE FRESH OUT OF BARS!' },
+    { narr: 'THEY RETREAT TO REGROUP, PUT THE KETTLE ON, AND BLAME THE ACOUSTICS.' }
+  ], { bg: 'black', onDone: function () {
+    Game.map = cp.map; Game.px = cp.px; Game.py = cp.py; Game.dir = cp.dir || 'down';
+    saveGame(false);
+    gotoWorld();
+  } });
+}
+
 /* ---------------- trainer helpers ---------------- */
 function trainerBlocked(x, y) {
   var m = curMap();
@@ -2123,12 +2167,13 @@ function mkTrainer(x, y, cfg) {
   return cfg;
 }
 function startTrainerBattle(o) {
-  World.locked = true; World.spot = null;
+  World.locked = true; World.spot = null; World._fightingTrainer = o;
   var nm = o.tname || 'CHALLENGER';
   Cutscene.play([
     { say: [nm, o.hail || "YOU THERE! WE DUEL, HERE, NOW!"] },
     { battle: function () { return { enemies: [{ enemy: o.enemy, level: o.level || 5 }], music: 'battle', canFlee: false, bg: o.bg, taunt: o.hail }; },
-      onResult: function (r) { if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0);
+      onResult: function (r) { World._fightingTrainer = null;
+        if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0);
         if (o._anchorx !== undefined) { o.x = o._anchorx; o.y = o._anchory; } /* return to post: never block a doorway */ } } },
     { say: [nm, o.beaten || 'A WORTHY BOUT. WELL BATTLED.'] }
   ], { onDone: function () { gotoWorld(); } });
@@ -2829,12 +2874,12 @@ function makeBattle(spec, onEnd) {
     finish: function () {
       var r = this.result;
       if (r.win || r.fled) { var cb = this.onEnd; Battle = null; cb(r); return; }
-      /* lost: revive party, heal, and either retry (boss) or return */
+      /* lost: revive + full-heal the party, then respawn at the last checkpoint.
+         Any surrounding cutscene script is dropped; boss/trainer fights re-trigger
+         on return because their flags only set on a win. */
       for (var i = 0; i < this.party.length; i++) { this.party[i].fainted = false; this.party[i].hp = maxHPd(this.party[i]); this.party[i].status = null; this.party[i].stage = { FLOW: 0, POISE: 0, TEMPO: 0, EVA: 0 }; }
-      if (this.spec.canFlee === false && !this.spec.wild) {
-        /* boss/story: retry the same fight */
-        var spec = this.spec, onEnd = this.onEnd; Battle = null; startBattle(spec, onEnd);
-      } else { var cb2 = this.onEnd; Battle = null; cb2({ win: false, lost: true }); }
+      Battle = null;
+      respawnAtCheckpoint();
     },
     /* ---------- update / draw ---------- */
     update: function (dt) {
@@ -3352,7 +3397,7 @@ registerEra({ id: 'home', label: 'LONDON 1889 - HOME', warp: { to: 'manor', tx: 
 
 /* ================= DADDY MANOR ================= */
 registerMap('manor', {
-  banner: 'DADDY MANOR', music: 'manor',
+  banner: 'DADDY MANOR', music: 'manor', safe: true,
   grid: [
     '###############',
     '#.HH.....O....#',
@@ -3399,7 +3444,7 @@ registerMap('manor', {
 
 /* ================= BAKER'S ROW ================= */
 registerMap('bakersrow', {
-  banner: "BAKER'S ROW", music: 'town', encPool: 'london',
+  banner: "BAKER'S ROW", music: 'town', encPool: 'london', safe: true,
   grid: [
     '###################',
     '#gggggggppgggggggg#',
@@ -3551,7 +3596,7 @@ BGS.stands = function () {
 
 /* ---------------- FORUM (festival day) ---------------- */
 registerMap('forum', {
-  banner: 'THE FORUM - ROME', music: 'rome', riftBg: 'rome',
+  banner: 'THE FORUM - ROME', music: 'rome', riftBg: 'rome', safe: true,
   grid: [
     '#################',
     '#mmmmmmmmmmmmmmm#',
@@ -3889,7 +3934,7 @@ var SHOP_WEST = ['earlgrey', 'strongtea', 'crumpet', 'lozenge', 'sparestache', '
 
 /* ---------------- MAIN STREET (town) ---------------- */
 registerMap('mainstreet', {
-  banner: 'MAIN STREET - DODGE CITY', music: 'west', riftBg: 'west',
+  banner: 'MAIN STREET - DODGE CITY', music: 'west', riftBg: 'west', safe: true,
   grid: [
     '#################',
     '#sssssssssssssss#',
@@ -4113,7 +4158,7 @@ function drawDumpster(x, y) { px(x + 1, y + 6, 14, 8, '#3a5a4a'); px(x + 1, y + 
 
 /* ---------------- BACK ALLEY (arrival) ---------------- */
 registerMap('backalley', {
-  banner: 'BACK ALLEY - NEW YORK', music: 'disco',
+  banner: 'BACK ALLEY - NEW YORK', music: 'disco', safe: true,
   grid: [
     'bbbbbbbbbbbbb',
     '#ppppppppppp#',
@@ -4137,7 +4182,7 @@ registerMap('backalley', {
 
 /* ---------------- CLUB INFERNO (town) ---------------- */
 registerMap('clubinferno', {
-  banner: 'CLUB INFERNO', music: 'disco', riftBg: 'disco',
+  banner: 'CLUB INFERNO', music: 'disco', riftBg: 'disco', safe: true,
   grid: [
     '#################',
     '#fffffffffffffff#',
@@ -4383,7 +4428,7 @@ function drawMarquee(x, y) { px(x, y, TS, 12, '#5a2038'); px(x + 1, y + 1, TS - 
 
 /* ================= THEATRE DISTRICT (occupied) ================= */
 registerMap('theatredistrict', {
-  banner: 'THEATRE DISTRICT', music: 'london', riftBg: 'london',
+  banner: 'THEATRE DISTRICT', music: 'london', riftBg: 'london', safe: true,
   grid: [
     '###################',
     '#gggggggppgggggggg#',
@@ -4498,6 +4543,8 @@ function snobEscalate() {
     { narr: 'SNOBBINGTON TEARS OPEN HIS COAT — THE FINAL DRAFT!' },
     { music: 'finale' },
     { narr: 'BUT THE CROWD IS ALL DADDIES NOW! THE METER SLAMS IN HER FAVOR!' },
+    { do: function () { healParty(); } },
+    { narr: 'THE THEATRE CHANTS THEIR NAMES. THE DADDIES FEEL BRAND NEW.' },
     { battle: function () { return { enemies: [{ boss: 'snob2' }], music: 'finale', canFlee: false, bg: 'stage', crowdStart: 100 }; },
       onResult: function (r) { if (r.win) setFlag('finale_done'); } }
   ], { onDone: function () { if (hasFlag('finale_done')) pDiddyUnmask(); else gotoWorld(); } });
@@ -4683,7 +4730,7 @@ BGS.goblin = function () {
 
 /* ================= GOBLIN REALM (single map) ================= */
 registerMap('goblinrealm', {
-  banner: 'THE GOBLIN REALM', music: 'west', encPool: 'goblin',
+  banner: 'THE GOBLIN REALM', music: 'west', encPool: 'goblin', safe: true,
   grid: [
     '#################',
     '#ggggggggggggggg#',
@@ -5029,6 +5076,7 @@ function newGame() {
   Game.activeIdx = 0; Game.flags = {}; Game.items = {}; Game.drip = {};
   Game.money = 30; Game.mustaches = 0; Game.parts = 0;
   Game.map = 'manor'; Game.px = 7; Game.py = 9; Game.dir = 'up'; Game.playtime = 0; Game.started = true;
+  Game.checkpoint = { map: 'manor', px: 7, py: 9, dir: 'up' };
   giveItem('earlgrey', 3); giveItem('lozenge', 1);
   /* clear any per-map cached entry flags */
   for (var k in Maps) Maps[k]._entered = false;
@@ -5114,7 +5162,7 @@ function serializeGame() {
   return JSON.stringify({
     v: 2, party: party, activeIdx: Game.activeIdx, flags: Game.flags, items: Game.items,
     drip: Game.drip, money: Game.money, mustaches: Game.mustaches, parts: Game.parts,
-    map: Game.map, px: Game.px, py: Game.py, dir: Game.dir, playtime: Game.playtime
+    map: Game.map, px: Game.px, py: Game.py, dir: Game.dir, checkpoint: Game.checkpoint, playtime: Game.playtime
   });
 }
 function saveGame(loud) {
@@ -5145,6 +5193,7 @@ function loadGame() {
   Game.activeIdx = o.activeIdx || 0; Game.flags = o.flags || {}; Game.items = o.items || {};
   Game.drip = o.drip || {}; Game.money = o.money || 0; Game.mustaches = o.mustaches || 0; Game.parts = o.parts || 0;
   Game.map = o.map || 'manor'; Game.px = o.px; Game.py = o.py; Game.dir = o.dir || 'down';
+  Game.checkpoint = o.checkpoint || { map: Game.map, px: Game.px, py: Game.py, dir: Game.dir };
   Game.playtime = o.playtime || 0; Game.started = true;
   return true;
 }
@@ -5198,42 +5247,103 @@ function makePartyScreen(back) {
 }
 function objHas(o, k) { return o && o[k]; }
 
-/* ---------- bag field screen ---------- */
+/* ---------- bag field screen: browse swag, pick a Daddy, apply it ----------
+   Consumables (tea, lozenges, spare mustaches) are USED on a chosen member;
+   DRIP gear (hats, chains, goggles) is EQUIPPED on a chosen member for
+   permanent stat bonuses (HYPE = max HP, FLOW = attack, etc.). */
 function makeBagScreen(back) {
   return {
-    idx: 0,
+    idx: 0, top: 0, mode: 'list', whoIdx: 0, msg: '', msgT: 0,
+    build: function () {
+      var a = [], k;
+      for (k in Game.items) { if (k.indexOf('drip:') === 0) continue; if (Game.items[k] > 0 && ITEMS[k]) a.push(k); }
+      for (k in Game.items) { if (k.indexOf('drip:') === 0 && Game.items[k] > 0 && DRIP[k.slice(5)]) a.push(k); }
+      return a;
+    },
+    def: function (id) { return id.indexOf('drip:') === 0 ? DRIP[id.slice(5)] : ITEMS[id]; },
+    toast: function (m) { this.msg = m; this.msgT = 1.6; },
     onPress: function (k) {
+      if (this.mode === 'who') return this.whoInput(k);
       var list = this.build();
       if (k === 'up') { this.idx = (this.idx + list.length - 1) % Math.max(1, list.length); sfx('cursor'); }
       else if (k === 'down') { this.idx = (this.idx + 1) % Math.max(1, list.length); sfx('cursor'); }
       else if (k === 'b' || k === 'start') { sfx('cancel'); setScene(back); }
-      else if (k === 'a') { sfx('select'); this.useField(list[this.idx]); }
+      else if (k === 'a' && list.length) {
+        var it = ITEMS[list[this.idx]];
+        if (it && it.kind === 'flee') { this.toast('ONLY USEFUL MID-BATTLE.'); sfx('cancel'); return; }
+        sfx('select'); this.mode = 'who'; this.whoIdx = 0;
+      }
     },
-    build: function () { var a = []; for (var id in Game.items) { if (id.indexOf('drip:') === 0) continue; if (Game.items[id] > 0 && ITEMS[id]) a.push(id); } return a; },
-    useField: function (id) {
-      if (!id) return; var it = ITEMS[id];
-      if (it && it.kind === 'heal') { var f = firstDamaged(); if (f) { f.hp = Math.min(maxHPd(f), f.hp + it.amt); takeItem(id); sfx('heal'); } }
-      else if (it && it.kind === 'cure') { var g = firstStatus(); if (g) { g.status = null; takeItem(id); sfx('item'); } }
-      else if (it && it.kind === 'revive') { var d = firstFainted(); if (d) { d.fainted = false; d.hp = Math.round(maxHPd(d) * 0.5); takeItem(id); sfx('heal'); } }
+    whoInput: function (k) {
+      if (k === 'up') { this.whoIdx = (this.whoIdx + Game.party.length - 1) % Game.party.length; sfx('cursor'); }
+      else if (k === 'down') { this.whoIdx = (this.whoIdx + 1) % Game.party.length; sfx('cursor'); }
+      else if (k === 'b' || k === 'start') { this.mode = 'list'; sfx('cancel'); }
+      else if (k === 'a') { this.apply(Game.party[this.whoIdx]); }
     },
-    update: function () {},
+    apply: function (f) {
+      var list = this.build(), id = list[this.idx];
+      if (!id || !f) { this.mode = 'list'; return; }
+      if (id.indexOf('drip:') === 0) {
+        var d = id.slice(5);
+        if (f.drip === d) { f.drip = null; this.toast(f.name + ' TAKES OFF THE ' + DRIP[d].name + '.'); }
+        else { f.drip = d; this.toast(f.name + ' DONS THE ' + DRIP[d].name + '!'); }
+        sfx('item'); this.mode = 'list'; return;
+      }
+      var it = ITEMS[id];
+      if (it.kind === 'heal') {
+        if (f.fainted) { this.toast(f.name + ' NEEDS A SPARE MUSTACHE.'); sfx('cancel'); return; }
+        if (f.hp >= maxHPd(f)) { this.toast(f.name + ' IS ALREADY FULL OF HYPE.'); sfx('cancel'); return; }
+        var heal = Math.min(it.amt, maxHPd(f) - f.hp);
+        f.hp += heal; takeItem(id); sfx('heal'); this.toast(f.name + ' RECOVERED ' + heal + ' HYPE!');
+      } else if (it.kind === 'cure') {
+        if (!f.status) { this.toast(f.name + ' HAS NOTHING TO CURE.'); sfx('cancel'); return; }
+        f.status = null; takeItem(id); sfx('item'); this.toast(f.name + ' FEELS COMPOSED AGAIN.');
+      } else if (it.kind === 'revive') {
+        if (!f.fainted) { this.toast(f.name + ' IS STILL STANDING.'); sfx('cancel'); return; }
+        f.fainted = false; f.hp = Math.round(maxHPd(f) * 0.5); takeItem(id); sfx('heal'); this.toast(f.name + ' IS BACK IN THE CYPHER!');
+      } else { this.toast('NO USE FOR THAT HERE.'); sfx('cancel'); return; }
+      if (itemCount(id) <= 0) this.mode = 'list';
+    },
+    update: function () { if (this.msgT > 0) this.msgT -= 1 / 60; },
     draw: function () {
       cls(COL.night); centerText('SWAG POUCH', 8, COL.gold);
       var list = this.build();
+      if (this.idx >= list.length) this.idx = Math.max(0, list.length - 1);
+      /* keep the cursor inside an 8-row window (drip can overflow one screen) */
+      var ROWS = 8;
+      if (this.idx < this.top) this.top = this.idx;
+      if (this.idx >= this.top + ROWS) this.top = this.idx - ROWS + 1;
       drawText('SHILLINGS: ' + Game.money, 12, 20, COL.white);
       if (list.length === 0) centerText('NOTHING BUT LINT.', 80, COL.stone);
-      for (var i = 0; i < list.length; i++) { var id = list[i];
-        var yy = 32 + i * 12; drawText(ITEMS[id].name + '  x' + Game.items[id], 24, yy, i === this.idx ? COL.gold : COL.white);
-        if (i === this.idx) drawText('>', 14, yy, COL.red); }
-      if (list.length) { panel(6, 138, 228, 16, COL.cream); drawText(ITEMS[list[this.idx]].desc, 12, 143, COL.black); }
-      else centerText('B: BACK', 150, COL.stone);
+      for (var i = this.top; i < list.length && i < this.top + ROWS; i++) {
+        var id = list[i], d = this.def(id), isDrip = id.indexOf('drip:') === 0;
+        var yy = 32 + (i - this.top) * 12;
+        drawText(d.name + (isDrip ? '' : '  x' + Game.items[id]), 24, yy, i === this.idx ? COL.gold : (isDrip ? COL.pink : COL.white));
+        if (i === this.idx) drawText('>', 14, yy, COL.red);
+      }
+      if (this.top > 0) drawText('^', 226, 32, COL.stone);
+      if (this.top + ROWS < list.length) drawText('v', 226, 32 + (ROWS - 1) * 12, COL.stone);
+      if (list.length) { panel(6, 132, 228, 16, COL.cream); drawText(this.def(list[this.idx]).desc, 12, 137, COL.black); }
+      centerText(this.mode === 'who' ? 'A: APPLY   B: BACK' : (list.length ? 'A: USE/EQUIP   B: BACK' : 'B: BACK'), 152, COL.stone);
+      if (this.mode === 'who') this.drawWho(list);
+      if (this.msgT > 0) { panel(30, 66, 180, 20, COL.cream, COL.gold); centerText(this.msg, 73, COL.black); }
+    },
+    drawWho: function (list) {
+      var id = list[this.idx], isDrip = id && id.indexOf('drip:') === 0;
+      var n = Game.party.length;
+      panel(16, 30, 208, n * 22 + 18, COL.cream, COL.gold);
+      centerText(isDrip ? 'WHO WEARS IT?' : 'USE ON WHO?', 36, COL.black);
+      for (var i = 0; i < n; i++) { var f = Game.party[i], yy = 48 + i * 22;
+        drawText(f.name, 34, yy, f.fainted ? COL.red : COL.black);
+        drawText('LV ' + f.level, 108, yy, COL.black);
+        if (f.drip && DRIP[f.drip]) drawText(DRIP[f.drip].name, 140, yy, COL.purple);
+        bar(34, yy + 9, 70, 4, f.hp / maxHPd(f), COL.grass);
+        drawText(f.fainted ? 'OUT COLD' : 'HP ' + f.hp + '/' + maxHPd(f), 108, yy + 8, COL.black);
+        if (i === this.whoIdx) drawText('>', 24, yy, COL.red);
+      }
     }
   };
 }
-function firstDamaged() { for (var i = 0; i < Game.party.length; i++) if (!Game.party[i].fainted && Game.party[i].hp < maxHPd(Game.party[i])) return Game.party[i]; return null; }
-function firstStatus() { for (var i = 0; i < Game.party.length; i++) if (Game.party[i].status) return Game.party[i]; return null; }
-function firstFainted() { for (var i = 0; i < Game.party.length; i++) if (Game.party[i].fainted) return Game.party[i]; return null; }
-
 /* ---------- shop screen ---------- */
 function makeShop(inv, back, title) {
   return {

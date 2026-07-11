@@ -18,7 +18,7 @@ BGS.goblin = function () {
 
 /* ================= GOBLIN REALM (single map) ================= */
 registerMap('goblinrealm', {
-  banner: 'THE GOBLIN REALM', music: 'west', encPool: 'goblin',
+  banner: 'THE GOBLIN REALM', music: 'west', encPool: 'goblin', safe: true,
   grid: [
     '#################',
     '#ggggggggggggggg#',

@@ -14,6 +14,7 @@ var Game = {
   parts: 0,         /* time machine parts */
   map: 'manor',
   px: 6, py: 8, dir: 'down',
+  checkpoint: { map: 'manor', px: 7, py: 9, dir: 'up' }, /* where a wiped party respawns */
   playtime: 0,
   started: false
 };
@@ -76,6 +77,8 @@ var World = {
   enter: function () {
     this.moving = false; this.menu = null; this.locked = false; this.spot = null;
     var m = curMap();
+    /* safe hubs (towns, the manor) are respawn checkpoints */
+    if (m && m.safe) Game.checkpoint = { map: Game.map, px: Game.px, py: Game.py, dir: Game.dir };
     if (m && m.music) musicStart(m.music);
     this.updateCam(true);
     if (m && m.onEnter) m.onEnter();
@@ -252,6 +255,7 @@ var World = {
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) {
       var tl = tileAt(m, tx, ty);
       tl.draw(tx * TS - cx, ty * TS - cy, f & 1);
+      if (warpAt(m, tx, ty)) drawWarpEntrance(m, tx, ty, tx * TS - cx, ty * TS - cy);
     }
     /* objects (behind or in front of player by y) */
     var pyForSort = Game.py;
@@ -317,6 +321,28 @@ function drawMustache(x, y) {
   px(x + 1, y + 9, 2, 1, c); px(x + 13, y + 9, 2, 1, c);
   px(x + 6, y + 6, 1, 1, COL.white); px(x + 4, y + 4, 1, 1, COL.white);
 }
+/* every warp gets visible entrance art: a door set into the wall above it when
+   there is one, and always a worn doorstep on the warp tile itself, so no
+   transition is ever an invisible patch of floor */
+function drawWarpEntrance(m, tx, ty, sx, sy) {
+  var aboveKey = tileKeyAt(m, tx, ty - 1);
+  if (aboveKey !== 'A' && (TILES[aboveKey] || TILES['#']).solid) drawDoorInWall(sx, sy - TS);
+  drawDoorstep(sx, sy);
+}
+function drawDoorInWall(x, y) {
+  px(x + 2, y, 12, 16, '#3a2418');                    /* recessed frame */
+  px(x + 3, y + 1, 10, 15, '#1e130c');                /* dark reveal */
+  px(x + 4, y + 2, 8, 14, '#6a4a2a');                 /* wooden double door */
+  px(x + 4, y + 2, 8, 1, '#8a6a3a');
+  px(x + 7, y + 2, 1, 14, '#4a3420');
+  px(x + 5, y + 8, 1, 2, COL.gold); px(x + 9, y + 8, 1, 2, COL.gold); /* handles */
+}
+function drawDoorstep(x, y) {
+  px(x + 2, y + 3, 12, 10, '#c8bca4');                /* pale worn step */
+  px(x + 2, y + 3, 12, 1, '#e8e0cc');
+  px(x + 2, y + 12, 12, 1, '#8a8068');
+  px(x + 4, y + 6, 8, 1, '#a89c84'); px(x + 4, y + 9, 8, 1, '#a89c84'); /* tread lines */
+}
 function drawLocationBanner(txt) {
   var w = textW(txt) + 16;
   panel((240 - w) / 2, 6, w, 16, COL.night, COL.gold);
@@ -343,6 +369,24 @@ function warpTo(w) {
 }
 function gotoWorld() { setScene(World); }
 
+/* ---------------- party wipe -> respawn at the last checkpoint ---------------- */
+function respawnAtCheckpoint() {
+  /* a mid-fight trainer walks back to their post so they never block a doorway */
+  if (World._fightingTrainer) { var o = World._fightingTrainer;
+    if (o._anchorx !== undefined) { o.x = o._anchorx; o.y = o._anchory; }
+    World._fightingTrainer = null; }
+  World.spot = null; World.locked = false;
+  var cp = Game.checkpoint || { map: 'manor', px: 7, py: 9, dir: 'up' };
+  Cutscene.play([
+    { narr: 'THE DADDIES ARE FRESH OUT OF BARS!' },
+    { narr: 'THEY RETREAT TO REGROUP, PUT THE KETTLE ON, AND BLAME THE ACOUSTICS.' }
+  ], { bg: 'black', onDone: function () {
+    Game.map = cp.map; Game.px = cp.px; Game.py = cp.py; Game.dir = cp.dir || 'down';
+    saveGame(false);
+    gotoWorld();
+  } });
+}
+
 /* ---------------- trainer helpers ---------------- */
 function trainerBlocked(x, y) {
   var m = curMap();
@@ -362,12 +406,13 @@ function mkTrainer(x, y, cfg) {
   return cfg;
 }
 function startTrainerBattle(o) {
-  World.locked = true; World.spot = null;
+  World.locked = true; World.spot = null; World._fightingTrainer = o;
   var nm = o.tname || 'CHALLENGER';
   Cutscene.play([
     { say: [nm, o.hail || "YOU THERE! WE DUEL, HERE, NOW!"] },
     { battle: function () { return { enemies: [{ enemy: o.enemy, level: o.level || 5 }], music: 'battle', canFlee: false, bg: o.bg, taunt: o.hail }; },
-      onResult: function (r) { if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0);
+      onResult: function (r) { World._fightingTrainer = null;
+        if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0);
         if (o._anchorx !== undefined) { o.x = o._anchorx; o.y = o._anchory; } /* return to post: never block a doorway */ } } },
     { say: [nm, o.beaten || 'A WORTHY BOUT. WELL BATTLED.'] }
   ], { onDone: function () { gotoWorld(); } });

@@ -2,7 +2,7 @@
    travel via machine -> festival forum -> grounds -> arcades -> hypogeum ->
    OBJECTIVE 1: Herschel (KITCHEN PASS) -> capstan puzzle -> stands ->
    Gate of Life -> OBJECTIVE 2: arena -> buffed Maximvs -> rewards. */
-const { loadGame, advanceUntil, isWorld, isBattle, walkTo, autoBattle, interactAt, walkToNextMap, sceneName } = require('./qa.js');
+const { loadGame, advanceUntil, isWorld, isBattle, walkTo, autoBattle, interactAt, walkToNextMap, trek, sceneName } = require('./qa.js');
 function assert(c, m) { if (!c) throw new Error('ASSERT FAILED: ' + m); }
 let PASS = 0; function ok(m) { PASS++; console.log('  ok  ' + m); }
 
@@ -21,11 +21,12 @@ advanceUntil(h, isWorld, 8000, 'travel to rome');
 assert(G.Game.map === 'forum', 'arrived in festival forum, got ' + G.Game.map);
 ok('time machine -> Rome, Day of the Games');
 
-// grind stand-in, then walk the approach
+// grind stand-in + tea from Babbage's cart (a wipe now respawns at the forum
+// checkpoint, so the walker heals like a real player and re-treks if wiped)
 G.Game.party[0] = G.makeFighter('samuel', 6);
-assert(walkToNextMap(h, 'grounds'), 'reach grounds');
-assert(walkToNextMap(h, 'arcades'), 'reach arcades (servants entrance)');
-assert(walkToNextMap(h, 'hypogeum'), 'reach hypogeum');
+G.giveItem('strongtea', 12);
+const MAZE = ['forum', 'grounds', 'arcades', 'hypogeum'];
+assert(trek(h, MAZE), 'reach hypogeum');
 ok('forum -> grounds -> arcades -> hypogeum (the maze)');
 
 // lift locked; capstan needs two people
@@ -57,16 +58,22 @@ ok('capstan puzzle solved (both hips)');
 // on-curve for the buffed boss
 G.Game.party.forEach(f => { const n = G.makeFighter(f.id, 7); f.level = 7; f.maxHP = n.maxHP; f.hp = n.maxHP; f.baseFLOW = n.baseFLOW; f.basePOISE = n.basePOISE; f.baseTEMPO = n.baseTEMPO; f.moves = n.moves.slice(); });
 
-// OBJECTIVE 2: lift -> stands -> Gate of Life -> arena
-assert(walkToNextMap(h, 'stands'), 'reach stands');
-assert(walkToNextMap(h, 'gateoflife'), 'reach Gate of Life');
-walkTo(h, 4, 1); // stepping onto the gated warp (pass in hand) -> arena -> Maximvs
-advanceUntil(h, isBattle, 8000, 'maximvs');
-assert(isBattle(G) && G.getScene().enemies[0].bossId === 'maximvs', 'Maximvs fight');
-assert(G.getScene().enemies[0].maxHP >= 180, 'Maximvs is buffed (' + G.getScene().enemies[0].maxHP + ' HP)');
-ok('OBJECTIVE 2: Gate of Life -> arena -> buffed Maximvs');
-
-autoBattle(h, { onBeat: true });
+// OBJECTIVE 2: lift -> stands -> Gate of Life -> arena (re-trek after any wipe)
+const TO_GATE = ['forum', 'grounds', 'arcades', 'hypogeum', 'stands', 'gateoflife'];
+assert(trek(h, TO_GATE), 'reach Gate of Life');
+ok('OBJECTIVE 2: lift -> stands -> Gate of Life');
+let mxWin = false;
+for (let att = 0; att < 6 && !mxWin; att++) {
+  assert(trek(h, TO_GATE), 'back to Gate of Life (attempt ' + (att + 1) + ')');
+  walkTo(h, 4, 1); // stepping onto the gated warp (pass in hand) -> arena -> Maximvs
+  advanceUntil(h, isBattle, 8000, 'maximvs');
+  assert(isBattle(G) && G.getScene().enemies[0].bossId === 'maximvs', 'Maximvs fight');
+  assert(G.getScene().enemies[0].maxHP >= 180, 'Maximvs is buffed (' + G.getScene().enemies[0].maxHP + ' HP)');
+  if (autoBattle(h, { onBeat: true }).win) mxWin = true;
+  else advanceUntil(h, isWorld, 8000, 'respawn after maximvs wipe');
+}
+assert(mxWin, 'beat buffed Maximvs within 6 attempts');
+ok('arena -> buffed Maximvs defeated');
 g = 0; while (g++ < 300 && !(G.getScene() === G.Cutscene && G.getScene().mode === 'choice')) { h.tap('a'); h.step(2, 25); }
 assert(G.hasFlag('maximvs_beaten') && G.hasFlag('rome_done') && G.Game.parts >= 1, 'Rome complete');
 assert(G.hasFlag('dodge_unlocked'), 'Dodge unlocked');

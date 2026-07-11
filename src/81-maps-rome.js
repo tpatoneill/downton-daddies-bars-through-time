@@ -90,7 +90,7 @@ BGS.stands = function () {
 
 /* ---------------- FORUM (festival day) ---------------- */
 registerMap('forum', {
-  banner: 'THE FORUM - ROME', music: 'rome', riftBg: 'rome',
+  banner: 'THE FORUM - ROME', music: 'rome', riftBg: 'rome', safe: true,
   grid: [
     '#################',
     '#mmmmmmmmmmmmmmm#',

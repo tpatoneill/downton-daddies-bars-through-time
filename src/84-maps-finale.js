@@ -21,7 +21,7 @@ function drawMarquee(x, y) { px(x, y, TS, 12, '#5a2038'); px(x + 1, y + 1, TS - 
 
 /* ================= THEATRE DISTRICT (occupied) ================= */
 registerMap('theatredistrict', {
-  banner: 'THEATRE DISTRICT', music: 'london', riftBg: 'london',
+  banner: 'THEATRE DISTRICT', music: 'london', riftBg: 'london', safe: true,
   grid: [
     '###################',
     '#gggggggppgggggggg#',
@@ -136,6 +136,8 @@ function snobEscalate() {
     { narr: 'SNOBBINGTON TEARS OPEN HIS COAT — THE FINAL DRAFT!' },
     { music: 'finale' },
     { narr: 'BUT THE CROWD IS ALL DADDIES NOW! THE METER SLAMS IN HER FAVOR!' },
+    { do: function () { healParty(); } },
+    { narr: 'THE THEATRE CHANTS THEIR NAMES. THE DADDIES FEEL BRAND NEW.' },
     { battle: function () { return { enemies: [{ boss: 'snob2' }], music: 'finale', canFlee: false, bg: 'stage', crowdStart: 100 }; },
       onResult: function (r) { if (r.win) setFlag('finale_done'); } }
   ], { onDone: function () { if (hasFlag('finale_done')) pDiddyUnmask(); else gotoWorld(); } });

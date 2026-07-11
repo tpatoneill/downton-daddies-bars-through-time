@@ -142,6 +142,20 @@ function autoBattle(h, opts) {
     if (b.phase === 'transition') { h.tap('a'); h.step(1, 20); continue; } // skip the intro animation
     if (b.phase === 'intro') { h.tap('a'); h.step(1, 20); continue; }
     if (b.phase === 'menu') {
+      // sip tea when low (a real player heals; wipes now cost a respawn)
+      const act = b.active();
+      if (act && !act.isEnemy && act.hp < G.maxHPd(act) * 0.4) {
+        const healId = Object.keys(G.Game.items).find(id =>
+          G.Game.items[id] > 0 && G.ITEMS[id] && G.ITEMS[id].kind === 'heal' && G.ITEMS[id].field !== false);
+        if (healId) {
+          b.menuIdx = 1; h.tap('a'); h.step(1, 20);
+          if (b.phase === 'bag') {
+            const i = b.bagList.indexOf(healId);
+            if (i >= 0) { b.itemIdx = i; h.tap('a'); h.step(1, 20); continue; }
+            h.tap('b'); h.step(1, 20);
+          }
+        }
+      }
       // choose FIGHT
       b.menuIdx = 0; h.tap('a'); h.step(1, 20); continue;
     }
@@ -158,7 +172,11 @@ function autoBattle(h, opts) {
       b.moveIdx = best; h.tap('a'); h.step(1, 20); continue;
     }
     if (b.phase === 'target') { h.tap('a'); h.step(1, 20); continue; }
-    if (b.phase === 'aim') { if (opts.onBeat) { /* try to hit beat */ h.tap('a'); } h.step(2, 20); continue; }
+    if (b.phase === 'aim') {
+      // ON BEAT window is p = 0.7 +/- 0.09 of aimDur; a practiced player waits for it
+      if (opts.onBeat && b.aimT >= b.aimDur * 0.65) h.tap('a');
+      h.step(1, 20); continue;
+    }
     if (b.phase === 'resolve') { h.tap('a'); h.step(1, 20); continue; }
     if (b.phase === 'faintswitch') {
       // choose first living
@@ -189,6 +207,22 @@ function walkToNextMap(h, targetMapId, onBattle) {
   if (isBattle(G)) { autoBattle(h, onBattle || {}); advanceUntil(h, isWorld, 5000); }
   return G.Game.map === targetMapId;
 }
+/* walk a multi-map route (list of map ids in order). If a party wipe respawns
+   us at a checkpoint, restart the trek from wherever we landed (the route must
+   include the checkpoint map, usually the era hub). Party respawns full-healed. */
+function trek(h, route, onBattle) {
+  const { G } = h;
+  for (let tries = 0; tries < 8; tries++) {
+    let i = route.indexOf(G.Game.map);
+    if (i < 0) return false; // respawned somewhere off-route
+    let interrupted = false;
+    for (; i < route.length - 1; i++) {
+      if (!walkToNextMap(h, route[i + 1], onBattle)) { interrupted = true; break; }
+    }
+    if (!interrupted && G.Game.map === route[route.length - 1]) return true;
+  }
+  return false;
+}
 /* advance any victory dialogue, then when the travelChoose hub appears pick the
    option whose label includes `needle`; then ride the transition into the new map */
 function pickTravel(h, needle) {
@@ -207,4 +241,4 @@ function pickTravel(h, needle) {
   return false;
 }
 
-module.exports = { loadGame, sceneName, isBattle, isWorld, advanceUntil, findPath, walkTo, walkStep, autoBattle, face, interactAt, walkToNextMap, pickTravel };
+module.exports = { loadGame, sceneName, isBattle, isWorld, advanceUntil, findPath, walkTo, walkStep, autoBattle, face, interactAt, walkToNextMap, trek, pickTravel };

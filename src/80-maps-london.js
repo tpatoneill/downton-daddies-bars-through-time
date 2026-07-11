@@ -30,7 +30,7 @@ registerEra({ id: 'home', label: 'LONDON 1889 - HOME', warp: { to: 'manor', tx: 
 
 /* ================= DADDY MANOR ================= */
 registerMap('manor', {
-  banner: 'DADDY MANOR', music: 'manor',
+  banner: 'DADDY MANOR', music: 'manor', safe: true,
   grid: [
     '###############',
     '#.HH.....O....#',
@@ -77,7 +77,7 @@ registerMap('manor', {
 
 /* ================= BAKER'S ROW ================= */
 registerMap('bakersrow', {
-  banner: "BAKER'S ROW", music: 'town', encPool: 'london',
+  banner: "BAKER'S ROW", music: 'town', encPool: 'london', safe: true,
   grid: [
     '###################',
     '#gggggggppgggggggg#',

@@ -191,3 +191,5 @@ defWalker('scgoon',   { hat: '#2c303c', hair: '#3a3a4a', coat: '#4a4a5a', accent
 defWalker('caroler',  { hat: '#96283c', hair: '#6a4a2a', coat: '#2e5e46', accent: sGD });
 defWalker('vendor',   { hat: '#5e3828', hair: '#3a2a1a', coat: '#8a3c2c', mous: '#3a2a1a' });
 defWalker('streetcomic', { hat: '#4a3c30', hair: '#2a2018', coat: '#5a4a6a', hatShow: false });
+defWalker('flaherty', { hat: '#2a2420', hair: '#2a2420', coat: '#4a5a6a', mous: '#2a2420', hatShow: false });
+defWalker('bartender', { hat: '#181420', hair: '#181420', coat: '#7a2a3a', mous: '#181420', hatShow: false });

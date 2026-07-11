@@ -18,6 +18,13 @@ SPEAKERS['ROLLER SKATER'] = { spr: SPR.skater, f: 300 };
 SPEAKERS['CACKLING GOBLIN'] = { spr: SPR.goblin, f: 330 };
 SPEAKERS['HEXING GOBLIN'] = { spr: SPR.goblinhex, f: 340 };
 SPEAKERS['BRUTE GOBLIN'] = { spr: SPR.goblinbrute, f: 150 };
+/* Second City in exile (NYC 1977) */
+SPEAKERS['DEL CLOSE'] = { spr: SPR.delclose, f: 165 };
+SPEAKERS['BELUSHI'] = { spr: SPR.belushi, f: 205 };
+SPEAKERS['MURRAY'] = { spr: SPR.murray, f: 178 };
+SPEAKERS['RAMIS'] = { spr: SPR.ramis, f: 262 };
+SPEAKERS['RADNER'] = { spr: SPR.radner, f: 430 };
+SPEAKERS['AYKROYD'] = { spr: SPR.aykroyd, f: 235 };
 
 /* ---- party growth helpers ---- */
 function addToParty(id, level) {
@@ -272,21 +279,22 @@ function debugVisit(era) {
        'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived']);
     Game.parts = 1;
     Game.map = 'mainstreet'; Game.px = 8; Game.py = 2; Game.dir = 'down';
-  } else if (era === 'nyc') {     /* Rosalind joins on arrival */
+  } else if (era === 'nyc') {     /* Second City chain; Rosalind joins in the disco */
     debugParty(['samuel', 'herschel', 'william'], 10);
     F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
        'dodge_unlocked', 'west_arrived_seen', 'drygulch_seen', 'train_at_station', 'ticket_bought',
        'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived', 'dodge_city_reached',
        'dodge_press', 'dodge_done', 'jake_beaten', 'william_joined', 'nyc_unlocked']);
     Game.parts = 2;
-    Game.map = 'backalley'; Game.px = 6; Game.py = 5; Game.dir = 'up';
+    Game.map = 'wellsstreet'; Game.px = 12; Game.py = 6; Game.dir = 'up';
   } else if (era === 'goblin') {  /* plays the Rex outro -> malfunction -> arrival chain */
     debugParty(['samuel', 'herschel', 'william', 'rosalind'], 11);
     F(['act0_tutorial', 'rome_unlocked', 'rome_arrived_seen', 'rome_done', 'maximvs_beaten', 'herschel_joined',
        'dodge_unlocked', 'west_arrived_seen', 'drygulch_seen', 'train_at_station', 'ticket_bought',
        'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived', 'dodge_city_reached',
        'dodge_press', 'dodge_done', 'jake_beaten', 'william_joined',
-       'nyc_unlocked', 'nyc_arrived_seen', 'nyc_done', 'rex_beaten', 'rosalind_joined']);
+       'nyc_unlocked', 'nyc_arrived_seen', 'nyc_done', 'rex_beaten', 'rosalind_joined',
+       'sc_password', 'sc_inside', 'sc_briefed', 'sc_elevator_key']);
     Game.parts = 3;
     Game.map = 'rooftop'; Game.px = 6; Game.py = 6; Game.dir = 'up';
     nycVictory(); return;
@@ -294,7 +302,7 @@ function debugVisit(era) {
     debugParty(['samuel', 'herschel', 'william', 'rosalind'], 14);
     F(['act0_tutorial', 'rome_arrived_seen', 'rome_done', 'herschel_joined', 'west_arrived_seen', 'drygulch_seen', 'train_at_station', 'ticket_bought',
        'train_departed', 'robbery_started', 'train_robbery_done', 'train_arrived', 'dodge_city_reached', 'dodge_press', 'dodge_done',
-       'william_joined', 'nyc_arrived_seen', 'nyc_done', 'rosalind_joined', 'goblin_arrived', 'goblin_done',
+       'william_joined', 'nyc_arrived_seen', 'nyc_done', 'rosalind_joined', 'sc_password', 'sc_inside', 'sc_briefed', 'sc_elevator_key', 'goblin_arrived', 'goblin_done',
        'pedro_beaten', 'london_unlocked', 'trueform']);
     Game.parts = 4;
     Game.party[0].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];

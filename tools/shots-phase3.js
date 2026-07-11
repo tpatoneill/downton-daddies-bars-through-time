@@ -46,13 +46,15 @@ for (let a = 0; a < 5 && !jakeDone; a++) {
 }
 // Jake's victory hub -> ride the engine straight to NYC
 pickTravel(h, 'NEW YORK');
-let g = 0; while (!(isWorld(G) && (G.Game.map === 'backalley' || G.Game.map === 'clubinferno')) && g++ < 400) { h.tap('a'); h.step(2, 25); }
+let g = 0; while (!(isWorld(G) && G.Game.map === 'wellsstreet') && g++ < 400) { h.tap('a'); h.step(2, 25); }
 shoot(h, 'p3-09-nyc-arrival');
 level(12);
-// traverse to club then rooftop
-const chain = []; { let cur = G.Game.map, seen = {}; while (cur && !seen[cur]) { seen[cur] = 1; const nxt = G.Maps[cur].warps.find(w => !seen[w.to] && ['clubinferno', 'boilerroom', 'rooftop'].includes(w.to)); if (!nxt) break; chain.push(nxt.to); cur = nxt.to; } }
-if (G.Game.map === 'backalley') { walkToNextMap(h, 'clubinferno'); }
-shoot(h, 'p3-10-clubinferno');
-for (let i = 0; i < chain.length; i++) if (['boilerroom'].includes(chain[i])) walkToNextMap(h, chain[i]);
-boss('rooftop'); shoot(h, 'p3-11-rex');
+// skip the Second City story steps for the screenshot pass
+['sc_password', 'sc_inside', 'sc_briefed', 'sc_elevator_key'].forEach(f => G.setFlag(f));
+walkToNextMap(h, 'backalley'); walkToNextMap(h, 'scfront'); shoot(h, 'p3-10-secondcity');
+walkToNextMap(h, 'scbasement'); walkToNextMap(h, 'clubinferno');
+advanceUntil(h, isWorld, 6000); // Rosalind joins in the disco
+shoot(h, 'p3-11-clubinferno');
+walkToNextMap(h, 'boilerroom');
+boss('rooftop'); shoot(h, 'p3-12-rex');
 console.log('done.');

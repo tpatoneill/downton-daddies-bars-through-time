@@ -27,6 +27,8 @@ var MOVES = {
   hattip:      { name: 'HAT TIP', type: 'CLASSIC', pow: 0, acc: 1, tgt: 'self', crowd: 12, eff: { buffStat: 'POISE', buffAmt: 1, evasion: 1 }, desc: 'RAISE POISE + EVASION. WITH STYLE.' },
   punchline:   { name: 'PUNCHLINE', type: 'WORDPLAY', pow: 58, acc: .9, tgt: 'enemy', crit: .25, crowd: 8, desc: 'HIGH CRIT WORDPLAY.' },
   nomoredis:   { name: 'NO MORE DISGUISE', type: 'HEART', pow: 95, acc: 1, tgt: 'enemy', crowd: 14, eff: { scaleCrowd: true }, desc: 'DAMAGE SCALES WITH THE CROWD.' },
+  /* --- taught at the Second City improv class (any Daddy) --- */
+  harold:      { name: 'THE HAROLD', type: 'CLASSIC', pow: 55, acc: 1, tgt: 'enemy', crowd: 8, eff: { scaleCrowd: true }, desc: 'CALLBACKS. DAMAGE SCALES WITH THE CROWD.' },
   /* --- Herschel --- */
   canewhack:   { name: 'CANE WHACK', type: 'CLASSIC', pow: 44, acc: 1, tgt: 'enemy', crowd: 4, desc: 'A STURDY THWACK.' },
   warstory:    { name: 'WAR STORY', type: 'CLASSIC', pow: 0, acc: .85, tgt: 'enemy', crowd: 6, eff: { status: 'BORED', chance: 1 }, desc: 'BORE THE FOE TO SLEEP.' },
@@ -147,7 +149,8 @@ var DRIP = {
   heartlocket:{ name: 'HEART LOCKET', desc: '+16 HYPE.', bonus: { HYPE: 16 } },
   laurelband: { name: 'LAUREL BAND', desc: '+3 FLOW, +3 POISE.', bonus: { FLOW: 3, POISE: 3 } },
   discogoggle:{ name: 'DISCO GOGGLES', desc: '+5 TEMPO, +2 FLOW.', bonus: { TEMPO: 5, FLOW: 2 } },
-  truestache: { name: 'TRUE MUSTACHE', desc: 'THE BEST DRIP. +6 ALL.', bonus: { HYPE: 24, FLOW: 6, POISE: 6, TEMPO: 6 } }
+  truestache: { name: 'TRUE MUSTACHE', desc: 'THE BEST DRIP. +6 ALL.', bonus: { HYPE: 24, FLOW: 6, POISE: 6, TEMPO: 6 } },
+  turtleneck: { name: 'BLACK TURTLENECK', desc: 'THE IMPROV UNIFORM. +3 POISE, +3 TEMPO.', bonus: { POISE: 3, TEMPO: 3 } }
 };
 
 /* ---------- enemy definitions ---------- */

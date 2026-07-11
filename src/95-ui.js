@@ -263,6 +263,7 @@ function makeShop(inv, back, title) {
 }
 DRIP.dapperhat.price = 45; DRIP.goldchain.price = 45; DRIP.swiftcane.price = 45; DRIP.heartlocket.price = 50;
 DRIP.laurelband.price = 70; DRIP.discogoggle.price = 80;
+DRIP.turtleneck.price = 60;
 
 /* heal whole party (phonograph / teapot save points) */
 function healParty() { for (var i = 0; i < Game.party.length; i++) { var f = Game.party[i]; f.fainted = false; f.hp = maxHPd(f); f.status = null; f.stage = { FLOW: 0, POISE: 0, TEMPO: 0, EVA: 0 }; } }

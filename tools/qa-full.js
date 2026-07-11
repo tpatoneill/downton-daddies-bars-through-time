@@ -128,19 +128,50 @@ pickTravel(h, 'NEW YORK'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000,
 assert(G.hasFlag('dodge_done') && G.Game.parts >= 2, 'Dodge complete, part 2');
 ok('DODGE CITY: press gate, Jake down, Chrono Coil');
 
-// ---- New York ----
-assert(G.Game.party.length === 4 && G.Game.party[3].id === 'rosalind', 'Rosalind joined on arrival');
-const nycStart = G.Game.map;
+// ---- New York: Second City in exile ----
+assert(G.Game.map === 'wellsstreet', 'arrived on Wells St., got ' + G.Game.map);
+assert(G.Game.party.length === 3, 'Rosalind NOT in the party yet (undercover upstairs)');
 levelParty(13);
-// traverse the NYC chain dynamically (map ids from the era file)
-const nycChain = [G.Game.map];
-{ let cur = G.Game.map, seen = {}; while (cur && !seen[cur]) { seen[cur] = 1; const m = G.Maps[cur]; const nxt = m.warps.find(w => !seen[w.to] && ['clubinferno','boilerroom','rooftop'].includes(w.to)); if (!nxt) break; nycChain.push(nxt.to); cur = nxt.to; } }
-assert(beatBoss(nycChain.slice(0, -1), nycChain[nycChain.length - 1], 'rex'), 'Rex beaten'); // Rex on onEnter
+// drive a cutscene through a choice, picking option index i, until back in the world
+function chooseOpt(i) {
+  let g = 0;
+  while (g++ < 400 && !isWorld(G)) {
+    const s = G.getScene();
+    if (s === G.Cutscene && s.mode === 'choice' && s.choice) { s.choice.idx = i; h.tap('a'); h.step(3, 25); }
+    else { h.tap('a'); h.step(2, 25); }
+  }
+  return isWorld(G);
+}
+// the password quiz: "YES, AND" (option 1)
+walkTo(h, 3, 3); interactAt(h, 2, 3); chooseOpt(1);
+assert(G.hasFlag('sc_password'), 'learned the password from Lenny');
+// street -> alley -> secret stage door -> lobby -> Resistance HQ briefing
+assert(trek(h, ['wellsstreet', 'backalley', 'scfront']), 'inside Second City');
+assert(walkToNextMap(h, 'scbasement'), 'down to Resistance HQ');
+walkTo(h, 6, 5); interactAt(h, 6, 4); advanceUntil(h, isWorld, 6000, 'del briefing');
+assert(G.hasFlag('sc_briefed'), 'Del Close briefing done');
+// improv class: enroll Herschel (option index 1), 60 shillings
+G.Game.money = Math.max(G.Game.money, 80);
+const scMoney = G.Game.money;
+interactAt(h, 6, 4); chooseOpt(1);
+assert(G.Game.money === scMoney - 60, 'class cost 60 shillings');
+assert(G.Game.party[1].moves.includes('harold'), 'Herschel learned THE HAROLD');
+// the freight elevator key hides in the green room prop trunk
+assert(walkToNextMap(h, 'scfront') && walkToNextMap(h, 'scgreenroom'), 'up to the green room');
+walkTo(h, 2, 7); interactAt(h, 1, 7); advanceUntil(h, isWorld, 4000, 'prop trunk');
+assert(G.hasFlag('sc_elevator_key'), 'got the freight elevator key');
+// ride up: Rosalind is undercover in the disco and joins there
+assert(walkToNextMap(h, 'scfront') && walkToNextMap(h, 'scbasement'), 'back to HQ');
+assert(walkToNextMap(h, 'clubinferno'), 'freight elevator up to the disco');
+advanceUntil(h, isWorld, 6000, 'rosalind joins');
+assert(G.Game.party.length === 4 && G.Game.party[3].id === 'rosalind', 'Rosalind joined IN the disco');
+// through the boiler room, up to the roof
+assert(beatBoss(['clubinferno', 'boilerroom'], 'rooftop', 'rex'), 'Rex beaten'); // Rex on onEnter
 // after Rex: nycVictory -> the engine malfunctions -> stranded in the Goblin Realm
 advanceUntil(h, isWorld, 14000, 'to goblin realm');
 assert(G.Game.map === 'goblinrealm', 'stranded in the Goblin Realm, got ' + G.Game.map);
 assert(G.hasFlag('nyc_done') && !G.hasFlag('london_unlocked'), 'London NOT unlocked until the engine is fixed');
-ok('NYC: Rex down, Time Crystal -> engine malfunction -> Goblin Realm');
+ok('NYC: password, Del briefing, THE HAROLD class, trunk key, Rosalind in the disco, Rex down');
 
 // ---- Goblin Realm: Pedro + the mid-battle wig reveal ----
 levelParty(13);

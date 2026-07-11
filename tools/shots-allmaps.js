@@ -11,7 +11,7 @@ G.Game.party = [G.makeFighter('samuel', 15), G.makeFighter('herschel', 15), G.ma
  'robbery_started','train_robbery_done','train_arrived','dodge_city_reached','dodge_press','dodge_done','jake_beaten','william_joined',
  'nyc_unlocked','nyc_arrived_seen','nyc_done','rex_beaten','rosalind_joined',
  'london_unlocked','finale_arrived','editor1_beaten','editor2_beaten','lobby_clear','snob1_beaten','finale_done','game_complete',
- 'babbage_moved'].forEach(f => G.setFlag(f));
+ 'babbage_moved', 'sc_password', 'sc_inside', 'sc_briefed', 'sc_elevator_key', 'sc_show_seen'].forEach(f => G.setFlag(f));
 const spawns = {
   manor: [7, 8], bakersrow: [9, 5], theatre: [7, 8],
   forum: [8, 5], marketroad: [9, 4], kitchens: [7, 7], arena: [6, 8],

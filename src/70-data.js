@@ -174,25 +174,40 @@ var ENEMIES = {
   goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 }
 };
 
-/* pre-fight one-liners shown after the battle-intro transition (Pokemon-style) */
+/* pre-fight one-liners shown after the battle-intro transition (Pokemon-style).
+   Each foe mixes its OWN lines with a big shared pool, so it's rarely the same twice. */
+var GENERIC_TAUNTS = [
+  'YOU CALL THAT A FLOW?', 'MY GRANDMOTHER SPITS HARDER.', "THIS WON'T EVEN BE CLOSE.",
+  'PREPARE TO BE OUT-BARRED.', 'NICE HAT. SHAME ABOUT THE RHYMES.', 'IS THAT MUSTACHE REGULATION?',
+  "LET'S SETTLE THIS. WITH BARS.", 'STEP TO ME AT YOUR PERIL.', 'YOUR LAST VERSE WAS YOUR LAST.',
+  'THE CROWD IS MINE TONIGHT.', 'TWO BARS IN AND YOU FOLD.', 'HOPE YOU BROUGHT A SPARE MUSTACHE.',
+  "DON'T CRY WHEN YOU LOSE.", 'BOLD OF YOU TO MAKE EYE CONTACT.', 'I FREESTYLE IN MY SLEEP.',
+  'AH, A CHALLENGER. HOW QUAINT.', 'I HAVE BEEN WAITING ALL DAY FOR THIS.', 'YOU AGAIN? NO? FIRST TIME? PERFECT.',
+  'YOU PICKED THE WRONG BLOCK.', 'MY BARS COME WITH A WARNING LABEL.', 'ENOUGH TALK. LESS TALK, ACTUALLY.',
+  'I WILL BE NARRATING YOUR DEFEAT.', 'BLINK AND YOU MISS THE PUNCHLINE.'
+];
 var TAUNTS = {
-  heckler: ["A ONE-DADDY SHOW? WHERE'S YER TEAM?"],
-  orator: ['ALL RHYMES IN TRIPLICATE!', 'THE FORUM CYPHER IS CLOSED!'],
-  senator: ['I HEARD YOUR BARS ARE... FINE.', 'HOW DELIGHTFULLY SCANDALOUS!'],
-  tumbleweed: ['...LISTEN TO MY PAIN, PARDNER.'],
-  auctioneer: ['GOING ONCE! GOING TWICE! FIGHT!'],
-  discofan: ['THE HUSTLE NEVER ENDS, BABY!'],
-  gerald: ['THIS BATTLE IS PRE-APPROVED.', 'MY NAME IS ALSO GERALD.'],
-  editor: ['YOUR VERSE IS... REJECTED.'],
-  goblin: ['HEE HEE! NO REFUNDS!'],
-  legionary: ['NONE SHALL PASS, PLEBEIAN!'],
-  salesman: ['STEP RIGHT UP AND GET BEAT!'],
-  deejay: ["I'LL DROP THE BEAT ON YOU!"],
-  skater: ['EAT MY DUST, DADDY-O!'],
-  goblinhex: ['A HEX UPON YOUR BARS!'],
-  goblinbrute: ['BRUTE SMASH YOUR RHYMES!']
+  heckler: ["A ONE-DADDY SHOW? WHERE'S YER TEAM?", 'GET OFF MY STAGE, GUV!', 'I HECKLE FOR A LIVING, MATE.'],
+  orator: ['ALL RHYMES IN TRIPLICATE!', 'THE FORUM CYPHER IS CLOSED!', 'FRIENDS, ROMANS, PREPARE TO LOSE.', 'I ORATE. YOU EVAPORATE.'],
+  senator: ['I HEARD YOUR BARS ARE... FINE.', 'HOW DELIGHTFULLY SCANDALOUS!', 'I SHALL SPREAD WORD OF YOUR DEFEAT.', 'ET TU? ET NO.'],
+  tumbleweed: ['...LISTEN TO MY PAIN, PARDNER.', 'THE DESERT TAUGHT ME EVERYTHING.', 'I WROTE A HAIKU ABOUT LOSING. TO YOU.'],
+  auctioneer: ['GOING ONCE! GOING TWICE! FIGHT!', 'DO I HEAR A DEFEAT? SOLD!', 'CATTLE FIRST, BARS SECOND, PARDNER.'],
+  discofan: ['THE HUSTLE NEVER ENDS, BABY!', "STAYIN' ALIVE? NOT AFTER THIS.", 'FEEL THE BOOGIE. FEAR THE BOOGIE.'],
+  gerald: ['THIS BATTLE IS PRE-APPROVED.', 'MY NAME IS ALSO GERALD.', 'PLEASE FILE YOUR DEFEAT IN TRIPLICATE.', 'THE SCRIPT SAYS I WIN. THE SCRIPT.'],
+  editor: ['YOUR VERSE IS... REJECTED.', 'I AM CUTTING THIS SCENE. AND YOU.', 'SEE ME AFTER CLASS. IN DEFEAT.'],
+  goblin: ['HEE HEE! NO REFUNDS!', 'WE ATE YOUR SNACKS ON THE TRIP!', 'GOBLIN RULES: THERE ARE NONE!'],
+  legionary: ['NONE SHALL PASS, PLEBEIAN!', 'FOR THE EMPIRE! AND FOR BARS!', 'MY SHIELD BLOCKS. MY BARS DO NOT.'],
+  salesman: ['STEP RIGHT UP AND GET BEAT!', 'ONE BOTTLE CURES COWARDICE! WATCH!', 'SATISFACTION NOT GUARANTEED!'],
+  deejay: ["I'LL DROP THE BEAT ON YOU!", 'THIS ONE GOES OUT TO YOUR L.', 'THE ALGORITHM CANNOT SAVE YOU.'],
+  skater: ['EAT MY DUST, DADDY-O!', "CAN'T STOP, WON'T STOP, WON'T LOSE!", 'GNARLY BARS INCOMING, DUDE!'],
+  goblinhex: ['A HEX UPON YOUR BARS!', 'ABRA-CADABRA-YOU-LOSE!', 'I CURSED YOUR RHYME SCHEME!'],
+  goblinbrute: ['BRUTE SMASH YOUR RHYMES!', 'BRUTE NO LIKE YOUR FACE-WORDS!', 'WORDS HARD. SMASH EASY!']
 };
-function pickTaunt(id) { var t = TAUNTS[id]; return t ? t[(Math.random() * t.length) | 0] : null; }
+function pickTaunt(id) {
+  var own = TAUNTS[id] || [];
+  var pool = own.concat(GENERIC_TAUNTS);
+  return pool.length ? pool[(Math.random() * pool.length) | 0] : null;
+}
 
 /* era encounter pools: mapId enc uses one of these */
 var ENC_POOLS = {

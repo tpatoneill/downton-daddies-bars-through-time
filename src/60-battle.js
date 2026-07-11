@@ -49,7 +49,7 @@ function makeBattle(spec, onEnd) {
     targetIdx: 0,
     crowd: spec.crowdStart || 0, usedShow: false,
     revealPending: false, revealDone: false, superFX: null,
-    phase: 'transition', transT: 0, transDur: 0.95, taunt: spec.taunt || null,
+    phase: 'transition', transT: 0, transDur: 1.7, taunt: spec.taunt || null,
     menuIdx: 0, moveIdx: 0, itemIdx: 0, switchIdx: 0,
     queue: [], qi: 0, msg: '', msgT: 0, autoMsgT: 0,
     aimT: 0, aimHit: false, pendingMove: null,
@@ -544,19 +544,26 @@ function makeBattle(spec, onEnd) {
     },
     drawTransition: function () {
       var t = this.transT, dur = this.transDur, p = t / dur, i;
-      if (p < 0.5) {                                  /* flash burst with radiating spokes */
-        var on = ((t * 26) | 0) % 2;
-        cls(on ? COL.white : '#1a1030');
-        var n = 16, len = p * 360;
-        for (i = 0; i < n; i++) { var a = (i / n) * 6.2832; px((120 + Math.cos(a) * len) | 0, (80 + Math.sin(a) * len) | 0, 4, 4, on ? '#1a1030' : COL.gold); }
-        centerTextO('!', 66, on ? COL.red : COL.white, COL.black, 3);
-      } else {                                        /* colored bands sweep + enemy slides in */
+      if (p < 0.32) {                                 /* spinning spoke burst (softer flash) */
+        var q0 = p / 0.32, on = ((t * 14) | 0) % 2;
+        cls(on ? '#3a2a5a' : '#1a1030');
+        var n = 18, len = q0 * 380, rot = t * 5;
+        for (i = 0; i < n; i++) { var a = (i / n) * 6.2832 + rot; var c0 = [COL.gold, COL.pink, COL.teal, COL.purple][i % 4];
+          px((120 + Math.cos(a) * len) | 0, (80 + Math.sin(a) * len) | 0, 5, 5, c0); }
+        centerTextO('!', 62, COL.white, COL.black, 3);
+      } else if (p < 0.72) {                           /* colored bands sweep in from both sides */
         cls('#1a1030');
-        var q = (p - 0.5) / 0.5;
+        var q = (p - 0.32) / 0.40;
         for (var b = 0; b < 12; b++) { var c = [COL.pink, COL.gold, COL.teal, COL.purple][b % 4]; var w = (240 * q) | 0; px((b % 2) ? 0 : 240 - w, b * 14, w, 14, c); }
+        centerTextO('VS!', 62, COL.white, COL.black, 3);
+      } else {                                         /* hold the VS, foe slides in, then a wipe */
+        var q2 = (p - 0.72) / 0.28;
+        cls('#1a1030');
+        for (var b2 = 0; b2 < 12; b2++) { var c2 = [COL.pink, COL.gold, COL.teal, COL.purple][b2 % 4]; px(0, b2 * 14, 240, 14, c2); }
         var en = this.enemies[0];
-        if (en && SPR[en.spr]) { ctx.globalAlpha = 0.4 + q * 0.6; SPR[en.spr]((240 - q * 96) | 0, 44, en.sprOpt); ctx.globalAlpha = 1; }
-        centerTextO('VS!', 64, COL.white, COL.black, 3);
+        if (en && SPR[en.spr]) { SPR[en.spr]((150 - (1 - q2) * 100) | 0, 44, en.sprOpt); }
+        centerTextO('VS!', 20, COL.white, COL.black, 2);
+        px(0, 0, (240 * q2) | 0, 160, 'rgba(26,16,48,0.0)'); /* (reserved) */
       }
     },
     drawHPBox: function (f, x, y, isPlayer) {

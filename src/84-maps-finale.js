@@ -9,6 +9,10 @@ var SHOP_FINALE = ['strongtea', 'crumpet', 'lozenge', 'sparestache', 'drip:heart
 SPEAKERS['P DIDDY'] = { spr: SPR.pdiddy, f: 240 };
 SPEAKERS['50 CENT'] = { spr: SPR.fiftycent, f: 200 };
 SPEAKERS['PEDRO'] = { spr: SPR.pedro, f: 196 };
+SPEAKERS['UNDERSTUDY'] = { spr: SPR.babbage, f: 300 };
+
+function drawBasement(x, y) { px(x + 2, y + 2, 12, 13, '#1a1018'); px(x + 3, y + 3, 10, 11, '#2a2030');
+  for (var i = 0; i < 4; i++) px(x + 4, y + 4 + i * 2, 8, 1, '#0e0812'); px(x + 6, y, 4, 3, COL.stoned); }
 
 function drawBarricade(x, y) { px(x, y + 3, TS, 10, '#3a3244'); px(x, y + 3, TS, 2, '#4a4258');
   px(x + 2, y + 6, 3, 6, COL.purple); px(x + 8, y + 6, 3, 6, COL.purple); px(x + 5, y, 2, TS, '#5a4a6a'); }
@@ -42,8 +46,12 @@ registerMap('theatredistrict', {
     { x: 3, y: 6, solid: true, draw: drawBarricade, onInteract: function () { say([['GERALD', 'THIS DISTRICT IS UNDER REVIEW.'], ['GERALD', 'ALL JOY MUST BE SUBMITTED IN WRITING.']]); } },
     { x: 15, y: 6, solid: true, draw: drawBarricade, onInteract: function () { say([['GERALD', 'NO FREESTYLING PAST THIS POINT.'], ['GERALD', 'ORDER OF LORD SNOBBINGTON.']]); } },
     { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
-    { x: 16, y: 9, solid: true, spr: 'babbage', dir: 'up', onInteract: function () { setScene(makeShop(SHOP_FINALE, World, "BABBAGE'S CART")); } },
-    { x: 5, y: 7, mustache: true, flag: 'stache_finale', onInteract: function (o) { collectMustache(o, 'stache_finale'); } }
+    { x: 16, y: 9, solid: true, spr: 'babbage', dir: 'up', onInteract: function () { babbageTalk(SHOP_FINALE, "BABBAGE'S CART"); } },
+    { x: 5, y: 7, mustache: true, flag: 'stache_finale', onInteract: function (o) { collectMustache(o, 'stache_finale'); } },
+    { x: 16, y: 3, solid: true, draw: drawBasement, onInteract: function () {
+        if (hasFlag('understudy_beaten')) say([['NARRATOR', 'THE UNDERSTUDY IS SILENT NOW.'], ['NARRATOR', 'A COPY NEVER BEATS THE ORIGINAL.']]);
+        else if (hasFlag('understudy_unlocked')) understudyFight();
+        else say([['NARRATOR', 'A SEALED CELLAR DOOR. SOMETHING HUMS'], ['NARRATOR', 'BELOW — WAITING FOR A FULL SET OF 12.']]); } }
   ],
   onStep: function () { if (hasFlag('editor1_beaten') && hasFlag('editor2_beaten')) setFlag('lobby_clear'); },
   onEnter: function () { if (!hasFlag('finale_arrived')) { setFlag('finale_arrived'); finaleArrive(); } }

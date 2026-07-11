@@ -18,8 +18,78 @@ function gainPart(name) { Game.parts++; jingle('get'); }
 function collectMustache(o, flag) {
   if (hasFlag(flag)) return;
   setFlag(flag); Game.mustaches++; sfx('sparkle');
-  say([['NARRATOR', 'A GOLDEN MUSTACHE! ( ' + Game.mustaches + ' / 12 )'],
-       ['NARRATOR', 'BABBAGE TRADES THESE FOR FINE DRIP.']]);
+  var hint = Game.mustaches >= 12 ? "THAT'S ALL 12! SEE BABBAGE IN LONDON." : 'BABBAGE TRADES THESE FOR FINE DRIP.';
+  say([['NARRATOR', 'A GOLDEN MUSTACHE! ( ' + Game.mustaches + ' / 12 )'], ['NARRATOR', hint]]);
+}
+
+/* ---- Golden Mustache exchange: milestones of Drip, capped by the TRUE MUSTACHE ---- */
+var MUSTACHE_REWARDS = [
+  { n: 3, drip: 'heartlocket', flag: 'mus_r3' },
+  { n: 6, drip: 'laurelband', flag: 'mus_r6' },
+  { n: 9, drip: 'discogoggle', flag: 'mus_r9' },
+  { n: 12, drip: 'truestache', flag: 'mus_r12' }
+];
+/* returns true (and plays a cutscene) if Babbage handed over a reward */
+function babbageMustacheTrade() {
+  var earned = [];
+  for (var i = 0; i < MUSTACHE_REWARDS.length; i++) { var r = MUSTACHE_REWARDS[i];
+    if (Game.mustaches >= r.n && !hasFlag(r.flag)) earned.push(r); }
+  if (earned.length === 0) return false;
+  var got12 = false, steps = [{ say: ['BABBAGE', 'GOLDEN MUSTACHES! LET ME SEE...'] }];
+  for (var j = 0; j < earned.length; j++) { var rr = earned[j];
+    steps.push({ do: (function (r) { return function () { setFlag(r.flag); giveDrip(r.drip); }; })(rr) });
+    steps.push({ narr: 'GOT ' + DRIP[rr.drip].name + '! (EQUIP IT IN PARTY)' });
+    if (rr.n === 12) got12 = true;
+  }
+  if (got12) {
+    steps.push({ say: ['BABBAGE', 'ALL TWELVE. REMARKABLE, MASTER SAMUEL.'] });
+    steps.push({ do: function () { setFlag('all_mustaches'); setFlag('understudy_unlocked'); } });
+  }
+  Cutscene.play(steps, { onDone: function () { if (got12) mustacheBonusScene(); else gotoWorld(); } });
+  return true;
+}
+/* Babbage's cart: try the mustache trade first, else open his shop */
+function babbageTalk(inv, title) {
+  if (babbageMustacheTrade()) return;
+  setScene(makeShop(inv, World, title));
+}
+/* the all-12 bonus scene (comedy) + the superboss hook */
+function mustacheBonusScene() {
+  Cutscene.play([
+    { bg: 'manorbg' }, { music: 'finale' },
+    { narr: 'THE TEAM GATHERS AROUND A DOZEN GOLDEN MUSTACHES.' },
+    { say: ['WILLIAM', 'A COMPLETE SET. EXQUISITE.'] },
+    { say: ['HERSCHEL', 'PUT THEM ON. ALL OF THEM. AT ONCE.'] },
+    { say: ['SAMUEL', 'HERSCHEL, I AM NOT WEARING TWELVE—'] },
+    { narr: 'SAMUEL WEARS ALL TWELVE MUSTACHES AT ONCE. IT IS MAGNIFICENT.' },
+    { say: ['ROSALIND', 'YOU LOOK LIKE A VERY REGAL BROOM.'] },
+    { say: ['BABBAGE', 'ALSO — THE TWELVE STIRRED SOMETHING'] },
+    { say: ['BABBAGE', 'IN THE THEATRE BASEMENT. AN... UNDERSTUDY.'] },
+    { say: ['SAMUEL', 'A COPY OF US? SEND IT MY REGARDS.'] },
+    { do: function () { saveGame(false); } }
+  ], { onDone: function () { gotoWorld(); } });
+}
+/* THE UNDERSTUDY superboss (theatre basement, unlocked by all 12 mustaches) */
+function understudyFight() {
+  Cutscene.play([
+    { bg: 'stage' }, { music: 'boss' },
+    { narr: 'IN THE BASEMENT: A BRASS AUTOMATON TRAINED ON EVERY DADDIES SHOW.' },
+    { say: ['UNDERSTUDY', 'I AM THE DOWNTON DADDIES.'] },
+    { say: ['UNDERSTUDY', 'I HAVE EVERY TRANSCRIPT. EVERY BAR.'] },
+    { say: ['SAMUEL', 'YOU HAVE THE WORDS.'] },
+    { say: ['SAMUEL', "YOU DON'T HAVE THE NEXT ONE."] },
+    { battle: function () { return { enemies: [{ boss: 'understudy' }], music: 'boss', canFlee: false, bg: 'stage', crowdStart: -10 }; },
+      onResult: function (r) { if (r.win) { setFlag('understudy_beaten'); Game.money += 500; } } }
+  ], { onDone: function () { if (hasFlag('understudy_beaten')) understudyWin(); else gotoWorld(); } });
+}
+function understudyWin() {
+  Cutscene.play([
+    { say: ['UNDERSTUDY', 'IMPOSSIBLE. I HAD EVERY LINE.'] },
+    { say: ['SAMUEL', 'EVERY LINE BUT THE ONE THAT MATTERED.'] },
+    { narr: 'THE UNDERSTUDY POWERS DOWN. THE REAL THING WINS. FOREVER.' },
+    { narr: 'GOT 500 SHILLINGS. AND THE ONLY BRAGGING RIGHTS THAT COUNT.' },
+    { do: function () { saveGame(false); } }
+  ], { onDone: function () { gotoWorld(); } });
 }
 
 /* ---- phonograph save point ---- */
@@ -30,10 +100,11 @@ function phonographInteract() {
 }
 
 /* ---- shops ---- */
-function bakersShop() { setScene(makeShop(SHOP_LONDON, World, "BABBAGE'S CART")); }
+function bakersShop() { babbageTalk(SHOP_LONDON, "BABBAGE'S CART"); }
 
 /* ---- manor Babbage guide ---- */
 function manorBabbage() {
+  if (babbageMustacheTrade()) return;
   if (!hasFlag('act0_tutorial')) {
     say([['BABBAGE', 'GOOD MORNING, MASTER SAMUEL. YOU'],
          ['BABBAGE', 'ALONE REMAIN IN 1889.'],

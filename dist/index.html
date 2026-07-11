@@ -1448,6 +1448,252 @@ defWalker('goblinhex', {hat: '#5a3f88', hair: '#8a6ab8', coat: '#5a3f88', coatd:
 defWalker('goblinbrute', {hair: '#4a8a3a', coat: '#4a8a3a', coatd: '#356828', mous: '#234a1a', accent: '#c8b48c', hatShow: false});
 
 
+/* ===== 33-sprites-rome.js ===== */
+/* sprites-rome.js — Colosseum dungeon opponents/NPCs (Rome, 74 AD).
+   Appends to the global SPR registry and WALK registry from 30-sprites.js.
+   Reuses painter(), the shared body primitives, and the shared palette consts. */
+
+/* Hypogeum Beast Handler — leather apron, arm wraps, coiled whip. Underground-worker vibe. */
+SPR.beasthandler = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, s;
+  var LE = '#6a4a2c', LEs = '#503620', LEh = '#84603a', TU = '#8a8a76', TUs = '#6a6a58', SCR = '#96283c';
+  /* short cropped dark hair */
+  g.ell(cx - 9, 6, cx + 9, 16, '#3a2a1a', sK);
+  var ytop = _face(g, cx, 14), ey = ytop + 5;
+  _eyes(g, cx, ey, true, 2); /* tired squint, heavy brows */
+  g.p(cx - 6, ey + 3, 3, 1, sSD); g.p(cx + 4, ey + 3, 3, 1, sSD); /* eye bags */
+  g.p(cx - 8, ytop + 2, 1, 4, SCR); /* old cheek scar */
+  g.p(cx - 3, ytop + 11, 6, 1, sK); /* flat tough mouth */
+  var sh = ytop + 15;
+  /* drab work tunic */
+  _coatBody(g, cx, sh, 53, TU, TUs, '#9c9c86', TU, false);
+  /* heavy leather apron over the front */
+  g.p(cx - 8, sh + 1, 16, 19, LE);
+  g.p(cx - 8, sh + 1, 16, 1, sK);
+  g.p(cx - 8, sh + 1, 1, 19, sK); g.p(cx + 7, sh + 1, 1, 19, sK);
+  g.p(cx - 7, sh + 2, 2, 17, LEh);
+  g.p(cx + 4, sh + 2, 3, 17, LEs);
+  g.p(cx - 4, sh + 8, 3, 1, LEs); g.p(cx + 1, sh + 13, 3, 1, LEs); /* claw nicks */
+  g.p(cx - 5, sh - 1, 2, 2, LEs); g.p(cx + 3, sh - 1, 2, 2, LEs); /* neck straps */
+  /* bare scratched arms with leather wrist wraps */
+  for (s = -1; s <= 1; s += 2) {
+    var ax = s < 0 ? cx - 17 : cx + 13;
+    g.p(ax, sh + 1, 5, 15, sSK);
+    g.p(ax, sh + 1, 5, 1, sK);
+    g.p(ax, sh + 1, 1, 15, sK); g.p(ax + 4, sh + 1, 1, 15, sK);
+    g.p(ax + 1, sh + 4, 3, 1, SCR); /* scratches */
+    g.p(ax + 1, sh + 7, 2, 1, SCR);
+    g.p(ax + 1, sh + 10, 3, 3, LE); /* arm wrap */
+    g.p(ax + 1, sh + 13, 3, 3, sSK); g.p(ax + 1, sh + 15, 3, 1, sSD);
+  }
+  /* coiled whip hanging by the right hand */
+  g.eo(cx + 12, sh + 17, cx + 20, sh + 25, LEs);
+  g.eo(cx + 13, sh + 18, cx + 19, sh + 24, LE);
+  g.p(cx + 19, sh + 25, 2, 3, LEs); /* whip tail */
+  _legs(g, cx, 53);
+};
+
+/* Gladiator Trainee — oversized bronze helmet tilted over the eyes, wooden rudis, padded arm. */
+SPR.trainee = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i;
+  var PAD = '#c8b48c', PADs = '#a08a60', WD = '#8a6a3c', WDs = '#6a4e28';
+  var ytop = _face(g, cx, 14), ey = ytop + 6;
+  /* oversized bronze galea, slumping down-left */
+  g.ell(cx - 12, 2, cx + 11, 19, sBZ, sK);
+  g.p(cx - 8, 4, 4, 3, '#d8b060'); /* shine */
+  /* wee red crest, also crooked */
+  g.p(cx - 4, 0, 8, 3, sRD); g.p(cx - 4, 0, 8, 1, sK);
+  g.p(cx - 4, 0, 1, 3, sK); g.p(cx + 3, 0, 1, 3, sK);
+  /* tilted brim: low over the left eye, riding up on the right */
+  g.p(cx - 13, 17, 12, 5, sBZ);
+  g.p(cx - 13, 17, 12, 1, sK); g.p(cx - 13, 21, 12, 1, sK);
+  g.p(cx - 13, 17, 1, 5, sK);
+  g.p(cx - 12, 20, 10, 1, sBZs);
+  g.p(cx - 1, 15, 13, 4, sBZ);
+  g.p(cx - 1, 15, 13, 1, sK); g.p(cx - 1, 18, 13, 1, sK);
+  g.p(cx + 11, 15, 1, 4, sK);
+  /* only the right eye peeks out from under the tilt */
+  g.p(cx + 2, ey, 4, 4, sWH); g.p(cx + 3, ey + 1, 2, 2, sK);
+  g.p(cx - 1, ey + 4, 2, 2, sSD);
+  g.p(cx + 9, ey + 2, 1, 3, sGL); /* nervous sweat drop */
+  _smile(g, cx, ytop + 13, true); /* big nervous grin */
+  var sh = ytop + 17;
+  /* quilted training tunic */
+  _coatBody(g, cx, sh, 53, PAD, PADs, '#d8c8a0', PAD, false);
+  for (i = 0; i < 4; i++) g.p(cx - 11, sh + 3 + i * 4, 22, 1, PADs); /* stitch rows */
+  g.p(cx - 12, sh + 14, 24, 2, WDs); /* rope belt */
+  /* left arm: extra-padded sparring sleeve */
+  g.p(cx - 19, sh + 1, 7, 14, PAD);
+  g.p(cx - 19, sh + 1, 7, 1, sK);
+  g.p(cx - 19, sh + 1, 1, 14, sK); g.p(cx - 13, sh + 1, 1, 14, sK);
+  g.p(cx - 18, sh + 4, 5, 1, PADs); g.p(cx - 18, sh + 8, 5, 1, PADs); g.p(cx - 18, sh + 12, 5, 1, PADs);
+  g.p(cx - 17, sh + 15, 3, 3, sSK); g.p(cx - 17, sh + 17, 3, 1, sSD);
+  /* right arm raised, gripping the wooden rudis */
+  g.p(cx + 12, sh - 2, 5, 11, PAD);
+  g.p(cx + 12, sh - 2, 5, 1, sK);
+  g.p(cx + 12, sh - 2, 1, 11, sK); g.p(cx + 16, sh - 2, 1, 11, sK);
+  g.p(cx + 13, sh - 5, 3, 3, sSK); /* fist */
+  g.p(cx + 12, sh - 6, 6, 2, WDs); /* crossguard */
+  g.p(cx + 12, sh - 6, 6, 1, sK);
+  g.p(cx + 14, sh - 16, 2, 10, WD); /* wooden blade */
+  g.p(cx + 14, sh - 16, 1, 10, WDs);
+  g.p(cx + 14, sh - 17, 2, 1, sK);
+  _legs(g, cx, 53);
+};
+
+/* Colosseum Bookmaker — toga, coin purse on belt, wax tablet + stylus, shifty eyes. */
+SPR.bookmaker = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i;
+  var TG = '#e8e8f0', TGs = '#c8c8d4', WD = '#8a6a3c', WDs = '#6a4e28', WAX = '#e0c860';
+  /* slick dark hair, combed flat */
+  g.ell(cx - 9, 6, cx + 9, 15, '#2a2028', sK);
+  g.p(cx - 7, 8, 11, 1, '#4a3c44'); /* comb shine */
+  var ytop = _face(g, cx, 13), ey = ytop + 5;
+  /* shifty sideways eyes: pupils pushed hard left */
+  g.p(cx - 6, ey, 4, 4, sWH); g.p(cx + 2, ey, 4, 4, sWH);
+  g.p(cx - 6, ey + 1, 2, 2, sK); g.p(cx + 2, ey + 1, 2, 2, sK);
+  g.p(cx - 7, ey - 3, 5, 1, sK); g.p(cx + 2, ey - 4, 5, 1, sK); /* one brow raised */
+  g.p(cx - 1, ey + 4, 2, 2, sSD);
+  /* slick lopsided smile */
+  g.p(cx - 2, ytop + 12, 5, 1, sK); g.p(cx + 3, ytop + 11, 1, 1, sK);
+  var sh = ytop + 16;
+  /* toga with a gold hem */
+  g.p(cx - 13, sh, 26, 24, TG);
+  g.p(cx - 13, sh, 26, 1, sK); g.p(cx - 13, sh + 23, 26, 1, sK);
+  g.p(cx - 13, sh, 1, 24, sK); g.p(cx + 12, sh, 1, 24, sK);
+  for (i = 0; i < 4; i++) g.p(cx - 10 + i * 6, sh + 2, 1, 20, TGs); /* folds */
+  g.p(cx - 12, sh + 21, 24, 2, sGD);
+  /* belt with a fat coin purse */
+  g.p(cx - 12, sh + 12, 24, 2, WDs);
+  g.ell(cx + 6, sh + 13, cx + 12, sh + 20, WD, sK);
+  g.p(cx + 8, sh + 13, 3, 1, WDs); /* drawstring */
+  g.p(cx + 8, sh + 11, 3, 2, sGD); /* coin peeking from the purse mouth */
+  g.p(cx + 9, sh + 12, 1, 1, sBZs);
+  /* short sleeves, forearms in toward the tablet */
+  _arms(g, cx, sh, 8, TG, false);
+  g.p(cx - 14, sh + 9, 7, 3, sSK); g.p(cx + 8, sh + 9, 7, 3, sSK);
+  g.p(cx - 14, sh + 9, 7, 1, sK); g.p(cx + 8, sh + 9, 7, 1, sK);
+  g.p(cx - 9, sh + 10, 3, 4, sSK); g.p(cx + 5, sh + 10, 3, 4, sSK); /* hands */
+  /* wax tablet held in front */
+  g.p(cx - 8, sh + 8, 12, 9, WD);
+  g.p(cx - 8, sh + 8, 12, 1, sK); g.p(cx - 8, sh + 16, 12, 1, sK);
+  g.p(cx - 8, sh + 8, 1, 9, sK); g.p(cx + 3, sh + 8, 1, 9, sK);
+  g.p(cx - 6, sh + 10, 8, 5, WAX);
+  g.p(cx - 5, sh + 11, 5, 1, WDs); g.p(cx - 5, sh + 13, 4, 1, WDs); /* the odds */
+  /* stylus sticking up from the right hand */
+  g.p(cx + 6, sh + 4, 1, 6, sBZ); g.p(cx + 6, sh + 3, 1, 1, sGD);
+  _legs(g, cx, 53);
+};
+
+/* Maximvs Superfan — half red / half gold face paint, banner on a stick, wild eyes, spiky hair. */
+SPR.superfan = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i;
+  var RD2 = '#c63a46', SPK = '#3a2a1a', BNR = '#e8e0c8', WD = '#8a6a3c';
+  var ytop = 14, ey = ytop + 6, sh = ytop + 17;
+  /* banner on a stick, waving behind the head (drawn first) */
+  g.p(cx + 14, sh - 24, 2, 34, WD);
+  g.p(cx - 1, sh - 24, 15, 8, BNR);
+  g.p(cx - 1, sh - 24, 15, 1, sK); g.p(cx - 1, sh - 17, 15, 1, sK);
+  g.p(cx - 1, sh - 24, 1, 8, sK);
+  /* crude MAX daubed in red */
+  g.p(cx, sh - 22, 1, 4, RD2); g.p(cx + 2, sh - 22, 1, 4, RD2); g.p(cx + 1, sh - 21, 1, 1, RD2);
+  g.p(cx + 4, sh - 22, 1, 4, RD2); g.p(cx + 6, sh - 22, 1, 4, RD2);
+  g.p(cx + 5, sh - 22, 1, 1, RD2); g.p(cx + 5, sh - 20, 1, 1, RD2);
+  g.p(cx + 8, sh - 22, 1, 1, RD2); g.p(cx + 10, sh - 22, 1, 1, RD2);
+  g.p(cx + 9, sh - 21, 1, 2, RD2);
+  g.p(cx + 8, sh - 19, 1, 1, RD2); g.p(cx + 10, sh - 19, 1, 1, RD2);
+  /* spiky hair */
+  g.ell(cx - 9, 7, cx + 9, 16, SPK, sK);
+  var sxs = [cx - 9, cx - 5, cx - 1, cx + 3, cx + 7];
+  for (i = 0; i < 5; i++) { g.p(sxs[i], 3, 3, 5, SPK); g.p(sxs[i] + 1, 1, 1, 2, SPK); }
+  _face(g, cx, ytop);
+  /* face paint: half red / half gold, split down the middle */
+  g.p(cx - 8, ytop + 1, 8, 12, RD2); g.p(cx, ytop + 1, 8, 12, sGD);
+  g.p(cx - 9, ytop + 3, 1, 8, RD2); g.p(cx + 8, ytop + 3, 1, 8, sGD);
+  g.p(cx - 7, ytop + 13, 7, 1, RD2); g.p(cx, ytop + 13, 7, 1, sGD);
+  /* wild happy eyes */
+  g.ell(cx - 8, ey - 1, cx - 2, ey + 4, sWH, sK);
+  g.ell(cx + 2, ey - 1, cx + 8, ey + 4, sWH, sK);
+  g.p(cx - 5, ey + 1, 2, 2, sK); g.p(cx + 4, ey + 1, 2, 2, sK);
+  g.p(cx - 1, ey + 5, 2, 1, sSD);
+  /* huge open cheer */
+  g.p(cx - 5, ytop + 12, 10, 3, sK);
+  g.p(cx - 4, ytop + 12, 8, 1, sWH);
+  /* two-tone tunic matching the paint job */
+  g.p(cx - 12, sh, 12, 22, RD2); g.p(cx, sh, 12, 22, sGD);
+  g.p(cx - 12, sh, 24, 1, sK); g.p(cx - 12, sh + 21, 24, 1, sK);
+  g.p(cx - 12, sh, 1, 22, sK); g.p(cx + 11, sh, 1, 22, sK);
+  g.p(cx - 11, sh + 1, 2, 20, '#d84c58');
+  g.p(cx + 9, sh + 1, 2, 20, sBZs);
+  /* left arm: bare, pumping a fist */
+  g.p(cx - 16, sh - 8, 4, 11, sSK);
+  g.p(cx - 16, sh - 8, 1, 11, sK); g.p(cx - 13, sh - 8, 1, 11, sK);
+  g.p(cx - 17, sh - 12, 5, 4, sSK);
+  g.p(cx - 17, sh - 12, 5, 1, sK); g.p(cx - 17, sh - 12, 1, 4, sK); g.p(cx - 13, sh - 12, 1, 4, sK);
+  g.p(cx - 16, sh - 9, 3, 1, sSD);
+  /* right arm gripping the banner pole */
+  g.p(cx + 12, sh + 1, 5, 9, sSK);
+  g.p(cx + 12, sh + 1, 5, 1, sK);
+  g.p(cx + 12, sh + 1, 1, 9, sK); g.p(cx + 16, sh + 1, 1, 9, sK);
+  g.p(cx + 13, sh + 8, 3, 3, sSK); g.p(cx + 13, sh + 10, 3, 1, sSD);
+  _legs(g, cx, 53);
+};
+
+/* Theater Critic — older, severe, thin; precise toga, half-unrolled scroll, wire-rim glasses. */
+SPR.critic = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i, s;
+  var TG = '#e8e8f0', TGs = '#c8c8d4', SCL = '#e8e0c8', SCLp = '#f4ecd8';
+  /* long thin face, bald dome */
+  g.ell(cx - 7, 6, cx + 7, 27, sSK, sK);
+  g.p(cx - 5, 24, 10, 2, sSD);
+  /* receding gray hair: side tufts + one loyal wisp */
+  g.p(cx - 9, 13, 3, 6, sBE); g.p(cx + 6, 13, 3, 6, sBE);
+  g.p(cx - 9, 13, 3, 1, sK); g.p(cx + 6, 13, 3, 1, sK);
+  g.p(cx - 9, 18, 3, 1, sBEs); g.p(cx + 6, 18, 3, 1, sBEs);
+  g.p(cx - 4, 6, 5, 1, sBE);
+  var ey = 14;
+  _eyes(g, cx, ey, false, 1);
+  g.p(cx - 6, ey, 4, 1, sSD); g.p(cx + 2, ey, 4, 1, sSD); /* half-lidded, unimpressed */
+  _glasses(g, cx, ey);
+  g.p(cx - 5, 21, 1, 2, sSD); g.p(cx + 4, 21, 1, 2, sSD); /* gaunt cheeks */
+  /* the frown of a man watching act three fall apart */
+  g.p(cx - 3, 23, 6, 1, sK);
+  g.p(cx - 4, 24, 1, 1, sK); g.p(cx + 3, 24, 1, 1, sK);
+  var sh = 28;
+  /* narrow toga, draped with terrifying precision */
+  g.p(cx - 10, sh, 20, 25, TG);
+  g.p(cx - 10, sh, 20, 1, sK); g.p(cx - 10, sh + 24, 20, 1, sK);
+  g.p(cx - 10, sh, 1, 25, sK); g.p(cx + 9, sh, 1, 25, sK);
+  for (i = 0; i < 4; i++) g.p(cx - 7 + i * 4, sh + 2, 1, 22, TGs); /* ruler-straight folds */
+  g.p(cx + 5, sh + 1, 2, 23, '#96283c'); /* severe maroon stripe */
+  /* thin arms */
+  for (s = -1; s <= 1; s += 2) {
+    var ax = s < 0 ? cx - 14 : cx + 11;
+    g.p(ax, sh + 1, 3, 14, TG);
+    g.p(ax, sh + 1, 3, 1, sK);
+    g.p(ax + (s < 0 ? 0 : 2), sh + 1, 1, 14, sK);
+    g.p(ax + (s < 0 ? 2 : 0), sh + 1, 1, 14, sK);
+    g.p(ax, sh + 15, 3, 3, sSK); g.p(ax, sh + 17, 3, 1, sSD);
+  }
+  /* scroll, half-unrolled: the review is not going well */
+  g.p(cx + 9, sh + 13, 8, 3, SCL);
+  g.p(cx + 9, sh + 13, 8, 1, sK); g.p(cx + 9, sh + 15, 8, 1, sK);
+  g.p(cx + 9, sh + 13, 1, 3, sK); g.p(cx + 16, sh + 13, 1, 3, sK);
+  g.p(cx + 10, sh + 16, 6, 9, SCLp);
+  g.p(cx + 10, sh + 16, 1, 9, sK); g.p(cx + 15, sh + 16, 1, 9, sK);
+  g.p(cx + 10, sh + 24, 6, 1, sK);
+  g.p(cx + 11, sh + 18, 4, 1, sBKs); g.p(cx + 11, sh + 20, 4, 1, sBKs); g.p(cx + 11, sh + 22, 3, 1, sBKs);
+  _legs(g, cx, 53);
+};
+
+/* ---- overworld walkers ---- */
+defWalker('beasthandler', {hair: '#3a2a1a', coat: '#6a4a2c', coatd: '#503620', hatShow: false, accent: '#96283c'});
+defWalker('trainee', {hat: sBZ, hair: '#6a4a2a', coat: '#c8b48c', coatd: '#a08a60', accent: sRD});
+defWalker('bookmaker', {hair: '#2a2028', coat: '#e8e8f0', coatd: '#c8c8d4', hatShow: false, accent: sGD});
+defWalker('superfan', {hair: '#3a2a1a', coat: '#c63a46', coatd: '#96283c', hatShow: false, accent: sGD});
+defWalker('critic', {hair: sBE, coat: '#e8e8f0', coatd: '#c8c8d4', hatShow: false, accent: '#96283c'});
+
+
 /* ===== 35-tiles.js ===== */
 /* tiles.js — 16x16 terrain tiles. Each entry: { solid, enc, draw(x,y,frame) }.
    Interactable objects (signs, machine, NPCs) are a separate map layer, not tiles. */
@@ -1882,7 +2128,8 @@ function startTrainerBattle(o) {
   Cutscene.play([
     { say: [nm, o.hail || "YOU THERE! WE DUEL, HERE, NOW!"] },
     { battle: function () { return { enemies: [{ enemy: o.enemy, level: o.level || 5 }], music: 'battle', canFlee: false, bg: o.bg, taunt: o.hail }; },
-      onResult: function (r) { if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0); } } },
+      onResult: function (r) { if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0);
+        if (o._anchorx !== undefined) { o.x = o._anchorx; o.y = o._anchory; } /* return to post: never block a doorway */ } } },
     { say: [nm, o.beaten || 'A WORTHY BOUT. WELL BATTLED.'] }
   ], { onDone: function () { gotoWorld(); } });
 }
@@ -2145,7 +2392,7 @@ function startWildBattle(map) {
   var eid = pool[(Math.random() * pool.length) | 0];
   var lead = firstLiving(Game.party) || Game.party[0];
   var lv = Math.max(1, lead.level + ((Math.random() * 3 | 0) - 1));
-  startBattle({ enemies: [{ enemy: eid, level: lv }], music: 'battle', canFlee: true, wild: true, taunt: pickTaunt(eid) },
+  startBattle({ enemies: [{ enemy: eid, level: lv }], music: 'battle', canFlee: true, wild: true, bg: map.battleBg, taunt: pickTaunt(eid) },
     function () { setScene(World); });
 }
 function firstLiving(arr) { for (var i = 0; i < arr.length; i++) if (!arr[i].fainted && arr[i].hp > 0) return arr[i]; return null; }
@@ -2319,7 +2566,7 @@ function makeBattle(spec, onEnd) {
         return pick(best || e.moves[0]);
       };
       /* every boss unleashes its screen-shaking SUPER every 4th turn */
-      if (e.superMove && e.turnCount >= 3 && e.turnCount % 4 === 0) return pick(e.superMove);
+      if (e.superMove && e.turnCount >= 3 && e.turnCount % 3 === 0) return pick(e.superMove);
       if (ai === 'maximvs' && e.turnCount <= 3) return pick('flexstack'); /* three escalating self-buffs */
       if (ai === 'rex' && this.crowd < -20 && e.turnCount % 2 === 0) return pick('mirrorball'); /* heals via crowd */
       if (ai === 'snob1' && e.turnCount % 3 === 0) return pick('rewrite');
@@ -2971,6 +3218,11 @@ var ENEMIES = {
   deejay:    { name: 'THE HYPE-MAN', spr: 'deejay', type: 'FLEX', moves: ['weakflex', 'heckle'], base: { HYPE: 42, FLOW: 16, POISE: 12, TEMPO: 13, gH: 4.0, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 30, money: 26 },
   skater:    { name: 'ROLLER SKATER', spr: 'skater', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 40, FLOW: 16, POISE: 11, TEMPO: 15, gH: 3.9, gF: 2.2, gP: 1.6, gT: 2.1 }, xp: 30, money: 26 },
   goblinhex: { name: 'HEXING GOBLIN', spr: 'goblinhex', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 34, FLOW: 17, POISE: 10, TEMPO: 14, gH: 3.7, gF: 2.4, gP: 1.6, gT: 2.0 }, xp: 30, money: 24 },
+  beasthandler:{ name: 'BEAST HANDLER', spr: 'beasthandler', type: 'ROAST', moves: ['weakroast', 'heckle'], base: { HYPE: 42, FLOW: 14, POISE: 13, TEMPO: 10, gH: 4.0, gF: 2.0, gP: 1.9, gT: 1.5 }, xp: 26, money: 20 },
+  trainee:   { name: 'GLADIATOR TRAINEE', spr: 'trainee', type: 'FLEX', moves: ['weakflex', 'scriptread'], base: { HYPE: 44, FLOW: 14, POISE: 12, TEMPO: 11, gH: 4.2, gF: 2.0, gP: 1.7, gT: 1.6 }, xp: 26, money: 20 },
+  bookmaker: { name: 'BOOKMAKER', spr: 'bookmaker', type: 'WORDPLAY', moves: ['weakword', 'scriptread'], base: { HYPE: 40, FLOW: 16, POISE: 12, TEMPO: 12, gH: 3.9, gF: 2.2, gP: 1.7, gT: 1.7 }, xp: 30, money: 40 },
+  superfan:  { name: 'MAXIMVS SUPERFAN', spr: 'superfan', type: 'HEART', moves: ['weakheart', 'heckle'], base: { HYPE: 46, FLOW: 15, POISE: 12, TEMPO: 12, gH: 4.3, gF: 2.1, gP: 1.7, gT: 1.7 }, xp: 28, money: 22 },
+  critic:    { name: 'THEATER CRITIC', spr: 'critic', type: 'WORDPLAY', moves: ['weakword', 'redpen'], base: { HYPE: 44, FLOW: 17, POISE: 13, TEMPO: 12, gH: 4.2, gF: 2.3, gP: 1.8, gT: 1.7 }, xp: 34, money: 30 },
   goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 }
 };
 
@@ -3000,6 +3252,11 @@ var TAUNTS = {
   salesman: ['STEP RIGHT UP AND GET BEAT!', 'ONE BOTTLE CURES COWARDICE! WATCH!', 'SATISFACTION NOT GUARANTEED!'],
   deejay: ["I'LL DROP THE BEAT ON YOU!", 'THIS ONE GOES OUT TO YOUR L.', 'THE ALGORITHM CANNOT SAVE YOU.'],
   skater: ['EAT MY DUST, DADDY-O!', "CAN'T STOP, WON'T STOP, WON'T LOSE!", 'GNARLY BARS INCOMING, DUDE!'],
+  beasthandler: ['YOU SPOOKED THE LION!', 'THE BEASTS BITE LESS THAN I DO.'],
+  trainee: ['COACH SAYS I MUST WIN THIS!', 'IS THIS HELMET ON RIGHT? FIGHT!'],
+  bookmaker: ['ODDS ARE TEN TO ONE. AGAINST YOU.', 'CARE TO MAKE THIS INTERESTING?'],
+  superfan: ['MAXIMVS! MAX-I-MVS!', 'YOU ARE NOT WORTHY OF HIS ARENA!'],
+  critic: ['I GAVE YOUR LAST VERSE ONE STAR.', 'IMPRESS ME. FEW DO.'],
   goblinhex: ['A HEX UPON YOUR BARS!', 'ABRA-CADABRA-YOU-LOSE!', 'I CURSED YOUR RHYME SCHEME!'],
   goblinbrute: ['BRUTE SMASH YOUR RHYMES!', 'BRUTE NO LIKE YOUR FACE-WORDS!', 'WORDS HARD. SMASH EASY!']
 };
@@ -3012,7 +3269,8 @@ function pickTaunt(id) {
 /* era encounter pools: mapId enc uses one of these */
 var ENC_POOLS = {
   london:  ['heckler'],
-  rome:    ['orator', 'senator', 'gerald'],
+  rome:    ['orator', 'senator', 'gerald', 'legionary'],
+  hypogeum:['beasthandler', 'trainee', 'legionary'],
   west:    ['tumbleweed', 'auctioneer', 'gerald'],
   disco:   ['discofan', 'gerald'],
   goblin:  ['goblin']
@@ -3023,19 +3281,19 @@ var BOSSES = {
   heckler_boss: { enemyId: 'heckler', name: 'THE HECKLER', level: 1, hpMul: 1.4, ai: 'basic', crowd: -10,
     type: 'CLASSIC', spr: 'heckler', moves: ['heckle'] },
   maximvs: { name: 'MC MAXIMVS', spr: 'maximvs', type: 'FLEX', level: 5, ai: 'maximvs', crowd: 0, super: 'thumbsdown',
-    base: { HYPE: 122, FLOW: 19, POISE: 15, TEMPO: 12 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
+    base: { HYPE: 190, FLOW: 23, POISE: 17, TEMPO: 13 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
   jake: { name: 'RATTLESNAKE JAKE', spr: 'jake', type: 'ROAST', level: 8, ai: 'jake', crowd: 0, super: 'gravelstorm',
-    base: { HYPE: 238, FLOW: 35, POISE: 21, TEMPO: 19 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
+    base: { HYPE: 350, FLOW: 41, POISE: 24, TEMPO: 20 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
   rex: { name: 'DISCO REX', spr: 'rex', type: 'HEART', level: 11, ai: 'rex', crowd: 0, super: 'lastdance',
-    base: { HYPE: 400, FLOW: 52, POISE: 29, TEMPO: 24 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
+    base: { HYPE: 560, FLOW: 60, POISE: 32, TEMPO: 25 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
   snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10, super: 'finalword',
-    base: { HYPE: 330, FLOW: 35, POISE: 25, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0 },
+    base: { HYPE: 460, FLOW: 41, POISE: 27, TEMPO: 23 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0 },
   snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100, super: 'finalword',
-    base: { HYPE: 372, FLOW: 53, POISE: 31, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
+    base: { HYPE: 470, FLOW: 56, POISE: 32, TEMPO: 31 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
   pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0, super: 'revolucion',
-    base: { HYPE: 250, FLOW: 34, POISE: 22, TEMPO: 18 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
+    base: { HYPE: 360, FLOW: 40, POISE: 24, TEMPO: 19 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
   understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0, super: 'finalword',
-    base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
+    base: { HYPE: 560, FLOW: 56, POISE: 34, TEMPO: 29 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
 };
 
 /* build an enemy fighter (wild or grunt) */
@@ -3201,11 +3459,52 @@ registerMap('theatre', {
 
 
 /* ===== 81-maps-rome.js ===== */
-/* 81-maps-rome.js — ROME, 74 AD. Forum plaza, Market Road, Colosseum Kitchens,
-   Arena. Herschel joins; MC Maximvs (FLEX) boss; senator love-poem sidequest. */
+/* 81-maps-rome.js — ROME, 74 AD, overhauled: "THE DAY OF THE GAMES".
+   Forum (festival) -> Colosseum Grounds (facade + crowds) -> the maze:
+   Arcades -> Hypogeum (Herschel + kitchens + capstan puzzle) -> Stands
+   -> Gate of Life (Porta Sanavivaria) -> Arena (Maximvs).
+   Objectives: (1) find Herschel — his KITCHEN PASS opens the arena gate;
+   (2) find the arena entrance through the maze. */
 
 var SHOP_ROME = ['earlgrey', 'strongtea', 'crumpet', 'lozenge', 'sparestache', 'drip:laurelband'];
 
+/* ---------------- new tiles (Colosseum set) ---------------- */
+/* A = travertine facade arch (solid) — stacked-arch look with dark opening */
+TILES['A'] = { solid: true, draw: function (x, y) {
+  px(x, y, TS, TS, '#d8d0c0'); px(x, y, TS, 1, '#b0a898'); px(x, y + 15, TS, 1, '#b0a898');
+  px(x + 3, y + 4, 10, 12, '#3a3226');                       /* arch opening */
+  px(x + 4, y + 2, 8, 3, '#3a3226'); px(x + 5, y + 1, 6, 2, '#3a3226');
+  px(x + 2, y + 4, 1, 12, '#b0a898'); px(x + 13, y + 4, 1, 12, '#b0a898');
+} };
+/* c = packed crowd in the stands (solid, heads bob on the anim frame) */
+TILES['c'] = { solid: true, draw: function (x, y, f) {
+  px(x, y, TS, TS, '#6a5a48');
+  var cols = ['#f4c898', '#ce9c6a', '#8a5a34', '#f4c898'];
+  for (var i = 0; i < 4; i++) {
+    var hx = x + 1 + i * 4, hy = y + 3 + ((i + (f ? 1 : 0)) % 2) * 2;
+    px(hx, hy, 3, 3, cols[i]);                                /* bobbing heads */
+    px(hx, hy + 3, 3, 4, ['#c63a46', '#349c8e', '#e2b23e', '#8b5cf6'][i]); /* tunics */
+  }
+} };
+/* u = hypogeum floor (dark earth), v = hypogeum wall, q = rubble (encounters) */
+TILES['u'] = { solid: false, draw: function (x, y) { px(x, y, TS, TS, '#3a3228');
+  px(x + 3, y + 5, 2, 1, '#2a241c'); px(x + 10, y + 11, 2, 1, '#2a241c'); px(x + 7, y + 2, 1, 1, '#4a4234'); } };
+TILES['v'] = { solid: true, draw: function (x, y) { px(x, y, TS, TS, '#241f18');
+  px(x, y, TS, 1, '#3a3228'); px(x, y + 8, TS, 1, '#161210'); px(x + 5, y, 1, 8, '#161210'); px(x + 11, y + 8, 1, 8, '#161210'); } };
+TILES['q'] = { solid: false, enc: true, draw: function (x, y, f) { px(x, y, TS, TS, '#3a3228');
+  var o = f ? 1 : 0; px(x + 2, y + 3 + o, 4, 3, '#57493a'); px(x + 9, y + 8 - o, 5, 3, '#4a3f30'); px(x + 5, y + 11, 3, 2, '#57493a'); } };
+/* G = beast cage (solid) */
+TILES['G'] = { solid: true, draw: function (x, y, f) {
+  px(x, y, TS, TS, '#241f18'); px(x + 1, y + 6, 14, 9, '#1a1510');
+  if (f) { px(x + 4, y + 9, 6, 4, '#8a6a3a'); px(x + 9, y + 8, 3, 3, '#8a6a3a'); } /* something stirs */
+  for (var i = 0; i < 5; i++) px(x + 1 + i * 3, y + 2, 2, 13, '#6a6255');          /* bars */
+  px(x, y + 1, TS, 2, '#57493a');
+} };
+/* L = wooden beast-lift platform (walkable) */
+TILES['L'] = { solid: false, draw: function (x, y) { px(x, y, TS, TS, '#5e4a2e');
+  px(x, y + 5, TS, 1, '#3f3220'); px(x, y + 11, TS, 1, '#3f3220'); px(x + 2, y, 1, TS, '#3f3220'); px(x + 12, y, 1, TS, '#3f3220'); } };
+
+/* ---------------- draw helpers ---------------- */
 function drawRift(x, y) {
   var t = (performance.now() / 120) | 0;
   for (var r = 0; r < 4; r++) { var c = [COL.purple, COL.neon, COL.neon2, COL.gold][(r + t) % 4]; px(x + 2 + r, y + 2 + r, 12 - r * 2, 12 - r * 2, c); }
@@ -3213,8 +3512,44 @@ function drawRift(x, y) {
 }
 function drawStew(x, y) { px(x + 2, y + 6, 12, 8, '#5a3c22'); px(x + 3, y + 5, 10, 3, '#7a4c2a');
   var t = (performance.now() / 200) | 0; px(x + 4 + (t % 3), y + 6, 3, 2, '#8a6c3a'); px(x + 9, y + 7, 2, 2, '#9a7c4a'); }
+function drawBannerObj(x, y) { var f = ((performance.now() / 260) | 0) % 2;
+  px(x + 7, y, 2, 16, '#8a6a3a');                              /* pole */
+  px(x + 2 + (f ? 1 : 0), y + 1, 6, 9, '#c63a46'); px(x + 2 + (f ? 1 : 0), y + 1, 6, 2, '#e2b23e');
+  px(x + 2 + (f ? 1 : 0), y + 9, 3, 2, '#c63a46'); }
+function drawTorch(x, y) { var f = ((performance.now() / 140) | 0) % 2;
+  px(x + 7, y + 6, 2, 9, '#5a4a2e');
+  px(x + 5, y + 2 + (f ? 1 : 0), 6, 5, f ? '#e2b23e' : '#e07030'); px(x + 6, y + 1 + (f ? 1 : 0), 4, 2, '#f6e07a'); }
+function drawPoster(x, y) { px(x + 1, y + 1, 14, 14, '#d8d0c0'); px(x + 1, y + 1, 14, 1, '#8a6a3a'); px(x + 1, y + 14, 14, 1, '#8a6a3a');
+  px(x + 3, y + 3, 10, 5, '#e2b23e'); px(x + 5, y + 4, 6, 3, '#3a3226'); px(x + 3, y + 9, 10, 1, '#c63a46'); px(x + 3, y + 11, 8, 1, '#c63a46'); }
+function drawStatue(x, y) { px(x + 5, y + 12, 6, 3, '#b0a898'); px(x + 6, y + 4, 4, 8, '#d8d0c0');
+  px(x + 6, y + 2, 4, 3, '#d8d0c0'); px(x + 4, y + 6, 2, 4, '#d8d0c0'); px(x + 10, y + 5, 2, 3, '#d8d0c0'); }
+function drawLever(x, y) { var on = hasFlag('rome_capstan');
+  px(x + 2, y + 10, 12, 5, '#57493a'); px(x + 4, y + 11, 8, 3, '#8a6a3a');   /* capstan drum */
+  if (on) { px(x + 10, y + 4, 2, 7, '#c49446'); px(x + 9, y + 3, 4, 2, '#c63a46'); }
+  else { px(x + 4, y + 4, 2, 7, '#c49446'); px(x + 3, y + 3, 4, 2, '#c63a46'); } }
+function drawAmphora(x, y) { px(x + 6, y + 3, 4, 2, '#8a5a34'); px(x + 5, y + 5, 6, 7, '#a86e3e');
+  px(x + 6, y + 12, 4, 2, '#8a5a34'); px(x + 6, y + 6, 1, 4, '#c08a52'); }
+function drawGateDoor(x, y) { px(x, y, TS, TS, '#57493a'); px(x + 2, y + 2, 12, 14, '#241f18');
+  px(x + 3, y + 3, 10, 1, '#c49446'); px(x + 7, y + 8, 2, 3, '#c49446'); }
 
-/* ---------------- FORUM (town) ---------------- */
+/* battle backdrops for the new zones */
+BGS.hypogeum = function () {
+  cls('#241f18');
+  px(0, 104, 240, 56, '#1a1510');
+  for (var i = 0; i < 4; i++) { var tx = 24 + i * 60;                          /* torches */
+    px(tx, 34, 3, 14, '#5a4a2e'); px(tx - 2, 26, 7, 8, '#e07030'); px(tx - 1, 24, 5, 4, '#f6e07a'); }
+  for (var c = 0; c < 3; c++) { var cx0 = 30 + c * 70;                          /* cages */
+    px(cx0, 64, 40, 36, '#1a1510'); for (var b = 0; b < 6; b++) px(cx0 + b * 7, 62, 3, 40, '#6a6255'); }
+};
+BGS.stands = function () {
+  cls(COL.sky);
+  for (var r = 0; r < 4; r++) { px(0, r * 22, 240, 22, r % 2 ? '#6a5a48' : '#75634e');
+    for (var i = 0; i < 15; i++) { px(6 + i * 16, r * 22 + 6, 4, 4, ['#f4c898', '#ce9c6a', '#8a5a34'][(i + r) % 3]);
+      px(6 + i * 16, r * 22 + 10, 4, 5, ['#c63a46', '#349c8e', '#e2b23e', '#8b5cf6'][(i + r) % 4]); } }
+  px(0, 104, 240, 56, COL.sand);
+};
+
+/* ---------------- FORUM (festival day) ---------------- */
 registerMap('forum', {
   banner: 'THE FORUM - ROME', music: 'rome', riftBg: 'rome',
   grid: [
@@ -3230,76 +3565,188 @@ registerMap('forum', {
     '#mmmmmmmmmmmmmmm#',
     '#################'
   ],
-  warps: [ { x: 15, y: 5, to: 'marketroad', tx: 2, ty: 4, dir: 'right' } ],
+  warps: [ { x: 15, y: 5, to: 'grounds', tx: 2, ty: 5, dir: 'right' },
+           { x: 15, y: 6, to: 'grounds', tx: 2, ty: 6, dir: 'right' } ],
   objs: [
     { x: 8, y: 1, solid: true, draw: drawRift, onInteract: function () { openRift(); } },
     { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
+    { x: 4, y: 1, solid: true, draw: drawBannerObj, onInteract: function () { say([['NARRATOR', 'FESTIVAL BANNERS, EVERYWHERE.'], ['NARRATOR', 'TODAY IS THE DAY OF THE GAMES.']]); } },
+    { x: 12, y: 1, solid: true, draw: drawBannerObj, onInteract: function () { say([['NARRATOR', 'THE CLOTH SNAPS IN THE WIND.'], ['NARRATOR', 'THE CITY HOLDS ITS BREATH.']]); } },
+    { x: 6, y: 2, solid: true, draw: drawPoster, onInteract: function () { say([['NARRATOR', 'POSTER: "MAXIMVS! XI YEARS'], ['NARRATOR', 'UNDEFEATED! TODAY AT NOON!"'], ['NARRATOR', 'SOMEONE DREW A MUSTACHE ON HIM.']]); } },
     { x: 4, y: 3, solid: true, spr: 'roman', dir: 'down', onInteract: function () { setScene(makeShop(SHOP_ROME, World, 'ROMAN MERCHANT')); } },
     { x: 12, y: 3, solid: true, spr: 'roman', dir: 'down', onInteract: function () { senatorQuest(); } },
-    { x: 8, y: 5, solid: true, spr: 'gerald', dir: 'down', onInteract: function () { say([['GERALD', 'ALL RHYMES MUST BE SUBMITTED IN'], ['GERALD', 'TRIPLICATE. IN WRITING. PRE-APPROVED.'], ['SAMUEL', 'WHO WRITES A FREESTYLE DOWN?'], ['GERALD', "WE DO. IT'S SAFER. IT'S SCRIPTED."]]); } },
-    { x: 6, y: 7, solid: true, spr: 'gerald', dir: 'up', onInteract: function () { say([['GERALD', 'THE FORUM CYPHER IS CLOSED.'], ['GERALD', 'BY ORDER OF THE SCRIPTED ORDER.'], ['GERALD', '(MY NAME IS ALSO GERALD.)']]); } },
-    { x: 10, y: 8, solid: true, draw: drawSign, onInteract: function () { say([['NARRATOR', 'NOTICE: "IMPROV STRICTLY FORBIDDEN.'], ['NARRATOR', 'VIOLATORS WILL BE EDITED."']]); } },
+    { x: 10, y: 5, solid: true, spr: 'villager', dir: 'right', onInteract: function () { say([['CITIZEN', 'THE QUEUE STARTS BEHIND ME.'], ['CITIZEN', 'I HAVE BEEN HERE SINCE TUESDAY.']]); } },
+    { x: 12, y: 6, solid: true, spr: 'villager2', dir: 'right', onInteract: function () { say([['CITIZEN', 'MAXIMVS ONCE RHYMED "GLADIATOR"'], ['CITIZEN', 'WITH "GLAD-HE-ATE-HER". GENIUS.']]); } },
+    { x: 6, y: 7, solid: true, spr: 'villager', dir: 'up', onInteract: function () { say([['SMALL CHILD', 'MISTER! ARE YOU A GLADIATOR?'], ['SAMUEL', 'WORSE. A FREESTYLER.'], ['SMALL CHILD', 'WHOA.']]); } },
+    { x: 8, y: 8, solid: true, spr: 'gerald', dir: 'down', onInteract: function () { say([['GERALD', "THE ORDER SPONSORS TODAY'S GAMES."], ['GERALD', 'EVERY VERSE PRE-APPROVED. EVEN HIS.'], ['GERALD', '(MY NAME IS ALSO GERALD.)']]); } },
     { x: 14, y: 9, mustache: true, flag: 'stache_rome', onInteract: function (o) { collectMustache(o, 'stache_rome'); } }
   ],
   onEnter: function () { if (!hasFlag('rome_arrived_seen')) { setFlag('rome_arrived_seen'); romeArrive(); } else if (hasFlag('rome_done')) { musicStart('rome'); } }
 });
 
-/* ---------------- MARKET ROAD (route) ---------------- */
-registerMap('marketroad', {
-  banner: 'MARKET ROAD', music: 'rome', encPool: 'rome',
+/* ---------------- COLOSSEUM GROUNDS (exterior) ---------------- */
+registerMap('grounds', {
+  banner: 'COLOSSEUM GROUNDS', music: 'rome', encPool: 'rome', battleBg: 'rome',
   grid: [
-    '###################',
-    '#ddddddddddddddddd#',
-    '#dtttttttttttttttd#',
-    '#dtttttttttttttttd#',
-    '#dtttttttttttttttd#',
-    '#dtttttttttttttttd#',
-    '#dtttttttttttttttd#',
-    '#ddddddddddddddddd#',
-    '###################'
+    '#AAAAAAAAAAAAAAAA#',
+    '#gggggggggggggggg#',
+    '#gtttggggggggtttg#',
+    '#gtttggggggggtttg#',
+    '#gggggggggggggggg#',
+    'ppppppppppppppppp#',
+    'ppppppppppppppppp#',
+    '#gggggggggggggggg#',
+    '#gtttggggggggtttg#',
+    '#gggggggggggggggg#',
+    '##################'
   ],
-  warps: [
-    { x: 1, y: 4, to: 'forum', tx: 14, ty: 5, dir: 'left' },
-    { x: 17, y: 4, to: 'kitchens', tx: 2, ty: 9, dir: 'up' }
-  ],
+  warps: [ { x: 0, y: 5, to: 'forum', tx: 14, ty: 5, dir: 'left' },
+           { x: 0, y: 6, to: 'forum', tx: 14, ty: 6, dir: 'left' },
+           { x: 16, y: 1, to: 'arcades', tx: 7, ty: 2, dir: 'up' } ],
   objs: [
-    { x: 9, y: 4, solid: true, spr: 'gerald', dir: 'down', flag: 'rome_gerald1',
+    /* the great facade: statues + gates along the arch row */
+    { x: 4, y: 0, solid: true, draw: drawStatue, onInteract: function () { say([['NARRATOR', 'A STATUE OF SOME EMPEROR.'], ['NARRATOR', 'THE PIGEONS ARE UNIMPRESSED.']]); } },
+    { x: 12, y: 0, solid: true, draw: drawStatue, onInteract: function () { say([['NARRATOR', 'A STATUE OF MAXIMVS, MID-BAR.'], ['NARRATOR', 'IT IS BRAND NEW. IT IS ENORMOUS.']]); } },
+    { x: 8, y: 0, solid: true, draw: drawGateDoor, onInteract: function () { say([['LEGIONARY', 'MAIN GATE IS FIGHTERS AND STAFF'], ['LEGIONARY', "ONLY. SERVANTS' DOOR IS EAST."], ['LEGIONARY', 'AND NO, YOUR HAT IS NOT STAFF.']]); } },
+    { x: 16, y: 0, solid: true, draw: drawGateDoor, onInteract: function () { say([['NARRATOR', "THE SERVANTS' ENTRANCE."], ['NARRATOR', 'IT SMELLS LIKE STEW AND DESTINY.']]); } },
+    /* fight-day activities */
+    { x: 3, y: 4, solid: true, spr: 'villager2', dir: 'right', onInteract: function () { say([['DICE PLAYER', 'TRIPLE VENUS! PAY UP, GAIVS!'], ['GAIVS', 'THE DICE ARE CARVED FROM LIES.']]); } },
+    { x: 5, y: 7, solid: true, spr: 'roman', dir: 'up', onInteract: function () { say([['SCALPER', 'PSST. TICKETS TO THE GAMES.'], ['SAMUEL', 'THE GAMES ARE FREE.'], ['SCALPER', '...THESE ARE PREMIUM FREE.']]); } },
+    { x: 13, y: 7, solid: true, spr: 'villager', dir: 'left', onInteract: function () { say([['JUGGLER', 'I JUGGLE FOR THE QUEUE!'], ['JUGGLER', 'YESTERDAY I DROPPED ONE ONTO'], ['JUGGLER', 'A SENATOR. BIG LAUGHS. BIG FINE.']]); } },
+    { x: 9, y: 4, solid: true, draw: drawBannerObj, onInteract: function () { say([['NARRATOR', 'BANNER: "THE CHAMPION DEFENDS'], ['NARRATOR', 'HIS TITLE. ALL COMERS WELCOME."']]); } },
+    /* patrolling locals */
+    mkTrainer(6, 2, { spr: 'roman', dir: 'down', patrol: { ax: 'h', span: 2 }, sight: 3, defeat: 'tr_rome_a', enemy: 'orator', level: 4, reward: 20, bg: 'rome', tname: 'STREET ORATOR', hail: 'A CROWD! PERFECT FOR MY SPEECH!', beaten: 'I SHALL WORKSHOP THAT ONE.' }),
+    mkTrainer(11, 8, { spr: 'legionary', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_rome_b', enemy: 'legionary', level: 4, reward: 20, bg: 'rome', tname: 'LEGIONARY', hail: 'CROWD CONTROL! YOU. BATTLE. NOW.', beaten: 'PROCEED. IN AN ORDERLY FASHION.' })
+  ],
+  onEnter: function () { if (!hasFlag('grounds_seen')) { setFlag('grounds_seen');
+    say([['NARRATOR', 'THE COLOSSEUM. FIGHT DAY.'], ['NARRATOR', 'HALF THE EMPIRE IS IN THIS QUEUE.'], ['SAMUEL', 'HERSCHEL IS SOMEWHERE INSIDE.']]); } }
+});
+
+/* ---------------- THE ARCADES (ring corridor) ---------------- */
+registerMap('arcades', {
+  banner: 'THE ARCADES', music: 'rome', encPool: 'rome', battleBg: 'rome',
+  grid: [
+    '###############',
+    '#mmmmmmmmmmmmm#',
+    '#mmmmmmmmmmmmm#',
+    '#mXmXmXmXmXmXm#',
+    '#mmmmmmmmmmmmm#',
+    '#mXmXmmmmmXmXm#',
+    '#mmmmmmmmmmmmm#',
+    '#mmmmmmmmmmmmm#',
+    '###############'
+  ],
+  warps: [ { x: 7, y: 1, to: 'grounds', tx: 16, ty: 2, dir: 'down' },
+           { x: 13, y: 7, to: 'hypogeum', tx: 2, ty: 2, dir: 'down' } ],
+  objs: [
+    { x: 1, y: 1, solid: true, draw: drawTorch, onInteract: function () {} },
+    { x: 13, y: 1, solid: true, draw: drawTorch, onInteract: function () {} },
+    { x: 1, y: 7, solid: true, draw: function (x, y) { px(x, y, TS, TS, '#57493a'); px(x + 3, y + 2, 10, 12, '#241f18'); },
+      onInteract: function () { say([['NARRATOR', 'STAIRS TO THE STANDS — PACKED'], ['NARRATOR', 'SOLID WITH FANS. NO WAY THROUGH.'], ['NARRATOR', 'MAYBE THERE IS A WAY BELOW.']]); } },
+    { x: 6, y: 4, solid: true, spr: 'gerald', dir: 'down', flag: 'rome_gerald1',
       onInteract: function (o) { romeGeraldBattle(o); } },
-    mkTrainer(5, 3, { spr: 'roman', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_rome_a', enemy: 'orator', level: 2, reward: 20, bg: 'rome', tname: 'STREET ORATOR', hail: 'HALT, PLEBEIAN! DEFEND YOUR VERSE!', beaten: 'IMPRESSIVE... FOR A TOURIST.' }),
-    mkTrainer(12, 3, { spr: 'legionary', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_rome_b', enemy: 'legionary', level: 2, reward: 20, bg: 'rome', tname: 'LEGIONARY', hail: 'NONE PASS WITHOUT A BATTLE.', beaten: 'YOU FIGHT LIKE A CONSUL.' }),
-    mkTrainer(14, 6, { spr: 'roman', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_rome_c', enemy: 'senator', level: 2, reward: 22, bg: 'rome', tname: 'GOSSIPING SENATOR', hail: 'I HEARD YOUR BARS ARE... AVERAGE.', beaten: 'I SHALL GOSSIP OF YOUR GENIUS.' }),
-    { x: 15, y: 1, mustache: true, flag: 'stache_rome2', onInteract: function (o) { collectMustache(o, 'stache_rome2'); } }
+    { x: 12, y: 6, solid: true, draw: function (x, y) { px(x + 2, y + 4, 12, 10, '#57493a'); px(x + 4, y + 2, 8, 4, '#6a5a48'); },
+      onInteract: function () { say([['NARRATOR', 'STAIRS DOWN. COLD AIR RISES.'], ['NARRATOR', 'SOMETHING GROWLS, FAR BELOW.']]); } },
+    mkTrainer(3, 2, { spr: 'legionary', dir: 'right', patrol: { ax: 'h', span: 2 }, sight: 3, defeat: 'tr_rome_c', enemy: 'legionary', level: 5, reward: 24, bg: 'rome', tname: 'LEGIONARY', hail: 'HALT! CORRIDOR INSPECTION!', beaten: 'INSPECTION... PASSED. SOMEHOW.' }),
+    mkTrainer(9, 6, { spr: 'trainee', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_rome_d', enemy: 'trainee', level: 5, reward: 24, bg: 'rome', tname: 'GLADIATOR TRAINEE', hail: 'MY FIRST REAL BATTLE! BE GENTLE!', beaten: 'I LEARNED SO MUCH JUST NOW.' })
   ]
 });
 
-/* ---------------- COLOSSEUM KITCHENS (dungeon) ---------------- */
-registerMap('kitchens', {
-  banner: 'COLOSSEUM KITCHENS', music: 'rome',
+/* ---------------- THE HYPOGEUM (underground) ---------------- */
+registerMap('hypogeum', {
+  banner: 'THE HYPOGEUM', music: 'manor', encPool: 'hypogeum', battleBg: 'hypogeum',
   grid: [
-    '###############',
-    '#....O...O..X.#',
-    '#.OO.......OO.#',
-    '#.............#',
-    '#...=======...#',
-    '#.............#',
-    '#.OO.....OO...#',
-    '#.............#',
-    '#.....===.....#',
-    '#.............#',
-    '###############'
+    'vvvvvvvvvvvvvvvvv',
+    'vuuuuuvGGvuuuuuuv',
+    'vuuquuvuuuuuqquuv',
+    'vuvvvuvuvvvvvvuuv',
+    'vuuuuuvuuuuuvuuuv',
+    'vvvuqvvvGGuvvuqvv',
+    'vuuuuuuuuuuuuuuuv',
+    'vuvvvuvvvvvuvvvuv',
+    'vuuquuuLLLuuuquuv',
+    'vvvvvvvLLLvvvvvvv',
+    'vvvvvvvvvvvvvvvvv'
   ],
-  warps: [
-    { x: 1, y: 9, to: 'marketroad', tx: 16, ty: 4, dir: 'left' },
-    { x: 13, y: 1, to: 'arena', tx: 6, ty: 8, dir: 'up' }
-  ],
+  warps: [ { x: 1, y: 1, to: 'arcades', tx: 12, ty: 7, dir: 'up' },
+           { x: 8, y: 9, to: 'stands', tx: 2, ty: 6, dir: 'up', gate: 'rome_capstan',
+             blocked: function () { say([['NARRATOR', 'THE BEAST LIFT IS LOCKED IN PLACE.'], ['NARRATOR', 'THE CAPSTAN NEARBY MIGHT RAISE IT.']]); } } ],
   objs: [
-    { x: 7, y: 5, solid: true, spr: 'herschel', dir: 'down', flag: 'herschel_joined',
+    { x: 3, y: 1, solid: true, draw: drawTorch, onInteract: function () {} },
+    { x: 12, y: 1, solid: true, draw: drawTorch, onInteract: function () {} },
+    { x: 10, y: 1, solid: true, spr: 'beasthandler', dir: 'left', onInteract: function () {
+        say([['BEAST HANDLER', 'SHHH. THE LION IS ASLEEP.'], ['BEAST HANDLER', 'SHE SNORES IN LATIN. LISTEN.'], ['NARRATOR', '"...ZZZQVE... ZZZQVE..."']]); } },
+    /* Herschel — objective 1. Found running the kitchens, of course. */
+    { x: 14, y: 1, solid: true, spr: 'herschel', dir: 'down', flag: 'herschel_joined',
       onInteract: function () { herschelJoin(); } },
-    { x: 7, y: 3, solid: true, draw: drawStew, flag: 'rome_medal',
+    { x: 15, y: 2, solid: true, draw: drawStew, flag: 'rome_medal',
       onInteract: function (o) { stewBattle(o); } },
-    { x: 11, y: 8, solid: true, spr: 'gerald', dir: 'left', onInteract: function () { say([['GERALD', 'STIR FASTER, OLD MAN. THE'], ['GERALD', 'SCRIPT SAYS THE STEW IS READY AT SIX.']]); } },
-    { x: 13, y: 9, mustache: true, flag: 'stache_rome3', onInteract: function (o) { collectMustache(o, 'stache_rome3'); } }
-  ]
+    { x: 15, y: 4, solid: true, draw: drawAmphora, flag: 'rome_amphora',
+      onInteract: function () { setFlag('rome_amphora'); giveDrip('goldchain'); sfx('item');
+        say([['NARRATOR', 'INSIDE THE AMPHORA: A GOLD CHAIN!'], ['NARRATOR', '(GLADIATOR DRIP. EQUIP IN PARTY.)']]); } },
+    /* the capstan — needs Herschel's hips */
+    { x: 6, y: 8, solid: true, draw: drawLever, onInteract: function () { capstanInteract(); } },
+    /* trapdoor side room prize */
+    { x: 3, y: 8, mustache: true, flag: 'stache_rome2', onInteract: function (o) { collectMustache(o, 'stache_rome2'); } },
+    mkTrainer(3, 6, { spr: 'beasthandler', dir: 'right', patrol: { ax: 'h', span: 2 }, sight: 3, defeat: 'tr_rome_e', enemy: 'beasthandler', level: 5, reward: 26, bg: 'hypogeum', tname: 'BEAST HANDLER', hail: 'YOU SPOOKED MY LION. APOLOGIZE!', beaten: 'SHE LIKES YOU NOW. LUCKY.' }),
+    mkTrainer(13, 6, { spr: 'trainee', dir: 'left', patrol: { ax: 'h', span: 2 }, sight: 3, defeat: 'tr_rome_f', enemy: 'trainee', level: 6, reward: 26, bg: 'hypogeum', tname: 'GLADIATOR TRAINEE', hail: 'NOBODY PASSES! COACH SAID SO!', beaten: 'COACH IS GOING TO HEAR OF THIS.' })
+  ],
+  onEnter: function () { if (!hasFlag('hypo_seen')) { setFlag('hypo_seen');
+    say([['NARRATOR', 'THE HYPOGEUM: TUNNELS AND CAGES'], ['NARRATOR', 'BENEATH THE ARENA FLOOR.'], ['SAMUEL', 'STEW. I SMELL STEW. HERSCHEL!']]); } }
+});
+
+/* ---------------- THE STANDS (cavea) ---------------- */
+registerMap('stands', {
+  banner: 'THE STANDS', music: 'rome', battleBg: 'stands',
+  grid: [
+    '#################',
+    '#ccccccccccccccc#',
+    '#mmmmmmmmmmmmmmm#',
+    '#ccccccmcccccccc#',
+    '#mmmmmmmmmmmmmmm#',
+    '#ccmccccccccmccc#',
+    '#mmmmmmmmmmmmmmm#',
+    '#ccccccccccccccc#',
+    '#################'
+  ],
+  warps: [ { x: 1, y: 6, to: 'hypogeum', tx: 8, ty: 8, dir: 'down' },
+           { x: 15, y: 6, to: 'gateoflife', tx: 4, ty: 4, dir: 'right' } ],
+  objs: [
+    { x: 8, y: 1, solid: true, spr: 'roman', dir: 'down', onInteract: function () { say([['SNOOZING SENATOR', 'ZZZ... I OBJECT... ZZZ...'], ['NARRATOR', 'HE HAS THE BEST SEAT. HE IS ASLEEP.']]); } },
+    { x: 4, y: 3, solid: true, draw: function (x, y) { px(x + 2, y + 2, 12, 12, '#e2b23e'); px(x + 4, y + 4, 8, 8, '#c63a46'); },
+      onInteract: function () { say([['NARRATOR', 'THE VIEW: THE ARENA BELOW,'], ['NARRATOR', 'FIFTY THOUSAND ROARING FANS,'], ['NARRATOR', 'AND ONE VERY LONELY CHAMPION.']]); } },
+    { x: 13, y: 2, mustache: true, flag: 'stache_rome3', onInteract: function (o) { collectMustache(o, 'stache_rome3'); } },
+    mkTrainer(3, 2, { spr: 'bookmaker', dir: 'right', patrol: { ax: 'h', span: 2 }, sight: 3, defeat: 'tr_rome_g', enemy: 'bookmaker', level: 6, reward: 40, bg: 'stands', tname: 'BOOKMAKER', hail: 'ODDS SAY YOU LOSE. CARE TO BET?', beaten: 'THE HOUSE... LOSES?! UNPRECEDENTED.' }),
+    mkTrainer(10, 4, { spr: 'superfan', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_rome_h', enemy: 'superfan', level: 6, reward: 28, bg: 'stands', tname: 'MAXIMVS SUPERFAN', hail: 'NOBODY SEES MAXIMVS BEFORE ME!', beaten: 'YOU FIGHT LIKE HIM. RESPECT.' }),
+    mkTrainer(14, 2, { spr: 'critic', dir: 'left', patrol: { ax: 'h', span: 1 }, sight: 4, defeat: 'tr_rome_i', enemy: 'critic', level: 7, reward: 34, bg: 'stands', tname: 'THEATER CRITIC', hail: 'AH, AMATEURS. I SHALL TAKE NOTES.', beaten: 'FOUR STARS. THE HAT LOSES ONE.' })
+  ],
+  onEnter: function () { if (!hasFlag('stands_seen')) { setFlag('stands_seen');
+    say([['NARRATOR', 'THE BEAST LIFT OPENS INTO THE'], ['NARRATOR', 'STANDS. FIFTY THOUSAND ROMANS.'], ['HERSCHEL', 'IF ANYONE ASKS, WE ARE STEW.']]); } }
+});
+
+/* ---------------- GATE OF LIFE (arena entrance) ---------------- */
+registerMap('gateoflife', {
+  banner: 'PORTA SANAVIVARIA', music: 'rome', battleBg: 'rome',
+  grid: [
+    '#########',
+    '####.####',
+    '####.####',
+    '###...###',
+    '###...###',
+    '###...###',
+    '#########'
+  ],
+  warps: [ { x: 4, y: 1, to: 'arena', tx: 6, ty: 8, dir: 'up', gate: 'herschel_joined',
+             blocked: function () { say([['GATE GUARD', 'THE GATE OF LIFE. FIGHTERS AND'], ['GATE GUARD', 'STAFF ONLY. SHOW A PASS OR WALK.']]); } },
+           { x: 4, y: 5, to: 'stands', tx: 14, ty: 6, dir: 'down' } ],
+  objs: [
+    { x: 3, y: 3, solid: true, draw: drawTorch, onInteract: function () {} },
+    { x: 5, y: 3, solid: true, spr: 'legionary', dir: 'left', onInteract: function () {
+        if (hasFlag('herschel_joined')) say([['GATE GUARD', 'A KITCHEN PASS? "BRAVERY IN THE'], ['GATE GUARD', 'KITCHEN, SECOND CLASS"... VALID.'], ['GATE GUARD', 'THE CHAMPION AWAITS. GOOD LUCK.']]);
+        else say([['GATE GUARD', 'BEYOND THIS GATE: THE ARENA.'], ['GATE GUARD', 'NO PASS, NO PASSAGE. STAFF ONLY.']]); } }
+  ],
+  onEnter: function () { if (!hasFlag('gate_seen')) { setFlag('gate_seen');
+    say([['NARRATOR', 'THE GATE OF LIFE — WHERE THE'], ['NARRATOR', 'FIGHTERS WALK OUT INTO THE SUN.']]); } }
 });
 
 /* ---------------- ARENA (boss) ---------------- */
@@ -3318,7 +3765,7 @@ registerMap('arena', {
     '#sssssssssss#',
     '#############'
   ],
-  warps: [ { x: 1, y: 5, to: 'kitchens', tx: 12, ty: 1, dir: 'left' } ],
+  warps: [ { x: 1, y: 5, to: 'gateoflife', tx: 4, ty: 2, dir: 'left' } ],
   objs: [
     { x: 6, y: 2, solid: true, spr: null, draw: function (x, y) { if (!hasFlag('maximvs_beaten')) SPR.maximvs(x - 18, y - 8); }, onInteract: function () { if (!hasFlag('maximvs_beaten')) maximvsFight(); } }
   ],
@@ -3329,17 +3776,22 @@ registerMap('arena', {
 function romeArrive() {
   Cutscene.play([
     { bg: 'rome' }, { music: 'rome' },
-    { narr: 'ROME, 74 AD. THE FORUM.' },
-    { say: ['NARRATOR', 'THE SCRIPTED ORDER HAS SILENCED THE FORUM CYPHER.'] },
-    { say: ['GERALD', 'MOVE ALONG. NO IMPROVISING IN THE FORUM.'] },
-    { say: ['SAMUEL', 'HERSCHEL IS HERE SOMEWHERE. HEAD FOR THE KITCHENS.'] }
+    { narr: 'ROME, 74 AD. THE DAY OF THE GAMES.' },
+    { narr: 'THE WHOLE CITY SURGES TOWARD THE COLOSSEUM. MAXIMVS FIGHTS AT NOON.' },
+    { say: ['GERALD', 'PROGRAMS! PRE-APPROVED PROGRAMS!'] },
+    { say: ['SAMUEL', 'EXCUSE ME — HAVE YOU SEEN AN OLD'] },
+    { say: ['SAMUEL', 'MAN? GRUMPY? SUSPICIOUS HIPS?'] },
+    { say: ['GERALD', "THE CHAMPION'S NEW KITCHEN MAN?"] },
+    { say: ['GERALD', 'HE IS INSIDE. COMPLAINING.'] },
+    { say: ['SAMUEL', "THAT'S HIM. TO THE COLOSSEUM."] }
   ], { onDone: function () { gotoWorld(); } });
 }
 function romeGeraldBattle(o) {
   Cutscene.play([
-    { say: ['GERALD', 'HALT! THIS ROAD IS PRE-APPROVED ONLY.'] },
+    { say: ['GERALD', 'HALT! THESE ARCADES ARE FOR'] },
+    { say: ['GERALD', 'PRE-APPROVED FOOT TRAFFIC ONLY.'] },
     { say: ['SAMUEL', 'THEN APPROVE THIS.'] },
-    { battle: function () { return { enemies: [{ enemy: 'gerald', level: 3 }], music: 'battle', canFlee: false }; },
+    { battle: function () { return { enemies: [{ enemy: 'gerald', level: 5 }], music: 'battle', canFlee: false, bg: 'rome' }; },
       onResult: function (r) { if (r.win) { setFlag('rome_gerald1'); } } },
     { say: ['GERALD', 'UGH. FINE. FILE A COMPLAINT WITH... ME.'] }
   ], { onDone: function () { gotoWorld(); } });
@@ -3347,20 +3799,36 @@ function romeGeraldBattle(o) {
 function herschelJoin() {
   Cutscene.play([
     { say: ['HERSCHEL', 'SAMUEL! THEY PUT ME TO WORK IN THE'] },
-    { say: ['HERSCHEL', 'KITCHEN. AGAIN.'] },
+    { say: ['HERSCHEL', 'KITCHEN. AGAIN. UNDERGROUND. AGAIN.'] },
     { say: ['SAMUEL', 'HERSCHEL! ARE YOU HURT?'] },
     { say: ['HERSCHEL', 'ONLY MY PRIDE. AND MY HIP.'] },
     { say: ['HERSCHEL', 'AND MY OTHER HIP.'] },
-    { do: function () { addToParty('herschel', 3); setFlag('herschel_joined'); } },
+    { do: function () { addToParty('herschel', 4); setFlag('herschel_joined'); } },
     { narr: 'HERSCHEL JOINS THE PARTY!' },
-    { say: ['HERSCHEL', 'THAT STEW POT GUARDS MY OLD MEDAL.'] },
-    { say: ['HERSCHEL', 'AND THE CHAMPION UPSTAIRS WANTS A WORD.'] }
+    { narr: 'GOT THE KITCHEN PASS! ("BRAVERY IN THE KITCHEN, SECOND CLASS")' },
+    { say: ['HERSCHEL', 'THAT PASS OPENS THE ARENA GATE.'] },
+    { say: ['HERSCHEL', 'AND THE STEW POT GUARDS MY MEDAL.'] },
+    { say: ['SAMUEL', 'FIRST: A WORD WITH THE CHAMPION.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
+function capstanInteract() {
+  if (hasFlag('rome_capstan')) { say([['NARRATOR', 'THE CAPSTAN IS LOCKED OPEN.'], ['NARRATOR', 'THE BEAST LIFT AWAITS.']]); return; }
+  if (!hasFlag('herschel_joined')) {
+    say([['NARRATOR', 'A GREAT WOODEN CAPSTAN. IT RAISES'], ['NARRATOR', 'THE BEAST LIFT TO THE STANDS.'], ['SAMUEL', 'TOO STIFF. THIS NEEDS TWO PEOPLE.']]);
+    return;
+  }
+  Cutscene.play([
+    { narr: 'SAMUEL AND HERSCHEL HEAVE THE CAPSTAN TOGETHER...' },
+    { say: ['HERSCHEL', 'BOTH. HIPS. WORTH IT.'] },
+    { sfx: 'door' },
+    { do: function () { setFlag('rome_capstan'); saveGame(false); } },
+    { narr: 'CLUNK. THE BEAST LIFT GRINDS INTO PLACE. THE WAY UP IS OPEN!' }
   ], { onDone: function () { gotoWorld(); } });
 }
 function stewBattle(o) {
   Cutscene.play([
     { narr: 'THE STEW BUBBLES... AND RISES UP!' },
-    { battle: function () { return { enemies: [{ enemy: 'orator', level: 4 }], music: 'battle', canFlee: false, bg: 'rome' }; },
+    { battle: function () { return { enemies: [{ enemy: 'orator', level: 5 }], music: 'battle', canFlee: false, bg: 'hypogeum' }; },
       onResult: function (r) { if (r.win) { setFlag('rome_medal'); giveDrip('laurelband'); } } },
     { narr: "HERSCHEL'S MEDAL IS RECOVERED! GOT A LAUREL BAND (DRIP)!" },
     { say: ['HERSCHEL', 'A MEDAL FOR BRAVERY IN THE KITCHEN.'] },
@@ -3373,15 +3841,18 @@ function senatorQuest() {
     q: 'GHOSTWRITE MY LOVE POEM! HOW SHALL I OPEN?',
     opts: ['ROSES ARE RED...', 'YOUR EYES: TWO COINS', 'O, THOU HAST NICE VIBES'],
     cb: function (idx) {
-      if (idx === 1) { setFlag('rome_poem'); giveDrip('goldchain'); say([['SENATOR', 'PERFECT! ROMANTIC AND FISCAL!'], ['NARRATOR', 'GOT A GOLD CHAIN (DRIP)!']]); }
+      if (idx === 1) { setFlag('rome_poem'); giveItem('crumpet', 1); say([['SENATOR', 'PERFECT! ROMANTIC AND FISCAL!'], ['NARRATOR', 'GOT A CRUMPET! (FULL HEAL)']]); }
       else say([['SENATOR', 'HMM. NO. TRY AGAIN LATER, POET.']]);
     } } }]);
 }
 function maximvsFight() {
   Cutscene.play([
     { bg: 'rome' }, { music: 'boss' },
-    { say: ['MAXIMVS', 'HALT! NONE MAY LEAVE THE ARENA'] },
-    { say: ['MAXIMVS', "WITHOUT A BATTLE. THEM'S THE RULES."] },
+    { narr: 'THE GATE LIFTS. SUNLIGHT. FIFTY THOUSAND VOICES GO QUIET.' },
+    { say: ['MAXIMVS', 'STAFF, IN MY ARENA? NO.'] },
+    { say: ['MAXIMVS', 'CHALLENGERS. AT LAST.'] },
+    { say: ['MAXIMVS', 'NONE MAY LEAVE WITHOUT A BATTLE.'] },
+    { say: ['MAXIMVS', "THEM'S THE RULES."] },
     { say: ['SAMUEL', 'THEN I CHOOSE A RAP BATTLE.'] },
     { say: ['MAXIMVS', '...ELEVEN YEARS UNDEFEATED. SHOW ME.'] },
     { battle: function () { return { enemies: [{ boss: 'maximvs' }], music: 'boss', canFlee: false, bg: 'rome' }; },

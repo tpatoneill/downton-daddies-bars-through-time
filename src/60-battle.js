@@ -12,7 +12,7 @@ function startWildBattle(map) {
   var eid = pool[(Math.random() * pool.length) | 0];
   var lead = firstLiving(Game.party) || Game.party[0];
   var lv = Math.max(1, lead.level + ((Math.random() * 3 | 0) - 1));
-  startBattle({ enemies: [{ enemy: eid, level: lv }], music: 'battle', canFlee: true, wild: true, taunt: pickTaunt(eid) },
+  startBattle({ enemies: [{ enemy: eid, level: lv }], music: 'battle', canFlee: true, wild: true, bg: map.battleBg, taunt: pickTaunt(eid) },
     function () { setScene(World); });
 }
 function firstLiving(arr) { for (var i = 0; i < arr.length; i++) if (!arr[i].fainted && arr[i].hp > 0) return arr[i]; return null; }
@@ -186,7 +186,7 @@ function makeBattle(spec, onEnd) {
         return pick(best || e.moves[0]);
       };
       /* every boss unleashes its screen-shaking SUPER every 4th turn */
-      if (e.superMove && e.turnCount >= 3 && e.turnCount % 4 === 0) return pick(e.superMove);
+      if (e.superMove && e.turnCount >= 3 && e.turnCount % 3 === 0) return pick(e.superMove);
       if (ai === 'maximvs' && e.turnCount <= 3) return pick('flexstack'); /* three escalating self-buffs */
       if (ai === 'rex' && this.crowd < -20 && e.turnCount % 2 === 0) return pick('mirrorball'); /* heals via crowd */
       if (ai === 'snob1' && e.turnCount % 3 === 0) return pick('rewrite');

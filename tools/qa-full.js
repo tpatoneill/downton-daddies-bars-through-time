@@ -28,26 +28,32 @@ ok('ACT 0: opening, walked 3 maps, tutorial battle won');
 walkToNextMap(h, 'bakersrow'); walkToNextMap(h, 'manor');
 assert(G.Game.map === 'manor', 'back at manor');
 
-// ---- Rome ----
-levelParty(4);
+// ---- Rome (Colosseum maze) ----
+levelParty(6);
 useMachineTo('ROME');
 assert(G.Game.map === 'forum', 'in Rome forum, got ' + G.Game.map);
-walkToNextMap(h, 'marketroad');
-walkToNextMap(h, 'kitchens');
-walkTo(h, 7, 6); interactAt(h, 7, 5); advanceUntil(h, isWorld, 4000);  // Herschel joins
-assert(G.Game.party.length === 2 && G.Game.party[1].id === 'herschel', 'Herschel joined');
-levelParty(6);
-enterBossMap('arena');                                     // Maximvs on onEnter
+assert(walkToNextMap(h, 'grounds'), 'reach grounds');
+assert(walkToNextMap(h, 'arcades'), 'reach arcades');
+assert(walkToNextMap(h, 'hypogeum'), 'reach hypogeum');
+walkTo(h, 14, 2); interactAt(h, 14, 1); advanceUntil(h, isWorld, 6000);  // OBJECTIVE 1: Herschel
+assert(G.Game.party.length === 2 && G.Game.party[1].id === 'herschel', 'Herschel joined (KITCHEN PASS)');
+walkTo(h, 5, 8); interactAt(h, 6, 8); advanceUntil(h, isWorld, 4000);    // capstan puzzle
+assert(G.hasFlag('rome_capstan'), 'beast lift raised');
+levelParty(7);
+assert(walkToNextMap(h, 'stands'), 'reach stands');
+assert(walkToNextMap(h, 'gateoflife'), 'reach Gate of Life');
+walkTo(h, 4, 1);                                            // gated warp -> arena (OBJECTIVE 2)
+advanceUntil(h, isBattle, 8000, 'maximvs');
 assert(isBattle(G) && G.getScene().enemies[0].bossId === 'maximvs', 'Maximvs fight');
 autoBattle(h, { onBeat: true });
 pickTravel(h, 'DODGE'); advanceUntil(h, g => isWorld(g) || isBattle(g), 8000, 'to dodge');
 assert(G.hasFlag('rome_done') && G.Game.parts >= 1, 'Rome complete, part 1');
-ok('ROME: Herschel joins, Maximvs down, Flux Gear');
+ok('ROME MAZE: Herschel + pass, capstan, Gate of Life, buffed Maximvs, Flux Gear');
 
 // ---- Dodge City ----
 assert(G.Game.map === 'mainstreet', 'in Dodge mainstreet, got ' + G.Game.map);
 assert(G.Game.party.length === 3 && G.Game.party[2].id === 'william', 'William joined on arrival');
-levelParty(8);
+levelParty(10);
 walkToNextMap(h, 'dustytrail');
 walkToNextMap(h, 'silvermine');
 enterBossMap('saloon');                                    // Jake on onEnter
@@ -60,7 +66,7 @@ ok('DODGE: William joins, Jake down, Chrono Coil');
 // ---- New York ----
 assert(G.Game.party.length === 4 && G.Game.party[3].id === 'rosalind', 'Rosalind joined on arrival');
 const nycStart = G.Game.map;
-levelParty(11);
+levelParty(13);
 // traverse the NYC chain dynamically (map ids from the era file)
 const nycChain = [];
 { let cur = G.Game.map, seen = {}; while (cur && !seen[cur]) { seen[cur] = 1; const m = G.Maps[cur]; const nxt = m.warps.find(w => !seen[w.to] && ['clubinferno','boilerroom','rooftop'].includes(w.to)); if (!nxt) break; nycChain.push(nxt.to); cur = nxt.to; } }
@@ -75,7 +81,7 @@ assert(G.hasFlag('nyc_done') && !G.hasFlag('london_unlocked'), 'London NOT unloc
 ok('NYC: Rex down, Time Crystal -> engine malfunction -> Goblin Realm');
 
 // ---- Goblin Realm: Pedro + the mid-battle wig reveal ----
-levelParty(12);
+levelParty(13);
 walkTo(h, 8, 2); interactAt(h, 8, 1);                       // talk to Pedro -> fight
 advanceUntil(h, isBattle, 6000, 'pedro');
 assert(isBattle(G) && G.getScene().enemies[0].bossId === 'pedro', 'Pedro fight');
@@ -88,7 +94,7 @@ assert(G.Game.map === 'theatredistrict', 'arrived at theatre district, got ' + G
 ok('GOBLIN REALM: Pedro, EXTREMELY-shocked wig reveal, True Form, number-spark fix');
 
 // ---- Finale (Samuel already True Form) ----
-levelParty(14);
+levelParty(15);
 walkTo(h, 8, 4); interactAt(h, 8, 3); advanceUntil(h, g => isWorld(g) || isBattle(g), 3000); if (isBattle(G)) { autoBattle(h, {}); advanceUntil(h, isWorld, 3000); }
 walkTo(h, 9, 4); interactAt(h, 9, 3); advanceUntil(h, g => isWorld(g) || isBattle(g), 3000); if (isBattle(G)) { autoBattle(h, {}); advanceUntil(h, isWorld, 3000); }
 assert(G.hasFlag('lobby_clear'), 'editors cleared');

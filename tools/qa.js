@@ -102,7 +102,11 @@ function walkTo(h, tx, ty, onBattle) {
   let attempts = 0;
   while (isWorld(G) && !(G.Game.px === tx && G.Game.py === ty) && attempts++ < 60) {
     const path = findPath(G, tx, ty);
-    if (!path || path.length === 0) throw new Error('no path to ' + tx + ',' + ty + ' on ' + G.Game.map + ' from ' + G.Game.px + ',' + G.Game.py);
+    if (!path || path.length === 0) {
+      // a patrolling trainer may be standing in a doorway — wait for it to move on
+      if (attempts < 55) { h.step(30, 33); continue; }
+      throw new Error('no path to ' + tx + ',' + ty + ' on ' + G.Game.map + ' from ' + G.Game.px + ',' + G.Game.py);
+    }
     for (const d of path) {
       const mapBefore = G.Game.map;
       walkStep(h, d);

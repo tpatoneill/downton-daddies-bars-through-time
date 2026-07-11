@@ -170,3 +170,25 @@ Screenshots: `screenshots/super-0*.png`. All suites green (phase4/full/dist).
   before the FIGHT menu.
 - QA harness skips the transition; all suites green (phase1 10 · phase2 7 · phase4 7 · loss 2 ·
   full 8 · dist 7). Screenshots: `screenshots/trans-*.png`.
+
+## Update — ROME OVERHAUL: "The Day of the Games" (owner request; built in dd-advance-kit-dev)
+- **Dev era menu (Task 1, pushed separately):** SELECT on the title opens DEV: VISIT ERA — all six
+  eras, each with story-correct party/levels/flags.
+- **Rome rebuilt as a 7-map Zelda/Pokemon dungeon:** festival Forum (banners, poster, queue, kid,
+  vendor) -> Colosseum Grounds (travertine arch facade, statues, scalper/dice/juggler activities)
+  -> THE MAZE: Arcades (ring corridor) -> Hypogeum (historically real underground: cages, torches,
+  beast-lift + capstan puzzle, the kitchens) -> the Stands (animated bobbing crowd, Bookmaker/
+  Superfan/Critic opponents) -> Gate of Life (Porta Sanavivaria, pass check) -> Arena.
+- **Two objectives:** (1) find Herschel in the hypogeum kitchens — his KITCHEN PASS ("bravery in
+  the kitchen, second class") gates the arena; the capstan needs his hips. (2) navigate to the
+  arena entrance. Hidden: 2 mustaches, amphora drip, stew-medal quest relocated underground.
+- **5 new characters** (subagent): Beast Handler, Gladiator Trainee, Bookmaker, Superfan, Critic —
+  typed across the wheel, patrolling as forced-battle trainers. New hypogeum/stands battle bgs;
+  wild battles now use the zone's backdrop; new tiles (facade arch, crowd, cage, lift, rubble).
+- **All era bosses hugely buffed** (Maximvs 122->190 HP, Jake 238->350, Rex 400->560, Snob 330->460,
+  FINAL DRAFT 470, Pedro 360, Understudy 560; supers every 3rd turn) — the maze forces more fights
+  and leveling. Test curve shifted up (Rome lv7, Dodge lv10, NYC lv13, finale lv15).
+- **Fix:** defeated trainers return to their post, and posts sit on dead-end rows, so they can
+  never block a one-tile corridor.
+All suites green: p1 10 · p2 9 (rewritten for the maze) · p4 7 · loss 2 · dist 7 · full 8.
+Screenshots: screenshots/rome2-*.png.

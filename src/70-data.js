@@ -171,6 +171,11 @@ var ENEMIES = {
   deejay:    { name: 'THE HYPE-MAN', spr: 'deejay', type: 'FLEX', moves: ['weakflex', 'heckle'], base: { HYPE: 42, FLOW: 16, POISE: 12, TEMPO: 13, gH: 4.0, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 30, money: 26 },
   skater:    { name: 'ROLLER SKATER', spr: 'skater', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 40, FLOW: 16, POISE: 11, TEMPO: 15, gH: 3.9, gF: 2.2, gP: 1.6, gT: 2.1 }, xp: 30, money: 26 },
   goblinhex: { name: 'HEXING GOBLIN', spr: 'goblinhex', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 34, FLOW: 17, POISE: 10, TEMPO: 14, gH: 3.7, gF: 2.4, gP: 1.6, gT: 2.0 }, xp: 30, money: 24 },
+  beasthandler:{ name: 'BEAST HANDLER', spr: 'beasthandler', type: 'ROAST', moves: ['weakroast', 'heckle'], base: { HYPE: 42, FLOW: 14, POISE: 13, TEMPO: 10, gH: 4.0, gF: 2.0, gP: 1.9, gT: 1.5 }, xp: 26, money: 20 },
+  trainee:   { name: 'GLADIATOR TRAINEE', spr: 'trainee', type: 'FLEX', moves: ['weakflex', 'scriptread'], base: { HYPE: 44, FLOW: 14, POISE: 12, TEMPO: 11, gH: 4.2, gF: 2.0, gP: 1.7, gT: 1.6 }, xp: 26, money: 20 },
+  bookmaker: { name: 'BOOKMAKER', spr: 'bookmaker', type: 'WORDPLAY', moves: ['weakword', 'scriptread'], base: { HYPE: 40, FLOW: 16, POISE: 12, TEMPO: 12, gH: 3.9, gF: 2.2, gP: 1.7, gT: 1.7 }, xp: 30, money: 40 },
+  superfan:  { name: 'MAXIMVS SUPERFAN', spr: 'superfan', type: 'HEART', moves: ['weakheart', 'heckle'], base: { HYPE: 46, FLOW: 15, POISE: 12, TEMPO: 12, gH: 4.3, gF: 2.1, gP: 1.7, gT: 1.7 }, xp: 28, money: 22 },
+  critic:    { name: 'THEATER CRITIC', spr: 'critic', type: 'WORDPLAY', moves: ['weakword', 'redpen'], base: { HYPE: 44, FLOW: 17, POISE: 13, TEMPO: 12, gH: 4.2, gF: 2.3, gP: 1.8, gT: 1.7 }, xp: 34, money: 30 },
   goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 }
 };
 
@@ -200,6 +205,11 @@ var TAUNTS = {
   salesman: ['STEP RIGHT UP AND GET BEAT!', 'ONE BOTTLE CURES COWARDICE! WATCH!', 'SATISFACTION NOT GUARANTEED!'],
   deejay: ["I'LL DROP THE BEAT ON YOU!", 'THIS ONE GOES OUT TO YOUR L.', 'THE ALGORITHM CANNOT SAVE YOU.'],
   skater: ['EAT MY DUST, DADDY-O!', "CAN'T STOP, WON'T STOP, WON'T LOSE!", 'GNARLY BARS INCOMING, DUDE!'],
+  beasthandler: ['YOU SPOOKED THE LION!', 'THE BEASTS BITE LESS THAN I DO.'],
+  trainee: ['COACH SAYS I MUST WIN THIS!', 'IS THIS HELMET ON RIGHT? FIGHT!'],
+  bookmaker: ['ODDS ARE TEN TO ONE. AGAINST YOU.', 'CARE TO MAKE THIS INTERESTING?'],
+  superfan: ['MAXIMVS! MAX-I-MVS!', 'YOU ARE NOT WORTHY OF HIS ARENA!'],
+  critic: ['I GAVE YOUR LAST VERSE ONE STAR.', 'IMPRESS ME. FEW DO.'],
   goblinhex: ['A HEX UPON YOUR BARS!', 'ABRA-CADABRA-YOU-LOSE!', 'I CURSED YOUR RHYME SCHEME!'],
   goblinbrute: ['BRUTE SMASH YOUR RHYMES!', 'BRUTE NO LIKE YOUR FACE-WORDS!', 'WORDS HARD. SMASH EASY!']
 };
@@ -212,7 +222,8 @@ function pickTaunt(id) {
 /* era encounter pools: mapId enc uses one of these */
 var ENC_POOLS = {
   london:  ['heckler'],
-  rome:    ['orator', 'senator', 'gerald'],
+  rome:    ['orator', 'senator', 'gerald', 'legionary'],
+  hypogeum:['beasthandler', 'trainee', 'legionary'],
   west:    ['tumbleweed', 'auctioneer', 'gerald'],
   disco:   ['discofan', 'gerald'],
   goblin:  ['goblin']
@@ -223,19 +234,19 @@ var BOSSES = {
   heckler_boss: { enemyId: 'heckler', name: 'THE HECKLER', level: 1, hpMul: 1.4, ai: 'basic', crowd: -10,
     type: 'CLASSIC', spr: 'heckler', moves: ['heckle'] },
   maximvs: { name: 'MC MAXIMVS', spr: 'maximvs', type: 'FLEX', level: 5, ai: 'maximvs', crowd: 0, super: 'thumbsdown',
-    base: { HYPE: 122, FLOW: 19, POISE: 15, TEMPO: 12 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
+    base: { HYPE: 190, FLOW: 23, POISE: 17, TEMPO: 13 }, moves: ['flexstack', 'gladiator', 'themsrules'], xp: 120, money: 80 },
   jake: { name: 'RATTLESNAKE JAKE', spr: 'jake', type: 'ROAST', level: 8, ai: 'jake', crowd: 0, super: 'gravelstorm',
-    base: { HYPE: 238, FLOW: 35, POISE: 21, TEMPO: 19 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
+    base: { HYPE: 350, FLOW: 41, POISE: 24, TEMPO: 20 }, moves: ['venom', 'gravel', 'weakroast'], xp: 180, money: 120 },
   rex: { name: 'DISCO REX', spr: 'rex', type: 'HEART', level: 11, ai: 'rex', crowd: 0, super: 'lastdance',
-    base: { HYPE: 400, FLOW: 52, POISE: 29, TEMPO: 24 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
+    base: { HYPE: 560, FLOW: 60, POISE: 32, TEMPO: 25 }, moves: ['mirrorball', 'discofire', 'weakheart'], xp: 260, money: 180 },
   snob1: { name: 'LORD SNOBBINGTON', spr: 'snob', type: 'WORDPLAY', level: 13, ai: 'snob1', crowd: -10, super: 'finalword',
-    base: { HYPE: 330, FLOW: 35, POISE: 25, TEMPO: 22 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0 },
+    base: { HYPE: 460, FLOW: 41, POISE: 27, TEMPO: 23 }, moves: ['approved', 'rewrite', 'redpen'], xp: 0, money: 0 },
   snob2: { name: 'THE FINAL DRAFT', spr: 'snob', sprOpt: { finalDraft: true }, type: 'WORDPLAY', level: 14, ai: 'snob2', crowd: 100, super: 'finalword',
-    base: { HYPE: 372, FLOW: 53, POISE: 31, TEMPO: 30 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
+    base: { HYPE: 470, FLOW: 56, POISE: 32, TEMPO: 31 }, moves: ['finaldraft', 'rewrite', 'approved'], xp: 400, money: 300 },
   pedro: { name: 'PEDRO GARCIA', spr: 'pedro', type: 'HEART', level: 12, ai: 'basic', crowd: 0, super: 'revolucion',
-    base: { HYPE: 250, FLOW: 34, POISE: 22, TEMPO: 18 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
+    base: { HYPE: 360, FLOW: 40, POISE: 24, TEMPO: 19 }, moves: ['smolder', 'discofire', 'weakflex'], xp: 240, money: 150 },
   understudy: { name: 'THE UNDERSTUDY', spr: 'babbage', type: 'CLASSIC', level: 15, ai: 'understudy', crowd: 0, super: 'finalword',
-    base: { HYPE: 360, FLOW: 48, POISE: 32, TEMPO: 28 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
+    base: { HYPE: 560, FLOW: 56, POISE: 34, TEMPO: 29 }, moves: ['understudy', 'finaldraft', 'gravel', 'discofire'], xp: 600, money: 500 }
 };
 
 /* build an enemy fighter (wild or grunt) */

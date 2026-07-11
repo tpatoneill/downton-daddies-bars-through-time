@@ -1694,6 +1694,202 @@ defWalker('superfan', {hair: '#3a2a1a', coat: '#c63a46', coatd: '#96283c', hatSh
 defWalker('critic', {hair: sBE, coat: '#e8e8f0', coatd: '#c8c8d4', hatShow: false, accent: '#96283c'});
 
 
+/* ===== 34-sprites-nyc.js ===== */
+/* sprites-nyc.js — Second City in exile (NYC, 1977). The resistance.
+   Real 70s alumni drawn with love: Del Close, John Belushi, Bill Murray,
+   Harold Ramis, Gilda Radner, Dan Aykroyd. Appends to SPR + WALK registries;
+   reuses painter(), the shared body primitives, and the shared palette. */
+
+/* Del Close — resistance leader. Balding crown, wild side hair, full beard,
+   burning teacher eyes, dark turtleneck under a corduroy jacket, raised chalk. */
+SPR.delclose = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var CRD = '#6a5238', CRDs = '#503c26', CRDh = '#84683e', TN = '#22222c', HR = '#8a8278', HRd = '#6a635a';
+  /* bare crown with wild side tufts */
+  var ytop = _face(g, cx, 12), ey = ytop + 5;
+  g.ell(cx - 12, ytop + 1, cx - 7, ytop + 12, HR, sK);   /* left tuft */
+  g.ell(cx + 7, ytop + 1, cx + 12, ytop + 12, HR, sK);   /* right tuft */
+  g.p(cx - 10, ytop + 4, 2, 6, HRd); g.p(cx + 8, ytop + 4, 2, 6, HRd);
+  g.p(cx - 6, ytop - 3, 12, 2, HR); g.p(cx - 4, ytop - 4, 8, 1, HRd); /* thin combover wisp */
+  _eyes(g, cx, ey, false, 2);                             /* heavy intense brows */
+  /* full grey beard swallowing the jaw */
+  g.ell(cx - 8, ytop + 9, cx + 8, ytop + 20, HR, sK);
+  g.p(cx - 5, ytop + 11, 10, 2, HRd);
+  g.p(cx - 3, ytop + 11, 6, 1, sK);                       /* mouth mid-lecture */
+  var sh = ytop + 19;
+  /* dark turtleneck under corduroy jacket */
+  _coatBody(g, cx, sh, 53, CRD, CRDs, CRDh, TN, true);
+  g.p(cx - 3, sh, 6, 3, TN); g.p(cx - 4, sh + 2, 8, 1, TN); /* rolled collar */
+  for (var i = 0; i < 3; i++) g.p(cx - 12, sh + 4 + i * 8, 2, 5, CRDs); /* cord wale hint */
+  /* left arm down, right arm raised with chalk — always teaching */
+  g.p(cx - 17, sh + 1, 5, 15, CRD);
+  g.p(cx - 17, sh + 1, 5, 1, sK); g.p(cx - 17, sh + 1, 1, 15, sK); g.p(cx - 13, sh + 1, 1, 15, sK);
+  g.p(cx - 16, sh + 16, 3, 3, sSK); g.p(cx - 16, sh + 18, 3, 1, sSD);
+  g.p(cx + 12, sh - 4, 5, 12, CRD);
+  g.p(cx + 12, sh - 4, 5, 1, sK); g.p(cx + 12, sh - 4, 1, 12, sK); g.p(cx + 16, sh - 4, 1, 12, sK);
+  g.p(cx + 13, sh - 7, 3, 3, sSK);                        /* raised fist */
+  g.p(cx + 14, sh - 11, 2, 4, sWH); g.p(cx + 14, sh - 12, 2, 1, sBEs); /* the chalk */
+  _legs(g, cx, 53);
+};
+
+/* John Belushi — mainstage thunder. Black mop, ONE raised eyebrow, big grin,
+   stocky dark suit with a loose skinny tie. */
+SPR.belushi = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var HR = '#181418', HRd = '#2c242c', ST = '#2e2c36', STs = '#201e28', STh = '#403e4c';
+  /* thick black mop, low on the brow */
+  g.ell(cx - 10, 4, cx + 10, 17, HR, sK);
+  g.p(cx - 9, 12, 4, 3, HRd); g.p(cx + 5, 11, 4, 3, HRd);
+  var ytop = _face(g, cx, 15), ey = ytop + 5;
+  /* the eyebrow: left arched high, right flat */
+  g.p(cx - 7, ey - 5, 6, 2, sK);                          /* raised left brow */
+  g.p(cx - 8, ey - 4, 2, 2, sK);
+  g.p(cx + 2, ey - 2, 5, 2, sK);                          /* flat right brow */
+  g.p(cx - 6, ey, 4, 4, sWH); g.p(cx - 4, ey + 1, 2, 2, sK);
+  g.p(cx + 2, ey + 1, 4, 3, sWH); g.p(cx + 4, ey + 2, 2, 2, sK);
+  g.p(cx - 1, ey + 4, 2, 2, sSD);
+  _smile(g, cx, ytop + 12, true);                         /* huge grin */
+  g.p(cx - 7, ytop + 8, 2, 4, sSD); g.p(cx + 5, ytop + 8, 2, 4, sSD); /* round cheeks */
+  var sh = ytop + 15;
+  /* stocky: widen the suit a touch with side fills */
+  _coatBody(g, cx, sh, 53, ST, STs, STh, sWH, true);
+  g.p(cx - 15, sh + 2, 2, 16, ST); g.p(cx + 13, sh + 2, 2, 16, ST);
+  g.p(cx - 15, sh + 2, 1, 16, sK); g.p(cx + 14, sh + 2, 1, 16, sK);
+  /* loose skinny tie, knot yanked down */
+  g.p(cx - 1, sh + 2, 2, 3, sRD);
+  g.p(cx - 2, sh + 5, 3, 8, sRD); g.p(cx - 1, sh + 13, 2, 3, sRD);
+  g.p(cx - 2, sh + 5, 1, 8, '#96283c');
+  _arms(g, cx, sh, 17, ST);
+  _legs(g, cx, 53);
+};
+
+/* Bill Murray — heavy-lidded deadpan, sandy shag, loud plaid lounge jacket,
+   liberated sandwich in hand. */
+SPR.murray = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i;
+  var HR = '#b08a52', HRd = '#8c6c3c', PL = '#7a4a3a', PLs = '#5e3828', PLh = '#96604a', PLq = '#c8a050';
+  /* shaggy sandy hair, parted, over the ears */
+  g.ell(cx - 10, 5, cx + 10, 17, HR, sK);
+  g.p(cx - 10, 12, 3, 6, HR); g.p(cx + 7, 12, 3, 6, HR);
+  g.p(cx - 2, 6, 6, 2, HRd); g.p(cx + 2, 8, 5, 2, HRd);
+  var ytop = _face(g, cx, 15), ey = ytop + 6;
+  /* heavy lids: half-closed eyes */
+  g.p(cx - 6, ey, 4, 3, sWH); g.p(cx - 6, ey, 4, 1, sSD); g.p(cx - 4, ey + 1, 2, 2, sK);
+  g.p(cx + 2, ey, 4, 3, sWH); g.p(cx + 2, ey, 4, 1, sSD); g.p(cx + 4, ey + 1, 2, 2, sK);
+  g.p(cx - 6, ey - 2, 4, 1, sK); g.p(cx + 2, ey - 2, 4, 1, sK); /* flat unbothered brows */
+  g.p(cx - 1, ey + 4, 2, 2, sSD);
+  g.p(cx - 3, ytop + 12, 5, 1, sK); g.p(cx + 2, ytop + 11, 2, 1, sK); /* sideways smirk */
+  g.p(cx - 7, ytop + 6, 2, 1, sSD); /* pockmark cheek */
+  var sh = ytop + 15;
+  /* loud plaid lounge jacket */
+  _coatBody(g, cx, sh, 53, PL, PLs, PLh, sBE, true);
+  for (i = 0; i < 3; i++) { g.p(cx - 12 + i * 9, sh + 1, 1, 20, PLq); } /* plaid verticals */
+  g.p(cx - 12, sh + 6, 24, 1, PLq); g.p(cx - 12, sh + 14, 24, 1, PLq); /* plaid horizontals */
+  /* left arm down; right arm bent holding the sandwich */
+  g.p(cx - 17, sh + 1, 5, 15, PL);
+  g.p(cx - 17, sh + 1, 5, 1, sK); g.p(cx - 17, sh + 1, 1, 15, sK); g.p(cx - 13, sh + 1, 1, 15, sK);
+  g.p(cx - 16, sh + 16, 3, 3, sSK); g.p(cx - 16, sh + 18, 3, 1, sSD);
+  g.p(cx + 12, sh + 4, 5, 9, PL);
+  g.p(cx + 12, sh + 4, 5, 1, sK); g.p(cx + 12, sh + 4, 1, 9, sK); g.p(cx + 16, sh + 4, 1, 9, sK);
+  g.p(cx + 12, sh + 13, 4, 3, sSK);
+  g.p(cx + 10, sh + 15, 8, 2, sBL); g.p(cx + 10, sh + 16, 8, 1, sLF); /* someone's sandwich */
+  g.p(cx + 10, sh + 17, 8, 2, sBLs);
+  _legs(g, cx, 53);
+};
+
+/* Harold Ramis — the head writer. Round wire-rims, dark curls, warm smile,
+   corduroy blazer, pencil tucked behind the ear. */
+SPR.ramis = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i;
+  var HR = '#2a2018', HRd = '#443528', CB = '#8a7a5a', CBs = '#6c5e42', CBh = '#a4946e';
+  /* tall pile of dark curls */
+  g.ell(cx - 10, 2, cx + 10, 15, HR, sK);
+  for (i = 0; i < 5; i++) g.eo(cx - 9 + i * 4, 4 + (i % 2) * 3, cx - 4 + i * 4, 9 + (i % 2) * 3, HRd);
+  g.p(cx - 10, 10, 3, 6, HR); g.p(cx + 7, 10, 3, 6, HR);
+  var ytop = _face(g, cx, 14), ey = ytop + 6;
+  _eyes(g, cx, ey, false, 1);
+  _glasses(g, cx, ey, sGD);                                /* real round wire-rims */
+  _smile(g, cx, ytop + 12, false);                         /* gentle knowing smile */
+  g.p(cx + 8, ytop - 1, 5, 2, sAR); g.p(cx + 12, ytop - 2, 1, 3, sRD); /* pencil behind ear */
+  var sh = ytop + 16;
+  _coatBody(g, cx, sh, 53, CB, CBs, CBh, sWH, true);
+  for (i = 0; i < 3; i++) g.p(cx + 10, sh + 3 + i * 7, 2, 4, CBs);  /* cord wale */
+  g.p(cx - 8, sh + 9, 5, 6, CBs); g.p(cx - 8, sh + 9, 5, 1, sK);    /* notebook in pocket */
+  g.p(cx - 7, sh + 10, 3, 4, sWH);
+  _arms(g, cx, sh, 17, CB);
+  _legs(g, cx, 53);
+};
+
+/* Gilda Radner — all warmth. Huge dark curls, bright eyes, the widest smile
+   in the building, mustard dress with a red scarf. */
+SPR.radner = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i;
+  var HR = '#3a2c20', HRd = '#54402e', DR = '#c89a3c', DRs = '#a07828', DRh = '#e0b45a', SC = sRD;
+  /* enormous curly halo */
+  g.ell(cx - 13, 1, cx + 13, 20, HR, sK);
+  for (i = 0; i < 6; i++) g.eo(cx - 12 + i * 4, 3 + (i % 2) * 4, cx - 6 + i * 4, 10 + (i % 2) * 4, HRd);
+  g.eo(cx - 12, 12, cx - 5, 19, HRd); g.eo(cx + 5, 12, cx + 12, 19, HRd);
+  var ytop = _face(g, cx, 15), ey = ytop + 5;
+  _eyes(g, cx, ey, false, 1);
+  g.p(cx - 6, ey - 1, 1, 1, sWH); g.p(cx + 2, ey - 1, 1, 1, sWH); /* sparkle */
+  _smile(g, cx, ytop + 11, true);
+  g.p(cx - 4, ytop + 13, 8, 1, sWH);                       /* extra tooth row: WIDEST smile */
+  g.p(cx - 8, ytop + 7, 2, 2, '#e8a0a0'); g.p(cx + 6, ytop + 7, 2, 2, '#e8a0a0'); /* blush */
+  var sh = ytop + 15;
+  /* mustard dress with skirt flare */
+  _coatBody(g, cx, sh, 53, DR, DRs, DRh, DR, false, true);
+  /* jaunty red scarf */
+  g.p(cx - 6, sh, 12, 3, SC); g.p(cx - 6, sh, 12, 1, sK);
+  g.p(cx + 3, sh + 3, 3, 8, SC); g.p(cx + 3, sh + 10, 3, 2, '#96283c');
+  _arms(g, cx, sh, 16, DR);
+  _legs(g, cx, 53);
+};
+
+/* Dan Aykroyd — precision instrument. Cop shades, dark crop, skinny tie,
+   screwdriver + scanner chassis mid-disassembly. */
+SPR.aykroyd = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var HR = '#241c14', ST = '#34343e', STs = '#26262e', STh = '#464652', MT = '#8a8a96', MTs = '#6a6a76';
+  /* short dark crop, straight fringe */
+  g.ell(cx - 9, 5, cx + 9, 15, HR, sK);
+  g.p(cx - 8, 12, 16, 2, HR);
+  var ytop = _face(g, cx, 14), ey = ytop + 5;
+  /* opaque cop shades: one black bar, glint pixel */
+  g.p(cx - 8, ey - 1, 16, 5, sK);
+  g.p(cx - 7, ey, 6, 3, '#2c2c38'); g.p(cx + 1, ey, 6, 3, '#2c2c38');
+  g.p(cx - 6, ey, 2, 1, sGL); g.p(cx + 2, ey, 2, 1, sGL);
+  g.p(cx - 1, ey + 5, 2, 2, sSD);
+  g.p(cx - 3, ytop + 12, 6, 1, sK);                        /* perfectly level mouth */
+  var sh = ytop + 16;
+  _coatBody(g, cx, sh, 53, ST, STs, STh, sWH, true);
+  /* regulation skinny tie */
+  g.p(cx - 1, sh + 1, 2, 2, sK); g.p(cx - 1, sh + 3, 2, 10, sK);
+  /* left hand: scanner chassis; right hand: screwdriver */
+  g.p(cx - 19, sh + 6, 8, 10, MT);
+  g.p(cx - 19, sh + 6, 8, 1, sK); g.p(cx - 19, sh + 6, 1, 10, sK); g.p(cx - 12, sh + 6, 1, 10, sK);
+  g.p(cx - 18, sh + 8, 6, 1, MTs); g.p(cx - 18, sh + 11, 4, 1, MTs);
+  g.p(cx - 17, sh + 13, 2, 2, sRD);                        /* little scanner LED */
+  g.p(cx - 15, sh + 2, 4, 4, sSK);                         /* hand gripping it */
+  g.p(cx + 12, sh + 1, 5, 12, ST);
+  g.p(cx + 12, sh + 1, 5, 1, sK); g.p(cx + 12, sh + 1, 1, 12, sK); g.p(cx + 16, sh + 1, 1, 12, sK);
+  g.p(cx + 13, sh + 13, 3, 3, sSK);
+  g.p(cx + 14, sh + 16, 1, 6, MTs); g.p(cx + 13, sh + 21, 3, 2, sRD); /* screwdriver */
+  _legs(g, cx, 53);
+};
+
+/* ---- overworld walkers for the resistance + street life ---- */
+defWalker('delclose', { hat: '#8a8278', hair: '#8a8278', coat: '#6a5238', mous: '#8a8278', hatShow: false });
+defWalker('belushi',  { hat: '#181418', hair: '#181418', coat: '#2e2c36', hatShow: false });
+defWalker('murray',   { hat: '#b08a52', hair: '#b08a52', coat: '#7a4a3a', hatShow: false });
+defWalker('ramis',    { hat: '#2a2018', hair: '#2a2018', coat: '#8a7a5a', hatShow: false });
+defWalker('radner',   { hat: '#3a2c20', hair: '#3a2c20', coat: '#c89a3c', hatShow: false });
+defWalker('aykroyd',  { hat: '#241c14', hair: '#241c14', coat: '#34343e', hatShow: false });
+defWalker('scgoon',   { hat: '#2c303c', hair: '#3a3a4a', coat: '#4a4a5a', accent: '#c63a46' });
+defWalker('caroler',  { hat: '#96283c', hair: '#6a4a2a', coat: '#2e5e46', accent: sGD });
+defWalker('vendor',   { hat: '#5e3828', hair: '#3a2a1a', coat: '#8a3c2c', mous: '#3a2a1a' });
+defWalker('streetcomic', { hat: '#4a3c30', hair: '#2a2018', coat: '#5a4a6a', hatShow: false });
+
+
 /* ===== 35-tiles.js ===== */
 /* tiles.js — 16x16 terrain tiles. Each entry: { solid, enc, draw(x,y,frame) }.
    Interactable objects (signs, machine, NPCs) are a separate map layer, not tiles. */
@@ -1777,6 +1973,7 @@ var Game = {
   px: 6, py: 8, dir: 'down',
   checkpoint: { map: 'manor', px: 7, py: 9, dir: 'up' }, /* where a wiped party respawns */
   playtime: 0,
+  slot: 1,          /* active save slot (1..4); dev visits use 'dev' */
   started: false
 };
 /* era registry (populated by per-era map modules) for the time-machine travel hub */
@@ -1899,7 +2096,7 @@ var World = {
     if (o.onInteract) { sfx('select'); o.onInteract(o); }
   },
   openMenu: function () {
-    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'CLOSE'] };
+    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'EXIT', 'CLOSE'] };
     sfx('select');
   },
   update: function (dt) {
@@ -1994,15 +2191,20 @@ var World = {
   },
   menuPress: function (k) {
     var mn = this.menu;
-    if (k === 'up') { mn.idx = (mn.idx + mn.items.length - 1) % mn.items.length; sfx('cursor'); }
-    else if (k === 'down') { mn.idx = (mn.idx + 1) % mn.items.length; sfx('cursor'); }
+    if (k === 'up') { mn.idx = (mn.idx + mn.items.length - 1) % mn.items.length; mn.exitArmed = false; sfx('cursor'); }
+    else if (k === 'down') { mn.idx = (mn.idx + 1) % mn.items.length; mn.exitArmed = false; sfx('cursor'); }
     else if (k === 'b' || k === 'start') { this.menu = null; sfx('cancel'); }
     else if (k === 'a') {
       var sel = mn.items[mn.idx];
+      if (sel !== 'EXIT') mn.exitArmed = false;
       if (sel === 'CLOSE') { this.menu = null; sfx('cancel'); }
       else if (sel === 'SAVE') { saveGame(true); mn.msg = 'GAME SAVED.'; mn.msgT = 1.2; sfx('save'); }
       else if (sel === 'PARTY') { setScene(makePartyScreen(World)); }
       else if (sel === 'SWAG') { setScene(makeBagScreen(World)); }
+      else if (sel === 'EXIT') {
+        if (mn.exitArmed) { this.menu = null; musicStop(); sfx('cancel'); setScene(Title); }
+        else { mn.exitArmed = true; mn.msg = 'UNSAVED PROGRESS IS LOST. A: QUIT'; mn.msgT = 2.4; sfx('cursor'); }
+      }
     }
   },
   draw: function () {
@@ -5071,7 +5273,8 @@ function timeMachineInteract() {
 function openRift() { travelChoose(BGS[curMap().riftBg] ? curMap().riftBg : 'black'); }
 
 /* ---- new game / continue ---- */
-function newGame() {
+function newGame(slot) {
+  Game.slot = slot || Game.slot || 1;
   Game.party = [makeFighter('samuel', 1)];
   Game.activeIdx = 0; Game.flags = {}; Game.items = {}; Game.drip = {};
   Game.money = 30; Game.mustaches = 0; Game.parts = 0;
@@ -5082,7 +5285,7 @@ function newGame() {
   for (var k in Maps) Maps[k]._entered = false;
   gotoWorld();
 }
-function continueGame() { if (loadGame()) gotoWorld(); else newGame(); }
+function continueGame(slot) { if (loadGame(slot)) gotoWorld(); else newGame(slot); }
 
 /* ---- DEV: visit any era to test its level (title screen, behind SELECT) ----
    Each visit recreates the party/flags/items for THAT point in the story, so
@@ -5105,6 +5308,7 @@ var DEV_VISITS = [
   { label: 'LONDON FINALE', era: 'finale' }
 ];
 function debugVisit(era) {
+  Game.slot = 'dev'; /* keep dev auto-saves away from the 4 real slots */
   Game.flags = {};
   var F = function (list) { for (var i = 0; i < list.length; i++) setFlag(list[i]); };
   if (era === 'act0') {           /* solo lv1: tutorial + manor testable from scratch */
@@ -5148,10 +5352,22 @@ function debugVisit(era) {
 
 
 /* ===== 95-ui.js ===== */
-/* 95-ui.js — save/load (localStorage + in-memory fallback), party & bag field screens. */
+/* 95-ui.js — save/load (localStorage + in-memory fallback), party & bag field screens.
+   FOUR SAVE SLOTS: each slot is its own localStorage key; Game.slot picks the
+   active one. The pre-slot key is silently treated as slot 1 (legacy migration). */
 
 var SAVE_KEY = 'dd_bars_through_time_v2';
-var _memSave = null; /* in-memory fallback for sandboxed iframes */
+var SLOT_COUNT = 4;
+var _memSaves = {}; /* in-memory fallback for sandboxed iframes, keyed per slot */
+
+function slotKey(slot) { return SAVE_KEY + '_slot' + slot; }
+function readSlotRaw(slot) {
+  var data = null;
+  try { data = localStorage.getItem(slotKey(slot)); } catch (e) {}
+  if (!data && slot === 1) { try { data = localStorage.getItem(SAVE_KEY); } catch (e) {} } /* legacy save -> slot 1 */
+  if (!data) data = _memSaves[slot] || null;
+  return data;
+}
 
 function serializeGame() {
   var party = [];
@@ -5167,21 +5383,35 @@ function serializeGame() {
 }
 function saveGame(loud) {
   var data = serializeGame();
-  try { localStorage.setItem(SAVE_KEY, data); } catch (e) { _memSave = data; }
-  _memSave = data;
+  try { localStorage.setItem(slotKey(Game.slot), data); } catch (e) {}
+  _memSaves[Game.slot] = data;
   if (loud) sfx('save');
 }
-function hasSave() {
-  try { if (localStorage.getItem(SAVE_KEY)) return true; } catch (e) {}
-  return !!_memSave;
+function hasSave() { /* any slot occupied? */
+  for (var s = 1; s <= SLOT_COUNT; s++) if (readSlotRaw(s)) return true;
+  return false;
 }
-function loadGame() {
-  var data = null;
-  try { data = localStorage.getItem(SAVE_KEY); } catch (e) {}
-  if (!data) data = _memSave;
+/* summary for the slot-select screen: null if empty */
+function slotInfo(slot) {
+  var data = readSlotRaw(slot);
+  if (!data) return null;
+  try {
+    var o = JSON.parse(data);
+    var lead = (o.party && o.party[0]) || { id: 'samuel', level: 1 };
+    var m = Maps[o.map];
+    return { where: (m && m.banner) ? m.banner : (o.map || '???').toUpperCase(),
+             lead: lead.id.toUpperCase(), level: lead.level,
+             daddies: o.party ? o.party.length : 1,
+             mins: Math.floor((o.playtime || 0) / 60) };
+  } catch (e) { return null; }
+}
+function loadGame(slot) {
+  if (slot === undefined) slot = Game.slot || 1;
+  var data = readSlotRaw(slot);
   if (!data) return false;
   var o;
   try { o = JSON.parse(data); } catch (e) { return false; }
+  Game.slot = slot;
   Game.party = [];
   for (var i = 0; i < o.party.length; i++) {
     var s = o.party[i], f = makeFighter(s.id, s.level);
@@ -5197,7 +5427,11 @@ function loadGame() {
   Game.playtime = o.playtime || 0; Game.started = true;
   return true;
 }
-function deleteSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} _memSave = null; }
+function deleteSave(slot) {
+  if (slot === undefined) slot = Game.slot || 1;
+  try { localStorage.removeItem(slotKey(slot)); if (slot === 1) localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  delete _memSaves[slot];
+}
 
 /* ---------- party field screen ---------- */
 function makePartyScreen(back) {
@@ -5432,6 +5666,8 @@ var Title = {
         centerText(DEV_VISITS[d].label, yy, d === this.idx ? COL.gold : COL.stone);
         if (d === this.idx) drawText('>', (240 - textW(DEV_VISITS[d].label)) / 2 - 12, yy, COL.red);
       }
+    } else if (this.mode === 'slots') {
+      this.drawSlots();
     } else {
       var opts = this.opts();
       var y0 = 112;
@@ -5439,6 +5675,20 @@ var Title = {
         if (j === this.idx) drawText('>', (240 - textW(opts[j])) / 2 - 12, y0 + j * 11, COL.red); }
       centerText('(C) 1889 DADDYSOFT', 152, COL.stone);
     }
+  },
+  drawSlots: function () {
+    var title = this.slotPurpose === 'continue' ? 'CONTINUE - CHOOSE A SLOT' : 'NEW GAME - CHOOSE A SLOT';
+    centerTextO(title, 106, COL.gold, COL.black);
+    for (var i = 0; i < SLOT_COUNT; i++) {
+      var yy = 116 + i * 9;
+      var info = slotInfo(i + 1);
+      var label = 'SLOT ' + (i + 1) + ': ' + (info ? (info.where + ' LV' + info.level + ' ' + info.mins + 'M') : 'EMPTY');
+      var col = (i === this.idx) ? COL.gold : (info ? COL.white : COL.stone);
+      centerText(label, yy, col);
+      if (i === this.idx) drawText('>', (240 - textW(label)) / 2 - 10, yy, COL.red);
+    }
+    var hint = this.overArmed ? 'SLOT IN USE! A: OVERWRITE  B: BACK' : 'A: SELECT   B: BACK';
+    centerText(hint, 153, this.overArmed ? COL.red : COL.stone);
   },
   opts: function () {
     return hasSave() ? ['CONTINUE', 'NEW GAME'] : ['NEW GAME'];
@@ -5449,19 +5699,42 @@ var Title = {
       else if (k === 'select') { this.debug = true; this.mode = 'menu'; this.idx = 0; sfx('cursor'); } /* DEV: era menu */
       return;
     }
-    if (k === 'select') { this.debug = !this.debug; this.idx = 0; sfx('cursor'); return; } /* toggle dev menu */
+    if (k === 'select') { this.debug = !this.debug; this.mode = 'menu'; this.idx = 0; sfx('cursor'); return; } /* toggle dev menu */
     if (this.debug) {
       if (k === 'up') { this.idx = (this.idx + DEV_VISITS.length - 1) % DEV_VISITS.length; sfx('cursor'); }
       else if (k === 'down') { this.idx = (this.idx + 1) % DEV_VISITS.length; sfx('cursor'); }
       else if (k === 'a' || k === 'start') { sfx('select'); musicStop(); debugVisit(DEV_VISITS[this.idx].era); }
       return;
     }
+    if (this.mode === 'slots') { this.slotsPress(k); return; }
     var opts = this.opts();
     if (k === 'up') { this.idx = (this.idx + opts.length - 1) % opts.length; sfx('cursor'); }
     else if (k === 'down') { this.idx = (this.idx + 1) % opts.length; sfx('cursor'); }
     else if (k === 'a' || k === 'start') {
-      sfx('select'); musicStop();
-      if (opts[this.idx] === 'CONTINUE') continueGame(); else newGame();
+      sfx('select');
+      this.slotPurpose = (opts[this.idx] === 'CONTINUE') ? 'continue' : 'new';
+      this.mode = 'slots'; this.overArmed = false;
+      /* preselect the first sensible slot: occupied for continue, empty for new */
+      this.idx = 0;
+      for (var i = 0; i < SLOT_COUNT; i++) {
+        var occ = !!slotInfo(i + 1);
+        if ((this.slotPurpose === 'continue') === occ) { this.idx = i; break; }
+      }
+    }
+  },
+  slotsPress: function (k) {
+    if (k === 'up') { this.idx = (this.idx + SLOT_COUNT - 1) % SLOT_COUNT; this.overArmed = false; sfx('cursor'); }
+    else if (k === 'down') { this.idx = (this.idx + 1) % SLOT_COUNT; this.overArmed = false; sfx('cursor'); }
+    else if (k === 'b') { this.mode = 'menu'; this.idx = 0; this.overArmed = false; sfx('cancel'); }
+    else if (k === 'a' || k === 'start') {
+      var slot = this.idx + 1, occ = !!slotInfo(slot);
+      if (this.slotPurpose === 'continue') {
+        if (!occ) { sfx('cancel'); return; }               /* nothing to load */
+        sfx('select'); musicStop(); continueGame(slot);
+      } else {
+        if (occ && !this.overArmed) { this.overArmed = true; sfx('cursor'); return; } /* confirm overwrite */
+        sfx('select'); musicStop(); newGame(slot);
+      }
     }
   }
 };

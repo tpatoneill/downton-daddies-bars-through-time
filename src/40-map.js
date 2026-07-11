@@ -16,6 +16,7 @@ var Game = {
   px: 6, py: 8, dir: 'down',
   checkpoint: { map: 'manor', px: 7, py: 9, dir: 'up' }, /* where a wiped party respawns */
   playtime: 0,
+  slot: 1,          /* active save slot (1..4); dev visits use 'dev' */
   started: false
 };
 /* era registry (populated by per-era map modules) for the time-machine travel hub */
@@ -138,7 +139,7 @@ var World = {
     if (o.onInteract) { sfx('select'); o.onInteract(o); }
   },
   openMenu: function () {
-    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'CLOSE'] };
+    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'EXIT', 'CLOSE'] };
     sfx('select');
   },
   update: function (dt) {
@@ -233,15 +234,20 @@ var World = {
   },
   menuPress: function (k) {
     var mn = this.menu;
-    if (k === 'up') { mn.idx = (mn.idx + mn.items.length - 1) % mn.items.length; sfx('cursor'); }
-    else if (k === 'down') { mn.idx = (mn.idx + 1) % mn.items.length; sfx('cursor'); }
+    if (k === 'up') { mn.idx = (mn.idx + mn.items.length - 1) % mn.items.length; mn.exitArmed = false; sfx('cursor'); }
+    else if (k === 'down') { mn.idx = (mn.idx + 1) % mn.items.length; mn.exitArmed = false; sfx('cursor'); }
     else if (k === 'b' || k === 'start') { this.menu = null; sfx('cancel'); }
     else if (k === 'a') {
       var sel = mn.items[mn.idx];
+      if (sel !== 'EXIT') mn.exitArmed = false;
       if (sel === 'CLOSE') { this.menu = null; sfx('cancel'); }
       else if (sel === 'SAVE') { saveGame(true); mn.msg = 'GAME SAVED.'; mn.msgT = 1.2; sfx('save'); }
       else if (sel === 'PARTY') { setScene(makePartyScreen(World)); }
       else if (sel === 'SWAG') { setScene(makeBagScreen(World)); }
+      else if (sel === 'EXIT') {
+        if (mn.exitArmed) { this.menu = null; musicStop(); sfx('cancel'); setScene(Title); }
+        else { mn.exitArmed = true; mn.msg = 'UNSAVED PROGRESS IS LOST. A: QUIT'; mn.msgT = 2.4; sfx('cursor'); }
+      }
     }
   },
   draw: function () {

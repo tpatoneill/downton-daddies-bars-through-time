@@ -213,7 +213,8 @@ function timeMachineInteract() {
 function openRift() { travelChoose(BGS[curMap().riftBg] ? curMap().riftBg : 'black'); }
 
 /* ---- new game / continue ---- */
-function newGame() {
+function newGame(slot) {
+  Game.slot = slot || Game.slot || 1;
   Game.party = [makeFighter('samuel', 1)];
   Game.activeIdx = 0; Game.flags = {}; Game.items = {}; Game.drip = {};
   Game.money = 30; Game.mustaches = 0; Game.parts = 0;
@@ -224,7 +225,7 @@ function newGame() {
   for (var k in Maps) Maps[k]._entered = false;
   gotoWorld();
 }
-function continueGame() { if (loadGame()) gotoWorld(); else newGame(); }
+function continueGame(slot) { if (loadGame(slot)) gotoWorld(); else newGame(slot); }
 
 /* ---- DEV: visit any era to test its level (title screen, behind SELECT) ----
    Each visit recreates the party/flags/items for THAT point in the story, so
@@ -247,6 +248,7 @@ var DEV_VISITS = [
   { label: 'LONDON FINALE', era: 'finale' }
 ];
 function debugVisit(era) {
+  Game.slot = 'dev'; /* keep dev auto-saves away from the 4 real slots */
   Game.flags = {};
   var F = function (list) { for (var i = 0; i < list.length; i++) setFlag(list[i]); };
   if (era === 'act0') {           /* solo lv1: tutorial + manor testable from scratch */

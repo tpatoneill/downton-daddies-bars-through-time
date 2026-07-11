@@ -192,3 +192,14 @@ Screenshots: `screenshots/super-0*.png`. All suites green (phase4/full/dist).
   never block a one-tile corridor.
 All suites green: p1 10 · p2 9 (rewritten for the maze) · p4 7 · loss 2 · dist 7 · full 8.
 Screenshots: screenshots/rome2-*.png.
+
+## Update — 4 save slots + EXIT to title (owner request)
+- **Four save slots:** NEW GAME and CONTINUE on the title menu now open a slot-select screen
+  (SLOT 1-4, each showing location + lead level + minutes played, or EMPTY). Slots are independent
+  localStorage keys (`_slot1..4`); the pre-slot save is silently treated as slot 1 (legacy
+  migration); starting a NEW GAME on an occupied slot requires an overwrite confirm; DEV era
+  visits auto-save to their own 'dev' slot so they never stomp real saves.
+- **EXIT in the pause menu:** START menu gains EXIT (PARTY/SWAG/SAVE/EXIT/CLOSE) with a two-press
+  confirm ("UNSAVED PROGRESS IS LOST") that returns to the title screen.
+- New suite `tools/qa-slots.js` (6 checks). Full regression green: slots 6 · p1 10 · p2 10 ·
+  p4 7 · loss 2 · dist 7 · full 8.

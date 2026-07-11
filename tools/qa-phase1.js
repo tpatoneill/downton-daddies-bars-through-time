@@ -33,7 +33,7 @@ walkTo(h, 7, 11);
 advanceUntil(h, isWorld, 3000, 'to bakersrow');
 assert(G.Game.map === 'bakersrow', 'warped to bakersrow, got ' + G.Game.map);
 ok('walked manor -> bakersrow (warp + autosave)');
-assert(h.store['dd_bars_through_time_v2'], 'autosaved on transition');
+assert(h.store['dd_bars_through_time_v2_slot1'], 'autosaved on transition');
 ok('autosave on map transition present');
 
 // walk to theatre door warp (1,4) -> theatre (triggers tutorial)

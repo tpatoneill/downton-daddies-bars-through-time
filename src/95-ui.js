@@ -1,7 +1,19 @@
-/* 95-ui.js — save/load (localStorage + in-memory fallback), party & bag field screens. */
+/* 95-ui.js — save/load (localStorage + in-memory fallback), party & bag field screens.
+   FOUR SAVE SLOTS: each slot is its own localStorage key; Game.slot picks the
+   active one. The pre-slot key is silently treated as slot 1 (legacy migration). */
 
 var SAVE_KEY = 'dd_bars_through_time_v2';
-var _memSave = null; /* in-memory fallback for sandboxed iframes */
+var SLOT_COUNT = 4;
+var _memSaves = {}; /* in-memory fallback for sandboxed iframes, keyed per slot */
+
+function slotKey(slot) { return SAVE_KEY + '_slot' + slot; }
+function readSlotRaw(slot) {
+  var data = null;
+  try { data = localStorage.getItem(slotKey(slot)); } catch (e) {}
+  if (!data && slot === 1) { try { data = localStorage.getItem(SAVE_KEY); } catch (e) {} } /* legacy save -> slot 1 */
+  if (!data) data = _memSaves[slot] || null;
+  return data;
+}
 
 function serializeGame() {
   var party = [];
@@ -17,21 +29,35 @@ function serializeGame() {
 }
 function saveGame(loud) {
   var data = serializeGame();
-  try { localStorage.setItem(SAVE_KEY, data); } catch (e) { _memSave = data; }
-  _memSave = data;
+  try { localStorage.setItem(slotKey(Game.slot), data); } catch (e) {}
+  _memSaves[Game.slot] = data;
   if (loud) sfx('save');
 }
-function hasSave() {
-  try { if (localStorage.getItem(SAVE_KEY)) return true; } catch (e) {}
-  return !!_memSave;
+function hasSave() { /* any slot occupied? */
+  for (var s = 1; s <= SLOT_COUNT; s++) if (readSlotRaw(s)) return true;
+  return false;
 }
-function loadGame() {
-  var data = null;
-  try { data = localStorage.getItem(SAVE_KEY); } catch (e) {}
-  if (!data) data = _memSave;
+/* summary for the slot-select screen: null if empty */
+function slotInfo(slot) {
+  var data = readSlotRaw(slot);
+  if (!data) return null;
+  try {
+    var o = JSON.parse(data);
+    var lead = (o.party && o.party[0]) || { id: 'samuel', level: 1 };
+    var m = Maps[o.map];
+    return { where: (m && m.banner) ? m.banner : (o.map || '???').toUpperCase(),
+             lead: lead.id.toUpperCase(), level: lead.level,
+             daddies: o.party ? o.party.length : 1,
+             mins: Math.floor((o.playtime || 0) / 60) };
+  } catch (e) { return null; }
+}
+function loadGame(slot) {
+  if (slot === undefined) slot = Game.slot || 1;
+  var data = readSlotRaw(slot);
   if (!data) return false;
   var o;
   try { o = JSON.parse(data); } catch (e) { return false; }
+  Game.slot = slot;
   Game.party = [];
   for (var i = 0; i < o.party.length; i++) {
     var s = o.party[i], f = makeFighter(s.id, s.level);
@@ -47,7 +73,11 @@ function loadGame() {
   Game.playtime = o.playtime || 0; Game.started = true;
   return true;
 }
-function deleteSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} _memSave = null; }
+function deleteSave(slot) {
+  if (slot === undefined) slot = Game.slot || 1;
+  try { localStorage.removeItem(slotKey(slot)); if (slot === 1) localStorage.removeItem(SAVE_KEY); } catch (e) {}
+  delete _memSaves[slot];
+}
 
 /* ---------- party field screen ---------- */
 function makePartyScreen(back) {

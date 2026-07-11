@@ -383,8 +383,12 @@ console.log('composing front cover (smooth cartoon style)...');
   K.rrect(190 * SS, 1700 * SS, 132 * SS, 180 * SS, 8 * SS, '#ffffff');
   K.rrect(196 * SS, 1706 * SS, 120 * SS, 168 * SS, 6 * SS, '#000000');
   K.rrect(200 * SS, 1710 * SS, 112 * SS, 128 * SS, 4 * SS, '#ffffff');
-  K.ptext('E', 238 * SS, 1726 * SS, 22 * SS, '#000000');
-  K.ptext('EVERYONE', 212 * SS, 1849 * SS, 3.2 * SS, '#ffffff');
+  /* center the E in the white window (drawn width = 4 cells, height = 5 cells) */
+  const eScale = 22 * SS, eW = 4 * eScale, eH = 5 * eScale;
+  K.ptext('E', 200 * SS + (112 * SS - eW) / 2, 1710 * SS + (128 * SS - eH) / 2, eScale, '#000000');
+  /* center EVERYONE in the black strip below (drop the trailing letter-space) */
+  const evScale = 3 * SS, evW = K.ptextW('EVERYONE', evScale) - evScale, evH = 5 * evScale;
+  K.ptext('EVERYONE', 196 * SS + (120 * SS - evW) / 2, 1838 * SS + (36 * SS - evH) / 2, evScale, '#ffffff');
   /* company + publisher */
   K.ptext('THE DOWNTON DADDIES COMPANY', CX - K.ptextW('THE DOWNTON DADDIES COMPANY', 4 * SS) / 2, 1892 * SS, 4 * SS, '#f6f4fa');
   K.rrect(1030 * SS, 1786 * SS, 270 * SS, 76 * SS, 38 * SS, '#c8102e');

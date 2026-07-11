@@ -361,15 +361,13 @@ console.log('composing front cover (smooth cartoon style)...');
   /* BLUE only-for tab */
   K.rect(0, 0, BAND, 170 * SS, '#1d4fc4');
   K.vgrad(0, 0, BAND, 24 * SS, '#3a6ee0', '#1d4fc4');
-  /* vertical texts (render on scratch buffer, rotate 90° CCW) */
+  /* vertical band type: smooth Arial Black with a 3D backing (GBA-logotype style),
+     pre-rendered by Pillow in tools/assets (already rotated to read bottom-to-top) */
   {
-    const tmp = makeBuf(); const T = kit(tmp);
-    T.rect(0, 0, 1400 * SS, 80 * SS, '#ff00ff');
-    const w1 = T.ptext('ONLY FOR', 0, 6, 4 * SS, '#ffffff');
-    rotCCW(tmp, w1, 40 * SS, K, 56 * SS, 8 * SS, '#ff00ff');
-    T.rect(0, 0, 1400 * SS, 80 * SS, '#ff00ff');
-    const w2 = T.ptext('DADDYBOY ADVANCE', 0, 6, 10 * SS, '#22224a');
-    rotCCW(tmp, w2, 66 * SS, K, 34 * SS, 200 * SS, '#ff00ff');
+    const onlyFor = loadImage(path.join(__dirname, 'assets', 'band-onlyfor.png'));
+    const dba = loadImage(path.join(__dirname, 'assets', 'band-dba.png'));
+    spriteBlit(buf, onlyFor, 42 * SS, 12 * SS, 66 * SS, 146 * SS);
+    spriteBlit(buf, dba, 22 * SS, 200 * SS, 106 * SS, 1660 * SS);
   }
   /* arched bubbly logo */
   const gold = '#f2c53d', navy = '#232a54';

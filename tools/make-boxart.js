@@ -111,12 +111,16 @@ function loadImage(p2) {
   if (p2.match(/\.png$/i)) { const { PNG } = require(SCRATCH + '/pngjs'); const img = PNG.sync.read(b); return { w: img.width, h: img.height, data: img.data }; }
   const jpeg = require(SCRATCH + '/jpeg-js'); const img = jpeg.decode(b, { maxMemoryUsageInMB: 1024 }); return { w: img.width, h: img.height, data: img.data };
 }
+function findFile(names) { for (const c of names.filter(Boolean)) if (fs.existsSync(c)) return c; return null; }
 function findArt() {
-  const cands = [process.env.ART,
+  return findFile([process.env.ART,
     '/Users/pationeill/Downloads/cover-art.png', '/Users/pationeill/Downloads/cover-art.jpg',
-    '/Users/pationeill/Downloads/cover-art.jpeg', '/Users/pationeill/Downloads/cover-art 2.png'].filter(Boolean);
-  for (const c of cands) if (fs.existsSync(c)) return c;
-  return null;
+    '/Users/pationeill/Downloads/cover-art.jpeg', '/Users/pationeill/Downloads/cover-art 2.png']);
+}
+function findBackArt() {
+  return findFile([process.env.BACKART,
+    '/Users/pationeill/Downloads/back-art.png', '/Users/pationeill/Downloads/back-art.jpg',
+    '/Users/pationeill/Downloads/back-art.jpeg', '/Users/pationeill/Downloads/back-art 2.png']);
 }
 /* cover-fit `img` into buffer region (bilinear), cropping overflow centered */
 function coverBlit(buf, img, x0, y0, rw, rh) {
@@ -381,7 +385,14 @@ console.log('composing back cover...');
 const qrm = QR.create(URL, { errorCorrectionLevel: 'M' }).modules;
 {
   const buf = makeBuf(); const K = kit(buf);
-  field(K, 675 * SS, 200 * SS);
+  const backArt = findBackArt();
+  if (backArt) {
+    console.log('  back art: ' + backArt);
+    coverBlit(buf, loadImage(backArt), 0, 0, W, H);
+  } else {
+    console.log('  (no Downloads/back-art.png — using the drawn field)');
+    field(K, 675 * SS, 200 * SS);
+  }
   const gold = '#f2c53d', navy = '#232a54';
   /* top-left logo */
   K.bubble('DOWNTON', 60 * SS, 34 * SS, 6.5 * SS, gold, navy, 3 * SS, 8 * SS);
@@ -394,9 +405,9 @@ const qrm = QR.create(URL, { errorCorrectionLevel: 'M' }).modules;
   K.rrect(830 * SS, 112 * SS, 460 * SS, 52 * SS, 10 * SS, '#ffffff');
   K.ptext('ANY BROWSER', 1060 * SS - K.ptextW('ANY BROWSER', 4 * SS) / 2, 126 * SS, 4 * SS, '#000000');
   K.ptext('NOT COMPATIBLE WITH BEING SAD.', 830 * SS, 178 * SS, 3 * SS, '#ff8a9a');
-  /* the big dark panel */
-  K.rrect(52 * SS, 226 * SS, 1246 * SS, 1400 * SS, 24 * SS, gold);
-  K.rrect(58 * SS, 232 * SS, 1234 * SS, 1388 * SS, 20 * SS, '#221240');
+  /* the big dark panel (translucent over generated art) */
+  K.rrect(52 * SS, 226 * SS, 1246 * SS, 1400 * SS, 24 * SS, gold, backArt ? 0.9 : 1);
+  K.rrect(58 * SS, 232 * SS, 1234 * SS, 1388 * SS, 20 * SS, '#221240', backArt ? 0.82 : 1);
   /* blurb */
   const blurb = [
     'HISTORY IS UNSTABLE - THE TIME',

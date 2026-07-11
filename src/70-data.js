@@ -174,6 +174,26 @@ var ENEMIES = {
   goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 }
 };
 
+/* pre-fight one-liners shown after the battle-intro transition (Pokemon-style) */
+var TAUNTS = {
+  heckler: ["A ONE-DADDY SHOW? WHERE'S YER TEAM?"],
+  orator: ['ALL RHYMES IN TRIPLICATE!', 'THE FORUM CYPHER IS CLOSED!'],
+  senator: ['I HEARD YOUR BARS ARE... FINE.', 'HOW DELIGHTFULLY SCANDALOUS!'],
+  tumbleweed: ['...LISTEN TO MY PAIN, PARDNER.'],
+  auctioneer: ['GOING ONCE! GOING TWICE! FIGHT!'],
+  discofan: ['THE HUSTLE NEVER ENDS, BABY!'],
+  gerald: ['THIS BATTLE IS PRE-APPROVED.', 'MY NAME IS ALSO GERALD.'],
+  editor: ['YOUR VERSE IS... REJECTED.'],
+  goblin: ['HEE HEE! NO REFUNDS!'],
+  legionary: ['NONE SHALL PASS, PLEBEIAN!'],
+  salesman: ['STEP RIGHT UP AND GET BEAT!'],
+  deejay: ["I'LL DROP THE BEAT ON YOU!"],
+  skater: ['EAT MY DUST, DADDY-O!'],
+  goblinhex: ['A HEX UPON YOUR BARS!'],
+  goblinbrute: ['BRUTE SMASH YOUR RHYMES!']
+};
+function pickTaunt(id) { var t = TAUNTS[id]; return t ? t[(Math.random() * t.length) | 0] : null; }
+
 /* era encounter pools: mapId enc uses one of these */
 var ENC_POOLS = {
   london:  ['heckler'],

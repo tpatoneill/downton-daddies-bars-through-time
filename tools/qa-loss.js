@@ -26,8 +26,9 @@ G.Game.party[1].fainted = true; G.Game.party[1].hp = 0;
 G.Game.items = { sparestache: 1 };
 G.startBattle({ enemies: [{ enemy: 'heckler', level: 3 }], music: 'battle', canFlee: true }, () => {});
 let b = G.getScene();
+// skip the intro transition + taunt to the command menu
+let g = 0; while (b.phase !== 'menu' && g++ < 40) { h.tap('a'); h.step(2, 20); }
 // open SWAG -> use SPARE MUSTACHE
-if (b.phase === 'intro') { h.tap('a'); h.step(2); }
 b.menuIdx = 1; h.tap('a'); h.step(2);          // SWAG
 assert(b.phase === 'bag', 'bag opened');
 h.tap('a'); h.step(4);                          // use first item (spare mustache)

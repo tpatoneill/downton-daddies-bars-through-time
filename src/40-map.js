@@ -366,7 +366,7 @@ function startTrainerBattle(o) {
   var nm = o.tname || 'CHALLENGER';
   Cutscene.play([
     { say: [nm, o.hail || "YOU THERE! WE DUEL, HERE, NOW!"] },
-    { battle: function () { return { enemies: [{ enemy: o.enemy, level: o.level || 5 }], music: 'battle', canFlee: false, bg: o.bg }; },
+    { battle: function () { return { enemies: [{ enemy: o.enemy, level: o.level || 5 }], music: 'battle', canFlee: false, bg: o.bg, taunt: o.hail }; },
       onResult: function (r) { if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0); } } },
     { say: [nm, o.beaten || 'A WORTHY BOUT. WELL BATTLED.'] }
   ], { onDone: function () { gotoWorld(); } });

@@ -12,7 +12,7 @@ function startWildBattle(map) {
   var eid = pool[(Math.random() * pool.length) | 0];
   var lead = firstLiving(Game.party) || Game.party[0];
   var lv = Math.max(1, lead.level + ((Math.random() * 3 | 0) - 1));
-  startBattle({ enemies: [{ enemy: eid, level: lv }], music: 'battle', canFlee: true, wild: true },
+  startBattle({ enemies: [{ enemy: eid, level: lv }], music: 'battle', canFlee: true, wild: true, taunt: pickTaunt(eid) },
     function () { setScene(World); });
 }
 function firstLiving(arr) { for (var i = 0; i < arr.length; i++) if (!arr[i].fainted && arr[i].hp > 0) return arr[i]; return null; }
@@ -49,7 +49,8 @@ function makeBattle(spec, onEnd) {
     targetIdx: 0,
     crowd: spec.crowdStart || 0, usedShow: false,
     revealPending: false, revealDone: false, superFX: null,
-    phase: 'intro', menuIdx: 0, moveIdx: 0, itemIdx: 0, switchIdx: 0,
+    phase: 'transition', transT: 0, transDur: 0.95, taunt: spec.taunt || null,
+    menuIdx: 0, moveIdx: 0, itemIdx: 0, switchIdx: 0,
     queue: [], qi: 0, msg: '', msgT: 0, autoMsgT: 0,
     aimT: 0, aimHit: false, pendingMove: null,
     flash: 0, shake: 0, participants: {},
@@ -62,6 +63,7 @@ function makeBattle(spec, onEnd) {
     firstEnemyIdx: function () { for (var i = 0; i < this.enemies.length; i++) if (!this.enemies[i].fainted) return i; return -1; },
     /* ---------- input ---------- */
     onPress: function (k) {
+      if (this.phase === 'transition') { if (k === 'a' || k === 'start') { this.transT = this.transDur; this.phase = 'intro'; this.introT = 0; } return; }
       if (this.phase === 'intro') { if (k === 'a' || k === 'b' || k === 'start') this.toMenu(); return; }
       if (this.phase === 'menu') return this.menuInput(k);
       if (this.phase === 'move') return this.moveInput(k);
@@ -461,7 +463,8 @@ function makeBattle(spec, onEnd) {
       if (this.hitFlash > 0) this.hitFlash -= dt;
       if (this.shake > 0) this.shake -= dt;
       if (this.flash > 0) this.flash -= dt;
-      if (this.phase === 'intro') { this.introT += dt; if (this.introT > 1.0) this.toMenu(); }
+      if (this.phase === 'transition') { this.transT += dt; if (this.transT >= this.transDur) { this.phase = 'intro'; this.introT = 0; sfx('super'); } }
+      if (this.phase === 'intro') { this.introT += dt; if (this.introT > (this.taunt ? 2.6 : 1.0)) this.toMenu(); }
       if (this.phase === 'aim') { this.aimT += dt; if (this.aimT >= this.aimDur) { this.commitPlayer(this.pendingMove, false); } }
       if (this.phase === 'resolve') { this.autoMsgT += dt; if (this.autoMsgT > 2.4) this.advance(); }
       if (this.phase === 'result') { this.resultT += dt; }
@@ -469,6 +472,7 @@ function makeBattle(spec, onEnd) {
       this._crowdShown = (this._crowdShown === undefined) ? this.crowd : this._crowdShown + (this.crowd - this._crowdShown) * 0.2;
     },
     draw: function () {
+      if (this.phase === 'transition') { this.drawTransition(); return; }
       var sh = this.shake > 0 ? ((Math.random() - 0.5) * 5) | 0 : 0;
       ctx.save(); ctx.translate(sh, 0);
       /* backdrop */
@@ -494,7 +498,14 @@ function makeBattle(spec, onEnd) {
       this.drawCrowd();
       ctx.restore();
       /* UI panels */
-      if (this.phase === 'intro') { panel(6, 120, 228, 34); centerText((this.enemies[0] ? this.enemies[0].name : 'A FOE') + ' WANTS TO BATTLE!', 133, COL.black); }
+      if (this.phase === 'intro') {
+        var en = this.enemies[Math.max(0, this.firstEnemyIdx())] || this.enemies[0];
+        panel(6, 116, 228, 40, COL.cream, COL.black);
+        drawText((en ? en.name : 'A FOE'), 12, 121, COL.red);
+        if (this.taunt) { var tl = wrap(this.taunt, 210); for (var ti = 0; ti < tl.length && ti < 2; ti++) drawText(tl[ti], 12, 133 + ti * 10, COL.black); }
+        else centerText('WANTS TO BATTLE!', 137, COL.black);
+        if (Math.floor(performance.now() / 400) % 2) drawText('>', 224, 148, COL.red);
+      }
       else if (this.phase === 'menu') this.drawMenu();
       else if (this.phase === 'move') this.drawMoves();
       else if (this.phase === 'target') this.drawTargetPrompt();
@@ -530,6 +541,23 @@ function makeBattle(spec, onEnd) {
       var jx = ((Math.random() - 0.5) * 6) | 0;
       centerTextO(s.name, 66 + (((s.t * 20) | 0) % 2), COL.white, COL.black, 2);
       if (p < 0.5) centerTextO('!!', 92, s.color, COL.black, 2);
+    },
+    drawTransition: function () {
+      var t = this.transT, dur = this.transDur, p = t / dur, i;
+      if (p < 0.5) {                                  /* flash burst with radiating spokes */
+        var on = ((t * 26) | 0) % 2;
+        cls(on ? COL.white : '#1a1030');
+        var n = 16, len = p * 360;
+        for (i = 0; i < n; i++) { var a = (i / n) * 6.2832; px((120 + Math.cos(a) * len) | 0, (80 + Math.sin(a) * len) | 0, 4, 4, on ? '#1a1030' : COL.gold); }
+        centerTextO('!', 66, on ? COL.red : COL.white, COL.black, 3);
+      } else {                                        /* colored bands sweep + enemy slides in */
+        cls('#1a1030');
+        var q = (p - 0.5) / 0.5;
+        for (var b = 0; b < 12; b++) { var c = [COL.pink, COL.gold, COL.teal, COL.purple][b % 4]; var w = (240 * q) | 0; px((b % 2) ? 0 : 240 - w, b * 14, w, 14, c); }
+        var en = this.enemies[0];
+        if (en && SPR[en.spr]) { ctx.globalAlpha = 0.4 + q * 0.6; SPR[en.spr]((240 - q * 96) | 0, 44, en.sprOpt); ctx.globalAlpha = 1; }
+        centerTextO('VS!', 64, COL.white, COL.black, 3);
+      }
     },
     drawHPBox: function (f, x, y, isPlayer) {
       if (!f) return;
@@ -624,6 +652,6 @@ function makeBattle(spec, onEnd) {
       if (Math.floor(performance.now() / 400) % 2) centerText('PRESS A', 106, COL.red);
     }
   };
-  B.phase = 'intro';
+  B.phase = 'transition';
   return B;
 }

@@ -161,3 +161,12 @@ Screenshots: `screenshots/super-0*.png`. All suites green (phase4/full/dist).
   could cross battle-free. Trainers' line-of-sight also crosses the grassy lanes now.
 - Raised the QA retry cap (bosses got harder with supers + no-heal; retries heal to full, so they're
   winnable). All suites green: phase1 10 · phase2 7 · phase4 7 · loss 2 · full 8 · dist 7.
+
+## Update — Stylish battle-intro transition + pre-fight taunts (owner request)
+- Every battle now opens with a **Pokemon-style VS transition**: a flash burst with radiating
+  spokes, then sweeping colored bands + a "VS!" while the foe slides in. (~1s, skippable with A.)
+- The opponent **says a line before the fight** — a random in-character taunt per enemy type
+  (wild encounters use `TAUNTS`; trainers reuse their hail line), shown over the battle scene
+  before the FIGHT menu.
+- QA harness skips the transition; all suites green (phase1 10 · phase2 7 · phase4 7 · loss 2 ·
+  full 8 · dist 7). Screenshots: `screenshots/trans-*.png`.

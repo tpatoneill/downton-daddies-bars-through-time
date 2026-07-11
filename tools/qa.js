@@ -135,6 +135,7 @@ function autoBattle(h, opts) {
       break;
     }
     const b = G.getScene();
+    if (b.phase === 'transition') { h.tap('a'); h.step(1, 20); continue; } // skip the intro animation
     if (b.phase === 'intro') { h.tap('a'); h.step(1, 20); continue; }
     if (b.phase === 'menu') {
       // choose FIGHT

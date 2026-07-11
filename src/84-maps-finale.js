@@ -171,16 +171,59 @@ function pDiddyUnmask() {
     { narr: 'LORD SNOBBINGTON WAS... P DIDDY?!' },
     { say: ['P DIDDY', "AND I WOULD'VE GOTTEN AWAY WITH IT TOO,"] },
     { say: ['P DIDDY', "IF IT WEREN'T FOR YOU MEDDLING DADDIES!"] },
-    { sfx: 'whoosh' },
-    { narr: 'THEN THE TIME MACHINE ROARS. A FIGURE STEPS OUT.' },
-    { say: ['50 CENT', 'DADDIES. YOU TOOK DOWN P DIDDY.'] },
-    { say: ['50 CENT', 'I CAME FROM THE FUTURE. WE NEED YOU.'] },
+    { do: function () { setFlag('finale_done'); gainPart('MASTER SPRING'); saveGame(false); } },
+    { say: ['SAMUEL', 'WE DID IT, DADDIES! ...DADDIES?'] },
+    { narr: 'BUT THE OTHERS HAVE SLIPPED AWAY. THE STAGE IS EMPTY.' },
+    { say: ['SAMUEL', 'WHERE DID EVERYONE GO? ...HOME, I SUPPOSE.'] },
+    { narr: 'HEAD BACK TO DADDY HEADQUARTERS.' },
+    { do: function () { setFlag('await_party'); Game.map = 'bakersrow'; Game.px = 9; Game.py = 3; Game.dir = 'up'; saveGame(false); } }
+  ], { onDone: function () { gotoWorld(); } });
+}
+/* the manual walk home pays off: a surprise party, then the 50 Cent entrance. */
+function surprisePartyScene() {
+  setFlag('party_done');
+  Cutscene.play([
+    { bg: 'manorbg' }, { music: 'finale' },
+    { narr: 'SAMUEL STEPS INTO DADDY HEADQUARTERS. THE LIGHTS ARE OFF...' },
+    { sfx: 'showstopper' },
+    { say: ['HERSCHEL', 'SURPRISE!'] },
+    { say: ['WILLIAM', 'SURPRISE!'] },
+    { say: ['ROSALIND', 'SURPRISE!'] },
+    { narr: 'THE DADDIES THREW SAMUEL A SURPRISE PARTY!' },
+    { say: ['SAMUEL', 'YOU... PLANNED THIS? THE WHOLE TIME?'] },
+    { say: ['HERSCHEL', 'SINCE ROME, LASS. WE ALWAYS KNEW.'] },
+    { say: ['WILLIAM', 'IT WAS CROOKED EVERY SINGLE DAY.'] },
+    { do: function () { fiftyCentEntrance(function () { Cutscene.next(); }); } },
+    { say: ['HERSCHEL', '...IS THAT—?!'] },
+    { say: ['WILLIAM', 'IT IS. IT REALLY IS.'] },
+    { say: ['ROSALIND', 'SHOCK. AWE.'] },
+    { say: ['SAMUEL', 'AND REVERENCE.'] },
+    { say: ['50 CENT', 'DADDIES. I CAME FROM THE FUTURE.'] },
+    { say: ['50 CENT', 'YOU TOOK DOWN P DIDDY. WE NEED YOU.'] },
     { say: ['50 CENT', "THE MISSION? IT ISN'T WRITTEN YET."] },
     { say: ['SAMUEL', "THEN WE'LL FREESTYLE IT."] },
-    { say: ['HERSCHEL', 'MY HIP SAYS NO. WE GO ANYWAY.'] },
-    { do: function () { setFlag('game_complete'); gainPart('MASTER SPRING'); healParty(); saveGame(false); } },
-    { narr: 'THE DADDIES PILE INTO THE MACHINE. ONE MORE JUMP...' }
+    { do: function () { setFlag('game_complete'); saveGame(false); } }
   ], { onDone: function () { setScene(makeBirthday()); } });
+}
+/* animated 50 Cent rising out of the time machine */
+function fiftyCentEntrance(onDone) {
+  var s = {
+    t: 0,
+    enter: function () { musicStop(); sfx('whoosh'); },
+    update: function (dt) { this.t += dt; if (this.t > 2.6) onDone(); },
+    draw: function () {
+      BGS.manorbg();
+      var t = this.t;
+      px(96, 54, 48, 66, '#c49446'); px(100, 58, 40, 50, '#1a2138');            /* time machine */
+      var c = ((t * 12) | 0) % 2 ? COL.neon2 : COL.neon; px(108, 66, 24, 30, c);
+      if (t > 0.5) { var rise = Math.max(0, 70 - (t - 0.5) * 55); SPR.fiftycent(96, 44 + rise); }  /* rises out */
+      if (t < 1.6 && ((t * 10) | 0) % 2) { ctx.globalAlpha = 0.35; cls(COL.gold); ctx.globalAlpha = 1; }
+      centerTextO('50 CENT', 16, COL.gold, COL.black, 2);
+      if (t > 1.2 && (Math.floor(t * 2) % 2)) centerTextO('!!!', 132, COL.pink, COL.black, 2);
+    },
+    onPress: function () {}
+  };
+  setScene(s);
 }
 
 /* register the finale as a travel destination once unlocked */

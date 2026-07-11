@@ -56,14 +56,16 @@ assert(p2.crowd >= 100, 'crowd slammed to +100 in her favor (' + p2.crowd + ')')
 autoBattle(h, { onBeat: true });
 ok('Snobbington phase 2 (FINAL DRAFT) defeated');
 
-// P Diddy unmask + 50 Cent hook -> birthday sequence
+// P Diddy unmask -> control returns near HQ -> walk home -> surprise party + 50 Cent -> birthday
+advanceUntil(h, isWorld, 10000, 'p diddy -> HQ');
+assert(G.Game.map === 'bakersrow' && G.hasFlag('finale_done') && !G.hasFlag('game_complete'), 'unmask done, must walk home');
+walkTo(h, 9, 1);
 let guard = 0;
-while (!(G.getScene() && G.getScene().phase === 'credits') && guard++ < 400) { h.tap('a'); h.step(3, 25); }
-assert(G.hasFlag('finale_done'), 'finale_done flag set');
-assert(G.hasFlag('game_complete'), 'game_complete flag set');
+while (!(G.getScene() && G.getScene().phase === 'credits') && guard++ < 500) { h.tap('a'); h.step(3, 25); }
+assert(G.hasFlag('game_complete'), 'game_complete after surprise party');
 const bd = G.getScene();
 assert(bd && (bd.phase === 'credits' || bd.phase === 'bow'), 'birthday sequence reached (phase ' + (bd && bd.phase) + ')');
-ok('birthday sequence reached');
+ok('walk home -> surprise party + 50 Cent -> birthday');
 // config + new finale beats present
 const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'dist', 'index.html'), 'utf8');
 assert(src.indexOf("BIRTHDAY_NAME = 'LANE ALLISON'") >= 0, "config has BIRTHDAY_NAME = 'LANE ALLISON'");

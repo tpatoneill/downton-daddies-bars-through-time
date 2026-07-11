@@ -1135,6 +1135,319 @@ defWalker('goblin', {hat: '#3f7f36', hair: '#5aa84a', coat: '#3f7f36', coatd: '#
 defWalker('pedro', {hat: '#6a7a3c', hair: sBK, coat: '#6a7a3c', coatd: '#4e5c2c', mous: sBK, accent: sGD});
 
 
+/* ===== 32-sprites-locals.js ===== */
+/* sprites-locals.js — era-local enemy battle sprites + overworld walkers.
+   Appends to the global SPR registry and WALK registry from 30-sprites.js.
+   Reuses painter(), the shared body primitives, and the shared palette consts. */
+
+/* Legionary — Rome, ROAST. Bronze galea with red transverse crest, lorica segmentata, spear. */
+SPR.legionary = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i;
+  var IR = '#9aa0ae', IRs = '#6e7480', IRh = '#c6ccd8';
+  /* short spear behind the body */
+  g.p(cx + 17, 8, 2, 45, '#8a6a3c');
+  g.p(cx + 16, 8, 1, 1, sK); g.p(cx + 19, 8, 1, 1, sK);
+  g.p(cx + 16, 2, 4, 6, IR);
+  g.p(cx + 17, 0, 2, 3, IRh);
+  g.p(cx + 16, 2, 4, 1, sK); g.p(cx + 16, 7, 4, 1, sK);
+  /* red transverse crest (ear to ear across the helmet) */
+  g.p(cx - 13, 3, 26, 4, sRD);
+  g.p(cx - 13, 3, 26, 1, sK);
+  g.p(cx - 13, 3, 1, 4, sK); g.p(cx + 12, 3, 1, 4, sK);
+  g.p(cx - 11, 6, 22, 1, '#96283c');
+  /* bronze galea dome */
+  g.ell(cx - 10, 6, cx + 10, 19, sBZ, sK);
+  g.p(cx - 7, 8, 3, 3, '#d8b060');
+  g.p(cx - 9, 15, 18, 2, sBZs);
+  var ytop = _face(g, cx, 17, 15), ey = ytop + 4;
+  /* hinged cheek guards */
+  g.p(cx - 10, ytop, 3, 10, sBZ); g.p(cx + 7, ytop, 3, 10, sBZ);
+  g.p(cx - 10, ytop, 1, 10, sK); g.p(cx + 9, ytop, 1, 10, sK);
+  g.p(cx - 10, ytop + 8, 3, 2, sBZs); g.p(cx + 7, ytop + 8, 3, 2, sBZs);
+  _eyes(g, cx, ey, true, 2);
+  g.p(cx - 3, ytop + 11, 6, 1, sK); /* stern mouth */
+  var sh = ytop + 15;
+  /* segmented lorica — banded metal chest */
+  g.p(cx - 13, sh, 26, 15, IR);
+  g.p(cx - 13, sh, 26, 1, sK);
+  g.p(cx - 13, sh, 1, 15, sK); g.p(cx + 12, sh, 1, 15, sK);
+  for (i = 1; i < 5; i++) g.p(cx - 12, sh + i * 3, 24, 1, IRs);
+  g.p(cx - 12, sh + 1, 2, 13, IRh);
+  g.p(cx + 9, sh + 1, 3, 13, IRs);
+  /* shoulder plates */
+  g.p(cx - 16, sh - 1, 6, 5, IR); g.p(cx + 10, sh - 1, 6, 5, IR);
+  g.p(cx - 16, sh - 1, 6, 1, sK); g.p(cx + 10, sh - 1, 6, 1, sK);
+  g.p(cx - 16, sh + 3, 6, 1, IRs); g.p(cx + 10, sh + 3, 6, 1, IRs);
+  /* red tunic edge below the armor */
+  g.p(cx - 12, sh + 15, 24, 6, sRD);
+  g.p(cx - 12, sh + 15, 1, 6, sK); g.p(cx + 11, sh + 15, 1, 6, sK);
+  g.p(cx - 12, sh + 20, 24, 1, '#96283c');
+  _arms(g, cx, sh, 14, sRD);
+  _legs(g, cx, 53);
+};
+
+/* Snake-oil salesman — Dodge City, FLEX. Tall garish hat, checkered vest, tonic held high. */
+SPR.salesman = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i, j;
+  var PU = '#8b3ca8', CK = '#f0d838', CKs = '#c8a030', GN = '#4aa860';
+  /* tall garish purple hat with a yellow band */
+  g.p(cx - 8, 0, 16, 12, PU);
+  g.p(cx - 8, 0, 16, 1, sK);
+  g.p(cx - 8, 0, 1, 12, sK); g.p(cx + 7, 0, 1, 12, sK);
+  g.p(cx - 7, 1, 2, 10, '#a44fc0');
+  g.p(cx - 7, 9, 14, 2, CK);
+  g.p(cx - 13, 12, 26, 3, PU);
+  g.p(cx - 13, 12, 26, 1, sK); g.p(cx - 13, 14, 26, 1, sK);
+  g.p(cx - 13, 12, 1, 3, sK); g.p(cx + 12, 12, 1, 3, sK);
+  var ytop = _face(g, cx, 17), ey = ytop + 5;
+  _eyes(g, cx, ey, false, 1);
+  /* curly showman mustache */
+  g.p(cx - 7, ey + 6, 6, 2, sMC); g.p(cx + 1, ey + 6, 6, 2, sMC);
+  g.p(cx - 9, ey + 5, 2, 2, sMC); g.p(cx + 7, ey + 5, 2, 2, sMC);
+  _smile(g, cx, ytop + 14, true);
+  var sh = ytop + 17;
+  _coatBody(g, cx, sh, 53, CK, CKs, '#f8e878', sWH, false);
+  /* loud checkered vest pattern */
+  for (j = 0; j < 5; j++) for (i = 0; i < 2; i++) {
+    if ((i + j) % 2 === 0) g.p(cx - 12 + i * 4, sh + 2 + j * 3, 4, 3, sRD);
+    else g.p(cx + 4 + i * 4, sh + 2 + j * 3, 4, 3, sRD);
+  }
+  /* left arm down */
+  g.p(cx - 17, sh + 1, 5, 15, CK);
+  g.p(cx - 17, sh + 1, 5, 1, sK);
+  g.p(cx - 17, sh + 1, 1, 15, sK); g.p(cx - 13, sh + 1, 1, 15, sK);
+  g.p(cx - 16, sh + 16, 3, 3, sSK); g.p(cx - 16, sh + 18, 3, 1, sSD);
+  /* right arm raised, hand aloft */
+  g.p(cx + 12, sh - 6, 5, 9, CK);
+  g.p(cx + 12, sh - 6, 5, 1, sK);
+  g.p(cx + 12, sh - 6, 1, 9, sK); g.p(cx + 16, sh - 6, 1, 9, sK);
+  g.p(cx + 13, sh - 9, 3, 3, sSK);
+  /* the little bottle of MIRACLE TONIC, held high */
+  g.p(cx + 12, sh - 15, 5, 6, GN);
+  g.p(cx + 12, sh - 15, 5, 1, sK); g.p(cx + 12, sh - 10, 5, 1, sK);
+  g.p(cx + 12, sh - 15, 1, 6, sK); g.p(cx + 16, sh - 15, 1, 6, sK);
+  g.p(cx + 13, sh - 18, 3, 3, '#8a6a3c'); /* cork */
+  g.p(cx + 13, sh - 18, 3, 1, sK);
+  g.p(cx + 13, sh - 13, 3, 2, sWH); /* label */
+  _legs(g, cx, 53);
+};
+
+/* Deejay — New York, FLEX. Big headphones over an afro, gold chain, open shirt. */
+SPR.deejay = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var OR = '#e07820', ORs = '#b05a14', ORh = '#f09040', AF = '#2a2028';
+  /* afro */
+  g.ell(cx - 12, 2, cx + 12, 20, AF, sK);
+  g.p(cx - 12, 10, 3, 6, '#3a2c34'); g.p(cx + 9, 10, 3, 6, '#3a2c34');
+  var ytop = _face(g, cx, 17), ey = ytop + 6;
+  /* headphone band over the top, straps down the sides */
+  g.p(cx - 10, 1, 20, 3, sRD);
+  g.p(cx - 10, 1, 20, 1, sK); g.p(cx - 10, 3, 20, 1, sK);
+  g.p(cx - 13, 3, 2, ey - 5, sRD); g.p(cx + 11, 3, 2, ey - 5, sRD);
+  /* big red ear cups with dark pads */
+  g.p(cx - 15, ey - 2, 5, 9, sRD); g.p(cx + 10, ey - 2, 5, 9, sRD);
+  g.p(cx - 15, ey - 2, 5, 1, sK); g.p(cx + 10, ey - 2, 5, 1, sK);
+  g.p(cx - 15, ey + 6, 5, 1, sK); g.p(cx + 10, ey + 6, 5, 1, sK);
+  g.p(cx - 15, ey - 2, 1, 9, sK); g.p(cx + 14, ey - 2, 1, 9, sK);
+  g.p(cx - 14, ey + 1, 3, 3, '#96283c'); g.p(cx + 11, ey + 1, 3, 3, '#96283c');
+  _eyes(g, cx, ey, false, 1);
+  /* cool confident smirk */
+  g.p(cx - 2, ytop + 13, 5, 1, sK); g.p(cx + 3, ytop + 12, 1, 1, sK);
+  var sh = ytop + 17;
+  /* open flashy shirt: bare chest strip up the middle */
+  _coatBody(g, cx, sh, 53, OR, ORs, ORh, sSK, false);
+  /* big collar wings */
+  g.p(cx - 15, sh - 1, 6, 6, ORh); g.p(cx + 9, sh - 1, 6, 6, ORh);
+  g.p(cx - 15, sh - 1, 6, 1, sK); g.p(cx + 9, sh - 1, 6, 1, sK);
+  /* gold chain + medallion on the chest */
+  g.p(cx - 3, sh + 2, 1, 2, sGD); g.p(cx + 2, sh + 2, 1, 2, sGD);
+  g.p(cx - 2, sh + 4, 4, 1, sGD);
+  g.p(cx - 1, sh + 5, 2, 3, sGD); g.p(cx - 1, sh + 6, 2, 1, sBZs);
+  _arms(g, cx, sh, 17, OR);
+  _legs(g, cx, 53);
+};
+
+/* Skater — New York, WORDPLAY. Headband, striped tee, tube socks, roller skates. */
+SPR.skater = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, i, s;
+  var TS = '#f6f6fa', HR = '#8a5a2c';
+  /* hair */
+  g.ell(cx - 9, 1, cx + 9, 14, HR, sK);
+  var ytop = _face(g, cx, 12), ey = ytop + 5;
+  /* headband across the forehead, knot tail on the side */
+  g.p(cx - 9, ytop + 1, 18, 3, sRD);
+  g.p(cx - 9, ytop + 1, 18, 1, sK); g.p(cx - 9, ytop + 3, 18, 1, sK);
+  g.p(cx + 9, ytop + 2, 3, 2, sRD); g.p(cx + 10, ytop + 4, 2, 2, '#96283c');
+  _eyes(g, cx, ey); /* no brows: the headband sits right above the eyes */
+  _smile(g, cx, ytop + 12, true); /* sunny grin */
+  var sh = ytop + 16;
+  /* striped tee */
+  g.p(cx - 12, sh, 24, 13, TS);
+  g.p(cx - 12, sh, 24, 1, sK); g.p(cx - 12, sh + 12, 24, 1, sK);
+  g.p(cx - 12, sh, 1, 13, sK); g.p(cx + 11, sh, 1, 13, sK);
+  for (i = 0; i < 3; i++) g.p(cx - 11, sh + 2 + i * 4, 22, 2, sTE);
+  /* bare arms, wristbands */
+  for (s = -1; s <= 1; s += 2) {
+    var ax = s < 0 ? cx - 16 : cx + 12;
+    g.p(ax, sh + 1, 4, 12, sSK);
+    g.p(ax, sh + 1, 4, 1, sK);
+    g.p(ax + (s < 0 ? 0 : 3), sh + 1, 1, 12, sK);
+    g.p(ax + (s < 0 ? 3 : 0), sh + 1, 1, 12, sK);
+    g.p(ax + 1, sh + 10, 2, 2, sRD);
+    g.p(ax + 1, sh + 13, 2, 2, sSK); g.p(ax + 1, sh + 14, 2, 1, sSD);
+  }
+  /* gym shorts */
+  g.p(cx - 9, sh + 13, 18, 5, '#3a5ac0');
+  g.p(cx - 9, sh + 13, 1, 5, sK); g.p(cx + 8, sh + 13, 1, 5, sK);
+  g.p(cx - 9, sh + 17, 18, 1, sK);
+  g.p(cx - 8, sh + 14, 16, 1, sWH); /* piping */
+  /* bare legs */
+  g.p(cx - 7, sh + 18, 5, 4, sSK); g.p(cx + 2, sh + 18, 5, 4, sSK);
+  g.p(cx - 7, sh + 18, 1, 4, sSD); g.p(cx + 6, sh + 18, 1, 4, sSD);
+  /* striped tube socks */
+  g.p(cx - 7, sh + 22, 5, 6, TS); g.p(cx + 2, sh + 22, 5, 6, TS);
+  g.p(cx - 7, sh + 22, 1, 6, sK); g.p(cx - 3, sh + 22, 1, 6, sK);
+  g.p(cx + 2, sh + 22, 1, 6, sK); g.p(cx + 6, sh + 22, 1, 6, sK);
+  g.p(cx - 6, sh + 23, 3, 1, sRD); g.p(cx + 3, sh + 23, 3, 1, sRD);
+  g.p(cx - 6, sh + 25, 3, 1, sTE); g.p(cx + 3, sh + 25, 3, 1, sTE);
+  /* roller skates, mid-glide */
+  g.p(cx - 9, sh + 28, 8, 3, sRD); g.p(cx + 1, sh + 28, 8, 3, sRD);
+  g.p(cx - 9, sh + 28, 8, 1, sK); g.p(cx + 1, sh + 28, 8, 1, sK);
+  g.p(cx - 9, sh + 28, 1, 3, sK); g.p(cx + 8, sh + 28, 1, 3, sK);
+  g.p(cx - 8, sh + 29, 2, 1, sWH); g.p(cx + 2, sh + 29, 2, 1, sWH); /* laces */
+  /* wheels */
+  g.p(cx - 8, sh + 31, 2, 2, sK); g.p(cx - 4, sh + 31, 2, 2, sK);
+  g.p(cx + 2, sh + 31, 2, 2, sK); g.p(cx + 6, sh + 31, 2, 2, sK);
+  g.p(cx - 8, sh + 31, 1, 1, sGD); g.p(cx - 4, sh + 31, 1, 1, sGD);
+  g.p(cx + 2, sh + 31, 1, 1, sGD); g.p(cx + 6, sh + 31, 1, 1, sGD);
+};
+
+/* Hexing goblin — Goblin Realm, WORDPLAY. Purple-tinted, pointed wizard hat, glowing eyes. ~40px. */
+SPR.goblinhex = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24;
+  var PB = '#8a6ab8', PBs = '#5a3f88', PBk = '#3e2a62', GLO = '#e070ff';
+  /* big pointy ears */
+  g.p(cx - 15, 28, 6, 3, PB); g.p(cx - 18, 27, 3, 2, PB); g.p(cx - 18, 26, 2, 1, PBk);
+  g.p(cx - 15, 30, 6, 1, PBs);
+  g.p(cx + 9, 28, 6, 3, PB); g.p(cx + 15, 27, 3, 2, PB); g.p(cx + 16, 26, 2, 1, PBk);
+  g.p(cx + 9, 30, 6, 1, PBs);
+  /* head */
+  g.ell(cx - 9, 22, cx + 9, 38, PB, PBk);
+  g.p(cx - 6, 36, 12, 1, PBs);
+  /* glowing eyes with a faint spark */
+  g.ell(cx - 7, 25, cx - 2, 30, GLO, PBk);
+  g.ell(cx + 2, 25, cx + 7, 30, GLO, PBk);
+  g.p(cx - 5, 27, 1, 1, sWH); g.p(cx + 4, 27, 1, 1, sWH);
+  g.p(cx - 8, 24, 1, 1, GLO); g.p(cx + 7, 24, 1, 1, GLO);
+  /* mischievous grin with one fang */
+  g.p(cx - 5, 33, 10, 1, sK);
+  g.p(cx - 6, 32, 1, 1, sK); g.p(cx + 5, 32, 1, 1, sK);
+  g.p(cx - 3, 34, 1, 1, sWH);
+  /* little pointed wizard hat (drawn over the head) */
+  g.p(cx - 1, 8, 2, 3, PBs);
+  g.p(cx - 3, 11, 6, 3, PBs);
+  g.p(cx - 5, 14, 10, 3, PBs);
+  g.p(cx - 7, 17, 14, 4, PBs);
+  g.p(cx - 1, 8, 2, 1, sK);
+  g.p(cx - 3, 11, 1, 3, sK); g.p(cx + 2, 11, 1, 3, sK);
+  g.p(cx - 5, 14, 1, 3, sK); g.p(cx + 4, 14, 1, 3, sK);
+  g.p(cx - 7, 17, 1, 4, sK); g.p(cx + 6, 17, 1, 4, sK);
+  g.p(cx - 11, 21, 22, 2, PBk);
+  g.p(cx - 11, 21, 22, 1, sK); g.p(cx - 11, 22, 1, 1, sK); g.p(cx + 10, 22, 1, 1, sK);
+  g.p(cx - 4, 18, 3, 2, sGD); /* little star on the brim */
+  g.p(cx + 1, 12, 1, 1, GLO); /* hex spark on the cone */
+  /* raggedy robe with jagged hem */
+  g.p(cx - 8, 39, 16, 9, PBs);
+  g.p(cx - 8, 39, 16, 1, sK); g.p(cx - 8, 39, 1, 9, sK); g.p(cx + 7, 39, 1, 9, sK);
+  g.p(cx + 4, 40, 3, 8, PBk);
+  g.p(cx - 8, 48, 3, 2, PBs); g.p(cx - 2, 48, 3, 2, PBs); g.p(cx + 4, 48, 3, 2, PBs);
+  g.p(cx - 8, 49, 3, 1, sK); g.p(cx - 2, 49, 3, 1, sK); g.p(cx + 4, 49, 3, 1, sK);
+  /* rune belt */
+  g.p(cx - 8, 43, 16, 1, GLO);
+  /* spindly arms with grabby claws */
+  var s, ax;
+  for (s = -1; s <= 1; s += 2) {
+    ax = s < 0 ? cx - 11 : cx + 9;
+    g.p(ax, 40, 2, 9, PB);
+    g.p(ax + (s < 0 ? 0 : 1), 40, 1, 9, PBk);
+    g.p(ax - (s < 0 ? 1 : 0), 48, 3, 2, PB);
+    g.p(ax - (s < 0 ? 1 : 0), 49, 1, 1, sK); g.p(ax + (s < 0 ? 1 : 2), 49, 1, 1, sK);
+  }
+  /* short legs, bare toed feet */
+  g.p(cx - 5, 50, 3, 6, PB); g.p(cx + 2, 50, 3, 6, PB);
+  g.p(cx - 5, 50, 1, 6, PBk); g.p(cx + 4, 50, 1, 6, PBk);
+  g.p(cx - 7, 56, 6, 2, PB); g.p(cx + 1, 56, 6, 2, PB);
+  g.p(cx - 7, 57, 6, 1, sK); g.p(cx + 1, 57, 6, 1, sK);
+};
+
+/* Brute goblin — Goblin Realm, FLEX. Big, dark green, heavy brow, tusks, bone club. */
+SPR.goblinbrute = function (ox, oy) {
+  var g = painter(ox, oy), cx = 24, s;
+  var GB = '#4a8a3a', GBs = '#356828', GBk = '#234a1a', TK = '#e8e0c8', BN = '#c8b48c';
+  /* big pointy ears */
+  g.p(cx - 16, 12, 6, 4, GB); g.p(cx - 19, 11, 3, 2, GB); g.p(cx - 16, 15, 6, 1, GBs);
+  g.p(cx + 10, 12, 6, 4, GB); g.p(cx + 16, 11, 3, 2, GB); g.p(cx + 10, 15, 6, 1, GBs);
+  /* big blocky head */
+  g.ell(cx - 11, 4, cx + 11, 24, GB, GBk);
+  /* heavy single brow */
+  g.p(cx - 8, 10, 16, 3, GBk);
+  /* small dim eyes under the brow */
+  g.p(cx - 6, 13, 3, 2, sWH); g.p(cx + 3, 13, 3, 2, sWH);
+  g.p(cx - 5, 14, 1, 1, sK); g.p(cx + 4, 14, 1, 1, sK);
+  /* underbite jaw with tusks poking up */
+  g.p(cx - 7, 19, 14, 3, GBs);
+  g.p(cx - 6, 19, 12, 1, sK);
+  g.p(cx - 6, 17, 2, 3, TK); g.p(cx + 4, 17, 2, 3, TK);
+  g.p(cx - 6, 17, 2, 1, sWH); g.p(cx + 4, 17, 2, 1, sWH);
+  /* crude bone club (behind the right arm) */
+  g.ell(cx + 14, 13, cx + 21, 21, BN, sK);
+  g.p(cx + 16, 15, 2, 2, sWH);
+  g.p(cx + 16, 21, 4, 24, BN);
+  g.p(cx + 16, 21, 1, 24, sK); g.p(cx + 19, 21, 1, 24, sK);
+  g.p(cx + 17, 26, 1, 1, '#8a7a58'); g.p(cx + 18, 33, 1, 1, '#8a7a58');
+  /* broad hulking torso */
+  g.p(cx - 15, 25, 30, 18, GB);
+  g.p(cx - 15, 25, 30, 1, sK);
+  g.p(cx - 15, 25, 1, 18, sK); g.p(cx + 14, 25, 1, 18, sK);
+  g.p(cx - 14, 26, 2, 16, '#5a9c48');
+  g.p(cx + 11, 26, 3, 16, GBs);
+  /* ragged hide vest with a bone toggle */
+  g.p(cx - 8, 27, 16, 16, '#7a5a34');
+  g.p(cx - 8, 27, 16, 1, sK);
+  g.p(cx - 8, 27, 1, 16, sK); g.p(cx + 7, 27, 1, 16, sK);
+  g.p(cx + 4, 28, 3, 15, '#5a4024');
+  g.p(cx - 2, 31, 4, 2, TK);
+  /* thick arms with knuckly fists */
+  for (s = -1; s <= 1; s += 2) {
+    var x0 = s < 0 ? cx - 21 : cx + 15;
+    g.p(x0, 25, 6, 17, GB);
+    g.p(x0, 25, 6, 1, sK);
+    g.p(x0, 25, 1, 17, sK); g.p(x0 + 5, 25, 1, 17, sK);
+    g.p(x0 + (s < 0 ? 1 : 4), 27, 1, 13, GBs);
+    g.p(x0, 42, 6, 4, GB);
+    g.p(x0, 42, 1, 4, sK); g.p(x0 + 5, 42, 1, 4, sK);
+    g.p(x0, 45, 6, 1, sK);
+    g.p(x0 + 1, 43, 1, 1, GBk); g.p(x0 + 3, 43, 1, 1, GBk);
+  }
+  /* stumpy legs */
+  g.p(cx - 9, 43, 7, 8, GB); g.p(cx + 2, 43, 7, 8, GB);
+  g.p(cx - 9, 43, 1, 8, GBk); g.p(cx - 3, 43, 1, 8, GBk);
+  g.p(cx + 2, 43, 1, 8, GBk); g.p(cx + 8, 43, 1, 8, GBk);
+  /* big flat feet */
+  g.p(cx - 11, 51, 10, 3, GB); g.p(cx + 1, 51, 10, 3, GB);
+  g.p(cx - 11, 53, 10, 1, sK); g.p(cx + 1, 53, 10, 1, sK);
+  g.p(cx - 11, 51, 1, 2, sK); g.p(cx + 10, 51, 1, 2, sK);
+};
+
+/* ---- overworld walkers ---- */
+defWalker('legionary', {hat: sBZ, hair: sBZ, coat: '#9aa0ae', coatd: '#6e7480', accent: sRD});
+defWalker('salesman', {hat: '#8b3ca8', hair: '#6a4a2a', coat: '#f0d838', coatd: '#c8a030', mous: sMC, accent: sRD});
+defWalker('deejay', {hair: '#2a2028', coat: '#e07820', coatd: '#b05a14', hatShow: false, accent: '#4ff0ff'});
+defWalker('skater', {hat: sRD, hair: '#8a5a2c', coat: sTE, coatd: sTEs, accent: sRD});
+defWalker('goblinhex', {hat: '#5a3f88', hair: '#8a6ab8', coat: '#5a3f88', coatd: '#3e2a62', mous: '#3e2a62', accent: '#e070ff'});
+defWalker('goblinbrute', {hair: '#4a8a3a', coat: '#4a8a3a', coatd: '#356828', mous: '#234a1a', accent: '#c8b48c', hatShow: false});
+
+
 /* ===== 35-tiles.js ===== */
 /* tiles.js — 16x16 terrain tiles. Each entry: { solid, enc, draw(x,y,frame) }.
    Interactable objects (signs, machine, NPCs) are a separate map layer, not tiles. */
@@ -1276,7 +1589,7 @@ var World = {
   menu: null,       /* pause menu state */
   locked: false,    /* input lock during cutscenes */
   enter: function () {
-    this.moving = false; this.menu = null; this.locked = false;
+    this.moving = false; this.menu = null; this.locked = false; this.spot = null;
     var m = curMap();
     if (m && m.music) musicStart(m.music);
     this.updateCam(true);
@@ -1328,11 +1641,13 @@ var World = {
     if (m.onStep) m.onStep(Game.px, Game.py);
   },
   interact: function () {
-    if (this.locked) return;
+    if (this.locked || this.spot) return;
     var m = curMap(), d = DIRV[Game.dir];
     var o = objAt(m, Game.px + d[0], Game.py + d[1]);
     if (!o) { /* also allow interacting with tile you stand on for some pickups */ o = objAt(m, Game.px, Game.py); if (!o || !o.standOn) o = null; }
-    if (o && o.onInteract) { sfx('select'); o.onInteract(o); }
+    if (!o) return;
+    if (o.trainer) { sfx('select'); if (hasFlag(o.defeat)) say([[o.tname || 'THEM', o.beaten || 'GOOD BOUT.']]); else startTrainerBattle(o); return; }
+    if (o.onInteract) { sfx('select'); o.onInteract(o); }
   },
   openMenu: function () {
     this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'CLOSE'] };
@@ -1340,8 +1655,11 @@ var World = {
   },
   update: function (dt) {
     Game.playtime += dt;
+    if (this.spot) { this.updateSpot(dt); this.updateCam(false); return; } /* a trainer is charging us */
     if (this.locked) { this.updateCam(false); return; }
     if (this.menu) { this.updateCam(false); return; }
+    this.updateTrainers(dt);                              /* patrols + line-of-sight */
+    if (this.spot || this.locked) { this.updateCam(false); return; }
     if (this.moving) {
       this.moveT += dt;
       this.stepAcc += dt;
@@ -1349,7 +1667,7 @@ var World = {
       if (this.moveT >= this.moveDur) {
         this.moving = false;
         this.arrive();
-        if (this.moving || this.menu || this.locked || scene !== World) { this.updateCam(false); return; }
+        if (this.moving || this.menu || this.locked || this.spot || scene !== World) { this.updateCam(false); return; }
       }
     }
     if (!this.moving) {
@@ -1359,10 +1677,71 @@ var World = {
     this.updateCam(false);
   },
   onPress: function (k) {
-    if (this.locked) return;
+    if (this.spot || this.locked) return;
     if (this.menu) { this.menuPress(k); return; }
     if (k === 'a') this.interact();
     else if (k === 'start') this.openMenu();
+  },
+  /* ---------- Pokemon-style trainers: patrol, line-of-sight, forced battle ---------- */
+  initTrainer: function (o) {
+    if (o._init) return; o._init = true;
+    o._anchorx = o.x; o._anchory = o.y; o._moving = false; o._mt = 0;
+    o._wait = Math.random() * 0.6; o._frame = 0; if (!o.dir) o.dir = 'down';
+  },
+  updateTrainers: function (dt) {
+    var m = curMap(); if (!m.objs) return;
+    for (var i = 0; i < m.objs.length; i++) {
+      var o = m.objs[i];
+      if (!o.trainer || objGone(o)) continue;
+      this.initTrainer(o);
+      if (hasFlag(o.defeat)) continue;                   /* beaten: stands still */
+      if (o._moving) { o._mt += dt; if (o._mt >= 0.16) { o._moving = false; o._wait = 0.3 + Math.random() * 0.4; } }
+      else if (o._wait > 0) { o._wait -= dt; }
+      else { this.trainerStep(o); }
+      if (this.trainerSees(o)) { this.spotTrainer(o); return; }
+    }
+  },
+  trainerStep: function (o) {
+    var p = o.patrol || { type: 'watch' };
+    if (p.type === 'watch') { o.dir = (o.dir === (p.b || 'right')) ? (p.a || 'left') : (p.b || 'right'); o._wait = 0.5 + Math.random() * 0.5; o._frame ^= 1; return; }
+    var ax = p.ax || 'h', span = p.span || 2;
+    if (ax === 'h' && o.dir !== 'left' && o.dir !== 'right') o.dir = 'right';
+    if (ax === 'v' && o.dir !== 'up' && o.dir !== 'down') o.dir = 'down';
+    var dx = ax === 'h' ? (o.dir === 'left' ? -1 : 1) : 0, dy = ax === 'v' ? (o.dir === 'up' ? -1 : 1) : 0;
+    var nx = o.x + dx, ny = o.y + dy;
+    var within = ax === 'h' ? (nx >= o._anchorx - span && nx <= o._anchorx + span) : (ny >= o._anchory - span && ny <= o._anchory + span);
+    if (within && !trainerBlocked(nx, ny)) { o._fx = o.x; o._fy = o.y; o.x = nx; o.y = ny; o._moving = true; o._mt = 0; o._frame ^= 1; }
+    else { o.dir = (ax === 'h') ? (o.dir === 'left' ? 'right' : 'left') : (o.dir === 'up' ? 'down' : 'up'); o._wait = 0.2; }
+  },
+  trainerSees: function (o) {
+    var d = DIRV[o.dir]; if (!d) return 0;
+    var s = o.sight || 3, m = curMap();
+    for (var k = 1; k <= s; k++) {
+      var tx = o.x + d[0] * k, ty = o.y + d[1] * k;
+      if (tx < 0 || ty < 0 || tx >= m.w || ty >= m.h) return 0;
+      if (tx === Game.px && ty === Game.py) return k;
+      if (tileAt(m, tx, ty).solid) return 0;
+      var oo = objAt(m, tx, ty); if (oo && oo !== o && oo.solid) return 0;
+    }
+    return 0;
+  },
+  spotTrainer: function (o) { this.spot = { o: o, phase: 'alert', t: 0 }; o._moving = false; this.moving = false; sfx('bump'); sfx('cursor'); },
+  updateSpot: function (dt) {
+    var s = this.spot, o = s.o; s.t += dt;
+    if (s.phase === 'alert') { if (s.t > 0.6) { s.phase = 'march'; s.t = 0; } return; }
+    /* march toward the player, one tile at a time */
+    if (o._moving) { o._mt += dt; if (o._mt >= 0.14) o._moving = false; return; }
+    if (Math.abs(o.x - Game.px) + Math.abs(o.y - Game.py) <= 1) {
+      o.dir = (Game.px > o.x) ? 'right' : (Game.px < o.x) ? 'left' : (Game.py > o.y) ? 'down' : 'up';
+      this.spot = null; startTrainerBattle(o); return;
+    }
+    var dx = Game.px - o.x, dy = Game.py - o.y, sx = 0, sy = 0;
+    if (Math.abs(dx) >= Math.abs(dy)) sx = dx > 0 ? 1 : -1; else sy = dy > 0 ? 1 : -1;
+    var nx = o.x + sx, ny = o.y + sy;
+    if (trainerBlocked(nx, ny)) { if (sx) { sx = 0; sy = dy > 0 ? 1 : dy < 0 ? -1 : 0; } else { sy = 0; sx = dx > 0 ? 1 : dx < 0 ? -1 : 0; } nx = o.x + sx; ny = o.y + sy; }
+    o.dir = sx > 0 ? 'right' : sx < 0 ? 'left' : sy > 0 ? 'down' : 'up';
+    if (!trainerBlocked(nx, ny)) { o._fx = o.x; o._fy = o.y; o.x = nx; o.y = ny; o._moving = true; o._mt = 0; o._frame ^= 1; }
+    else { this.spot = null; startTrainerBattle(o); }
   },
   menuPress: function (k) {
     var mn = this.menu;
@@ -1398,9 +1777,15 @@ var World = {
     }
     /* draw objects with y <= player first (background), then player, then y>player */
     function drawObj(o) {
-      var ox = o.x * TS - cx, oy = o.y * TS - cy;
+      var pxo = o.x * TS, pyo = o.y * TS;
+      if (o.trainer && o._moving) { var t = o._mt / 0.16; pxo = (o._fx + (o.x - o._fx) * t) * TS; pyo = (o._fy + (o.y - o._fy) * t) * TS; }
+      var ox = pxo - cx, oy = pyo - cy;
       if (o.draw) { o.draw(ox, oy); return; }
-      if (o.spr && WALK[o.spr]) { drawWalker(o.spr, o.dir || 'down', 0, ox, oy); return; }
+      if (o.spr && WALK[o.spr]) {
+        drawWalker(o.spr, o.dir || 'down', (o.trainer && o._moving) ? o._frame : 0, ox, oy);
+        if (World.spot && World.spot.o === o && World.spot.phase === 'alert') drawAlert(ox, oy);
+        return;
+      }
       if (o.tile && TILES[o.tile]) { TILES[o.tile].draw(ox, oy, f & 1); return; }
       if (o.mustache) { drawMustache(ox, oy); return; }
       /* default: little marker */
@@ -1472,6 +1857,35 @@ function warpTo(w) {
   sfx('door');
 }
 function gotoWorld() { setScene(World); }
+
+/* ---------------- trainer helpers ---------------- */
+function trainerBlocked(x, y) {
+  var m = curMap();
+  if (solidAt(m, x, y)) return true;
+  if (x === Game.px && y === Game.py) return true;   /* don't stand on the player */
+  return false;
+}
+function drawAlert(x, y) {
+  px(x + 4, y - 12, 8, 9, COL.white); px(x + 4, y - 13, 8, 1, COL.black);
+  px(x + 4, y - 3, 8, 1, COL.black); px(x + 5, y - 4, 2, 3, COL.black); /* speech tail */
+  px(x + 7, y - 11, 2, 4, COL.red); px(x + 7, y - 6, 2, 2, COL.red);    /* the ! */
+}
+/* place a patrolling forced-battle trainer */
+function mkTrainer(x, y, cfg) {
+  cfg = cfg || {}; cfg.x = x; cfg.y = y; cfg.solid = true; cfg.trainer = true;
+  if (cfg.sight === undefined) cfg.sight = 3;
+  return cfg;
+}
+function startTrainerBattle(o) {
+  World.locked = true; World.spot = null;
+  var nm = o.tname || 'CHALLENGER';
+  Cutscene.play([
+    { say: [nm, o.hail || "YOU THERE! WE DUEL, HERE, NOW!"] },
+    { battle: function () { return { enemies: [{ enemy: o.enemy, level: o.level || 5 }], music: 'battle', canFlee: false, bg: o.bg }; },
+      onResult: function (r) { if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0); } } },
+    { say: [nm, o.beaten || 'A WORTHY BOUT. WELL BATTLED.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}
 
 
 /* ===== 50-events.js ===== */
@@ -2515,7 +2929,14 @@ var ENEMIES = {
   discofan:  { name: 'DISCO REGULAR', spr: 'dancer', type: 'HEART', moves: ['weakheart', 'weakflex'], base: { HYPE: 32, FLOW: 14, POISE: 11, TEMPO: 12, gH: 3.8, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 22, money: 14 },
   gerald:    { name: 'GERALD', spr: 'gerald', type: 'CLASSIC', moves: ['scriptread', 'weakword', 'heckle'], base: { HYPE: 30, FLOW: 12, POISE: 12, TEMPO: 9, gH: 3.6, gF: 1.9, gP: 1.9, gT: 1.4 }, xp: 20, money: 15 },
   editor:    { name: 'ORDER EDITOR', spr: 'editor', type: 'WORDPLAY', moves: ['redpen', 'approved', 'scriptread'], base: { HYPE: 40, FLOW: 15, POISE: 14, TEMPO: 11, gH: 4.2, gF: 2.4, gP: 2.2, gT: 1.8 }, xp: 40, money: 30 },
-  goblin:    { name: 'CACKLING GOBLIN', spr: 'goblin', type: 'ROAST', moves: ['heckle', 'weakroast'], base: { HYPE: 30, FLOW: 15, POISE: 10, TEMPO: 14, gH: 3.6, gF: 2.3, gP: 1.6, gT: 2.0 }, xp: 24, money: 13 }
+  goblin:    { name: 'CACKLING GOBLIN', spr: 'goblin', type: 'ROAST', moves: ['heckle', 'weakroast'], base: { HYPE: 30, FLOW: 15, POISE: 10, TEMPO: 14, gH: 3.6, gF: 2.3, gP: 1.6, gT: 2.0 }, xp: 24, money: 13 },
+  /* --- era-local mini-boss "characters" (forced-battle trainers), varied types --- */
+  legionary: { name: 'LEGIONARY', spr: 'legionary', type: 'ROAST', moves: ['weakroast', 'heckle'], base: { HYPE: 40, FLOW: 13, POISE: 13, TEMPO: 9, gH: 4.0, gF: 1.9, gP: 1.9, gT: 1.4 }, xp: 22, money: 18 },
+  salesman:  { name: 'SNAKE-OIL SALESMAN', spr: 'salesman', type: 'FLEX', moves: ['weakflex', 'scriptread'], base: { HYPE: 38, FLOW: 15, POISE: 11, TEMPO: 12, gH: 3.8, gF: 2.1, gP: 1.6, gT: 1.7 }, xp: 26, money: 22 },
+  deejay:    { name: 'THE HYPE-MAN', spr: 'deejay', type: 'FLEX', moves: ['weakflex', 'heckle'], base: { HYPE: 42, FLOW: 16, POISE: 12, TEMPO: 13, gH: 4.0, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 30, money: 26 },
+  skater:    { name: 'ROLLER SKATER', spr: 'skater', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 40, FLOW: 16, POISE: 11, TEMPO: 15, gH: 3.9, gF: 2.2, gP: 1.6, gT: 2.1 }, xp: 30, money: 26 },
+  goblinhex: { name: 'HEXING GOBLIN', spr: 'goblinhex', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 34, FLOW: 17, POISE: 10, TEMPO: 14, gH: 3.7, gF: 2.4, gP: 1.6, gT: 2.0 }, xp: 30, money: 24 },
+  goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 }
 };
 
 /* era encounter pools: mapId enc uses one of these */
@@ -2642,7 +3063,10 @@ registerMap('manor', {
     { x: 11, y: 2, solid: true, spr: 'babbage', dir: 'down', flag: 'babbage_moved',
       onInteract: function () { manorBabbage(); } }
   ],
-  onEnter: function () { if (!hasFlag('act0_intro')) { openingCutscene(); } }
+  onEnter: function () {
+    if (!hasFlag('act0_intro')) { openingCutscene(); }
+    else if (hasFlag('await_party') && !hasFlag('party_done')) { surprisePartyScene(); }
+  }
 });
 
 /* ================= BAKER'S ROW ================= */
@@ -2771,6 +3195,9 @@ registerMap('marketroad', {
   objs: [
     { x: 9, y: 4, solid: true, spr: 'gerald', dir: 'down', flag: 'rome_gerald1',
       onInteract: function (o) { romeGeraldBattle(o); } },
+    mkTrainer(5, 3, { spr: 'roman', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_rome_a', enemy: 'orator', level: 2, reward: 20, bg: 'rome', tname: 'STREET ORATOR', hail: 'HALT, PLEBEIAN! DEFEND YOUR VERSE!', beaten: 'IMPRESSIVE... FOR A TOURIST.' }),
+    mkTrainer(12, 3, { spr: 'legionary', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_rome_b', enemy: 'legionary', level: 2, reward: 20, bg: 'rome', tname: 'LEGIONARY', hail: 'NONE PASS WITHOUT A BATTLE.', beaten: 'YOU FIGHT LIKE A CONSUL.' }),
+    mkTrainer(14, 6, { spr: 'roman', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_rome_c', enemy: 'senator', level: 2, reward: 22, bg: 'rome', tname: 'GOSSIPING SENATOR', hail: 'I HEARD YOUR BARS ARE... AVERAGE.', beaten: 'I SHALL GOSSIP OF YOUR GENIUS.' }),
     { x: 15, y: 1, mustache: true, flag: 'stache_rome2', onInteract: function (o) { collectMustache(o, 'stache_rome2'); } }
   ]
 });
@@ -2903,7 +3330,7 @@ function romeVictory() {
     { narr: 'HERSCHEL LEARNED BOTH HIPS!' },
     { narr: 'FLUX GEAR GET! ( 1 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH DODGE CITY.'] },
-    { do: function () { healParty(); saveGame(false); } }
+    { do: function () { saveGame(false); } }
   ], { onDone: function () { travelChoose('rome'); } });
 }
 
@@ -2970,6 +3397,9 @@ registerMap('dustytrail', {
   objs: [
     { x: 9, y: 4, solid: true, spr: 'gerald', dir: 'down', flag: 'dodge_gerald1',
       onInteract: function (o) { dodgeGeraldBattle(o); } },
+    mkTrainer(5, 3, { spr: 'cowboy', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_dodge_a', enemy: 'tumbleweed', level: 7, reward: 26, bg: 'west', tname: 'TUMBLEWEED POET', hail: 'STOP. LISTEN TO MY... FEELINGS.', beaten: 'THAT WAS BEAUTIFUL. I LOST.' }),
+    mkTrainer(12, 3, { spr: 'cowboy', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_dodge_b', enemy: 'auctioneer', level: 7, reward: 26, bg: 'west', tname: 'CATTLE AUCTIONEER', hail: 'DO-I-HEAR-A-BATTLE-BATTLE-HEY?', beaten: 'SOLD! TO THE DADDY IN THE HAT.' }),
+    mkTrainer(14, 6, { spr: 'salesman', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_dodge_c', enemy: 'salesman', level: 7, reward: 30, bg: 'west', tname: 'SNAKE-OIL SALESMAN', hail: 'STEP RIGHT UP AND GET BEAT!', beaten: 'THE TONIC WAS JUST GRAVY. DANG.' }),
     { x: 15, y: 1, mustache: true, flag: 'stache_dodge2', onInteract: function (o) { collectMustache(o, 'stache_dodge2'); } }
   ]
 });
@@ -3111,7 +3541,7 @@ function dodgeVictory() {
     { say: ['JAKE', 'FEELINGS TO WRANGLE.'] },
     { narr: 'CHRONO COIL GET! ( 2 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH NEW YORK.'] },
-    { do: function () { healParty(); saveGame(false); } }
+    { do: function () { saveGame(false); } }
   ], { onDone: function () { travelChoose('west'); } });
 }
 
@@ -3228,6 +3658,9 @@ registerMap('boilerroom', {
     { x: 7, y: 9, solid: true, draw: drawPlaylist, flag: 'nyc_playlist',
       onInteract: function (o) { playlistBattle(o); } },
     { x: 10, y: 2, solid: true, spr: 'gerald', dir: 'right', onInteract: function () { say([['GERALD', "REX IS ON THE ROOF. HE WON'T"], ['GERALD', 'SIGN THE PLAYLIST CONTRACT.'], ['GERALD', 'HE SAID, QUOTE, "NEVER."'], ['GERALD', 'IT WAS HONESTLY VERY COOL.']]); } },
+    mkTrainer(5, 5, { spr: 'discoer', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_nyc_a', enemy: 'discofan', level: 10, reward: 34, bg: 'disco', tname: 'DISCO REGULAR', hail: 'YOU WANNA BATTLE? ON THE FLOOR?', beaten: 'OKAY OKAY, YOU GOT THE MOVES.' }),
+    mkTrainer(13, 4, { spr: 'deejay', dir: 'up', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_nyc_b', enemy: 'deejay', level: 10, reward: 40, bg: 'disco', tname: 'THE HYPE-MAN', hail: 'MAKE SOME NOISE FOR YOUR DEFEAT!', beaten: 'AIGHT, AIGHT, YOU GOT BARS.' }),
+    mkTrainer(6, 9, { spr: 'skater', dir: 'right', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_nyc_c', enemy: 'skater', level: 10, reward: 40, bg: 'disco', tname: 'ROLLER SKATER', hail: "CAN'T STOP, WON'T STOP — LET'S GO!", beaten: 'WIPEOUT. RESPECT, THOUGH.' }),
     { x: 13, y: 9, mustache: true, flag: 'stache_nyc2', onInteract: function (o) { collectMustache(o, 'stache_nyc2'); } }
   ]
 });
@@ -3377,7 +3810,7 @@ function nycVictory() {
     { narr: 'TIME CRYSTAL GET! ( 3 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH HOME.'] },
     { say: ['BABBAGE', 'PLOTTING A COURSE FOR LONDON...'] }
-  ], { onDone: function () { healParty(); saveGame(false); goblinMalfunction(); } });
+  ], { onDone: function () { saveGame(false); goblinMalfunction(); } });
 }
 
 /* ---------------- register NYC as a travel destination ---------------- */
@@ -3559,16 +3992,59 @@ function pDiddyUnmask() {
     { narr: 'LORD SNOBBINGTON WAS... P DIDDY?!' },
     { say: ['P DIDDY', "AND I WOULD'VE GOTTEN AWAY WITH IT TOO,"] },
     { say: ['P DIDDY', "IF IT WEREN'T FOR YOU MEDDLING DADDIES!"] },
-    { sfx: 'whoosh' },
-    { narr: 'THEN THE TIME MACHINE ROARS. A FIGURE STEPS OUT.' },
-    { say: ['50 CENT', 'DADDIES. YOU TOOK DOWN P DIDDY.'] },
-    { say: ['50 CENT', 'I CAME FROM THE FUTURE. WE NEED YOU.'] },
+    { do: function () { setFlag('finale_done'); gainPart('MASTER SPRING'); saveGame(false); } },
+    { say: ['SAMUEL', 'WE DID IT, DADDIES! ...DADDIES?'] },
+    { narr: 'BUT THE OTHERS HAVE SLIPPED AWAY. THE STAGE IS EMPTY.' },
+    { say: ['SAMUEL', 'WHERE DID EVERYONE GO? ...HOME, I SUPPOSE.'] },
+    { narr: 'HEAD BACK TO DADDY HEADQUARTERS.' },
+    { do: function () { setFlag('await_party'); Game.map = 'bakersrow'; Game.px = 9; Game.py = 3; Game.dir = 'up'; saveGame(false); } }
+  ], { onDone: function () { gotoWorld(); } });
+}
+/* the manual walk home pays off: a surprise party, then the 50 Cent entrance. */
+function surprisePartyScene() {
+  setFlag('party_done');
+  Cutscene.play([
+    { bg: 'manorbg' }, { music: 'finale' },
+    { narr: 'SAMUEL STEPS INTO DADDY HEADQUARTERS. THE LIGHTS ARE OFF...' },
+    { sfx: 'showstopper' },
+    { say: ['HERSCHEL', 'SURPRISE!'] },
+    { say: ['WILLIAM', 'SURPRISE!'] },
+    { say: ['ROSALIND', 'SURPRISE!'] },
+    { narr: 'THE DADDIES THREW SAMUEL A SURPRISE PARTY!' },
+    { say: ['SAMUEL', 'YOU... PLANNED THIS? THE WHOLE TIME?'] },
+    { say: ['HERSCHEL', 'SINCE ROME, LASS. WE ALWAYS KNEW.'] },
+    { say: ['WILLIAM', 'IT WAS CROOKED EVERY SINGLE DAY.'] },
+    { do: function () { fiftyCentEntrance(function () { Cutscene.next(); }); } },
+    { say: ['HERSCHEL', '...IS THAT—?!'] },
+    { say: ['WILLIAM', 'IT IS. IT REALLY IS.'] },
+    { say: ['ROSALIND', 'SHOCK. AWE.'] },
+    { say: ['SAMUEL', 'AND REVERENCE.'] },
+    { say: ['50 CENT', 'DADDIES. I CAME FROM THE FUTURE.'] },
+    { say: ['50 CENT', 'YOU TOOK DOWN P DIDDY. WE NEED YOU.'] },
     { say: ['50 CENT', "THE MISSION? IT ISN'T WRITTEN YET."] },
     { say: ['SAMUEL', "THEN WE'LL FREESTYLE IT."] },
-    { say: ['HERSCHEL', 'MY HIP SAYS NO. WE GO ANYWAY.'] },
-    { do: function () { setFlag('game_complete'); gainPart('MASTER SPRING'); healParty(); saveGame(false); } },
-    { narr: 'THE DADDIES PILE INTO THE MACHINE. ONE MORE JUMP...' }
+    { do: function () { setFlag('game_complete'); saveGame(false); } }
   ], { onDone: function () { setScene(makeBirthday()); } });
+}
+/* animated 50 Cent rising out of the time machine */
+function fiftyCentEntrance(onDone) {
+  var s = {
+    t: 0,
+    enter: function () { musicStop(); sfx('whoosh'); },
+    update: function (dt) { this.t += dt; if (this.t > 2.6) onDone(); },
+    draw: function () {
+      BGS.manorbg();
+      var t = this.t;
+      px(96, 54, 48, 66, '#c49446'); px(100, 58, 40, 50, '#1a2138');            /* time machine */
+      var c = ((t * 12) | 0) % 2 ? COL.neon2 : COL.neon; px(108, 66, 24, 30, c);
+      if (t > 0.5) { var rise = Math.max(0, 70 - (t - 0.5) * 55); SPR.fiftycent(96, 44 + rise); }  /* rises out */
+      if (t < 1.6 && ((t * 10) | 0) % 2) { ctx.globalAlpha = 0.35; cls(COL.gold); ctx.globalAlpha = 1; }
+      centerTextO('50 CENT', 16, COL.gold, COL.black, 2);
+      if (t > 1.2 && (Math.floor(t * 2) % 2)) centerTextO('!!!', 132, COL.pink, COL.black, 2);
+    },
+    onPress: function () {}
+  };
+  setScene(s);
 }
 
 /* register the finale as a travel destination once unlocked */
@@ -3685,8 +4161,9 @@ registerMap('goblinrealm', {
     { x: 8, y: 1, solid: true, spr: 'pedro', dir: 'down', flag: 'pedro_beaten',
       onInteract: function () { pedroFight(); } },
     { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
-    { x: 5, y: 4, solid: true, spr: 'goblin', dir: 'right', onInteract: function () { say([['GOBLIN', 'HEE HEE! WELCOME TO OUR REALM!'], ['GOBLIN', 'WE RODE YOUR MACHINE FOR FREE!'], ['GOBLIN', 'NO REFUNDS! HEE HEE HEE!']]); } },
-    { x: 11, y: 5, solid: true, spr: 'goblin', dir: 'left', onInteract: function () { say([['GOBLIN', 'THE BAKER MAN GUARDS THE HILL.'], ['GOBLIN', 'HE IS VERY HANDSOME. WE HATE IT.']]); } },
+    mkTrainer(5, 5, { spr: 'goblin', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_gob_a', enemy: 'goblin', level: 11, reward: 30, bg: 'goblin', tname: 'CACKLING GOBLIN', hail: 'HEE HEE! NO REFUNDS! FIGHT US!', beaten: 'AWW. YOU BROKE OUR CACKLE.' }),
+    mkTrainer(11, 5, { spr: 'goblinhex', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_gob_b', enemy: 'goblinhex', level: 11, reward: 34, bg: 'goblin', tname: 'HEXING GOBLIN', hail: 'A HEX UPON YOUR BARS!', beaten: 'MY HEX... BACKFIRED. TYPICAL.' }),
+    mkTrainer(8, 6, { spr: 'goblinbrute', dir: 'down', patrol: { ax: 'v', span: 1 }, sight: 3, defeat: 'tr_gob_c', enemy: 'goblinbrute', level: 12, reward: 36, bg: 'goblin', tname: 'BRUTE GOBLIN', hail: 'BRUTE. SMASH. BARS. NOW.', beaten: 'BRUTE... SAD. BRUTE GO HOME.' }),
     { x: 13, y: 8, mustache: true, flag: 'stache_goblin', onInteract: function (o) { collectMustache(o, 'stache_goblin'); } }
   ],
   onEnter: function () { if (!hasFlag('goblin_arrived')) { /* arrival handled by goblinMalfunction */ } }
@@ -3782,7 +4259,7 @@ function pedroAfter() {
     { say: ['PEDRO', 'GO. MAKE YOUR DIFFERENCE IN ENGLAND.'] },
     { say: ['PEDRO', 'AND CALL ME. SOMEHOW.'] },
     { say: ['SAMUEL', 'I WILL. ...SOMEHOW.'] },
-    { do: function () { setFlag('goblin_done'); setFlag('london_unlocked'); healParty(); saveGame(false); } },
+    { do: function () { setFlag('goblin_done'); setFlag('london_unlocked'); saveGame(false); } },
     { narr: 'THE DADDIES BOARD THE MENDED MACHINE — LONDON AT LAST!' }
   ], { onDone: function () { playTravel('LONDON 1889', function () {
         Game.map = 'theatredistrict'; Game.px = 9; Game.py = 5; Game.dir = 'up'; saveGame(false); gotoWorld();
@@ -3795,6 +4272,22 @@ function pedroAfter() {
    Era-specific arrivals/bosses are registered from the per-era map modules. */
 
 /* ERAS + registerEra live in 40-map.js so era modules can self-register at load. */
+
+/* missing battle-sprite alias (auctioneer used 'cowboy' which had no SPR) */
+if (!SPR.cowboy) SPR.cowboy = SPR.jake;
+/* dialogue portraits for the era-local mini-boss "characters" */
+SPEAKERS['STREET ORATOR'] = { spr: SPR.orator, f: 210 };
+SPEAKERS['GOSSIPING SENATOR'] = { spr: SPR.senator, f: 220 };
+SPEAKERS['LEGIONARY'] = { spr: SPR.legionary, f: 190 };
+SPEAKERS['TUMBLEWEED POET'] = { spr: SPR.poet, f: 230 };
+SPEAKERS['CATTLE AUCTIONEER'] = { spr: SPR.cowboy, f: 175 };
+SPEAKERS['SNAKE-OIL SALESMAN'] = { spr: SPR.salesman, f: 250 };
+SPEAKERS['DISCO REGULAR'] = { spr: SPR.dancer, f: 262 };
+SPEAKERS['THE HYPE-MAN'] = { spr: SPR.deejay, f: 240 };
+SPEAKERS['ROLLER SKATER'] = { spr: SPR.skater, f: 300 };
+SPEAKERS['CACKLING GOBLIN'] = { spr: SPR.goblin, f: 330 };
+SPEAKERS['HEXING GOBLIN'] = { spr: SPR.goblinhex, f: 340 };
+SPEAKERS['BRUTE GOBLIN'] = { spr: SPR.goblinbrute, f: 150 };
 
 /* ---- party growth helpers ---- */
 function addToParty(id, level) {

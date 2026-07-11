@@ -37,8 +37,9 @@ registerMap('goblinrealm', {
     { x: 8, y: 1, solid: true, spr: 'pedro', dir: 'down', flag: 'pedro_beaten',
       onInteract: function () { pedroFight(); } },
     { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
-    { x: 5, y: 4, solid: true, spr: 'goblin', dir: 'right', onInteract: function () { say([['GOBLIN', 'HEE HEE! WELCOME TO OUR REALM!'], ['GOBLIN', 'WE RODE YOUR MACHINE FOR FREE!'], ['GOBLIN', 'NO REFUNDS! HEE HEE HEE!']]); } },
-    { x: 11, y: 5, solid: true, spr: 'goblin', dir: 'left', onInteract: function () { say([['GOBLIN', 'THE BAKER MAN GUARDS THE HILL.'], ['GOBLIN', 'HE IS VERY HANDSOME. WE HATE IT.']]); } },
+    mkTrainer(5, 5, { spr: 'goblin', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_gob_a', enemy: 'goblin', level: 11, reward: 30, bg: 'goblin', tname: 'CACKLING GOBLIN', hail: 'HEE HEE! NO REFUNDS! FIGHT US!', beaten: 'AWW. YOU BROKE OUR CACKLE.' }),
+    mkTrainer(11, 5, { spr: 'goblinhex', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_gob_b', enemy: 'goblinhex', level: 11, reward: 34, bg: 'goblin', tname: 'HEXING GOBLIN', hail: 'A HEX UPON YOUR BARS!', beaten: 'MY HEX... BACKFIRED. TYPICAL.' }),
+    mkTrainer(8, 6, { spr: 'goblinbrute', dir: 'down', patrol: { ax: 'v', span: 1 }, sight: 3, defeat: 'tr_gob_c', enemy: 'goblinbrute', level: 12, reward: 36, bg: 'goblin', tname: 'BRUTE GOBLIN', hail: 'BRUTE. SMASH. BARS. NOW.', beaten: 'BRUTE... SAD. BRUTE GO HOME.' }),
     { x: 13, y: 8, mustache: true, flag: 'stache_goblin', onInteract: function (o) { collectMustache(o, 'stache_goblin'); } }
   ],
   onEnter: function () { if (!hasFlag('goblin_arrived')) { /* arrival handled by goblinMalfunction */ } }
@@ -134,7 +135,7 @@ function pedroAfter() {
     { say: ['PEDRO', 'GO. MAKE YOUR DIFFERENCE IN ENGLAND.'] },
     { say: ['PEDRO', 'AND CALL ME. SOMEHOW.'] },
     { say: ['SAMUEL', 'I WILL. ...SOMEHOW.'] },
-    { do: function () { setFlag('goblin_done'); setFlag('london_unlocked'); healParty(); saveGame(false); } },
+    { do: function () { setFlag('goblin_done'); setFlag('london_unlocked'); saveGame(false); } },
     { narr: 'THE DADDIES BOARD THE MENDED MACHINE — LONDON AT LAST!' }
   ], { onDone: function () { playTravel('LONDON 1889', function () {
         Game.map = 'theatredistrict'; Game.px = 9; Game.py = 5; Game.dir = 'up'; saveGame(false); gotoWorld();

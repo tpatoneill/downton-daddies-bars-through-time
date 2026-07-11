@@ -135,3 +135,20 @@ Restructured the endgame per the owner's new story:
 Screenshots: `screenshots/super-0*.png`. All suites green (phase4/full/dist).
 
 (PENDING owner confirm: the era-specific patrolling forced-fight locals + no-heal attrition.)
+
+## Update — Trainers, types, attrition, and the walk-home ending (owner requests)
+- **Pokemon-style forced-battle mini-bosses:** a new trainer engine (patrol patterns + line-of-sight
+  + "!" alert + charge + forced battle + defeated state + money reward). Populated each era's route
+  with 3 **era-specific, typed locals** (Rome: Orator/Legionary/Senator; Dodge: Poet/Auctioneer/
+  Salesman; NYC: Disco Regular/Hype-Man/Skater; Goblin Realm: Cackling/Hexing/Brute goblins), spread
+  across the type wheel so different Daddies shine. Wild grass encounters remain. 6 new sprites
+  (Fable 5, `32-sprites-locals.js`); fixed missing overworld walkers (orator/senator/poet/dancer/cowboy).
+- **HP persists between battles (attrition):** removed the auto-heal from era-boss victories — damage
+  now carries era-to-era; heal only at phonographs / with teas / on a wipe. Bosses already buffed
+  (supers + solo Snobbington) to match.
+- **New walk-home ending:** after the P Diddy unmask, the dads vanish and **you manually walk back to
+  Daddy HQ**; entering the manor triggers a **SURPRISE PARTY** cutscene, then an **animated 50 Cent
+  entrance** from the time machine, the dads react in SHOCK/AWE/REVERENCE, then the birthday card.
+- QA: harness made spot/forced-battle aware (auto-resolves trainer/wild fights, leaves bosses to the
+  test; retry cap prevents unwinnable-fight hangs). All suites green: phase1 10 · phase2 7 · phase4 7 ·
+  loss 2 · full 8 · dist 7. Screenshots: `screenshots/tr-*.png`.

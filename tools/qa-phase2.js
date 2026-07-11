@@ -22,6 +22,9 @@ assert(G.Game.map === 'forum', 'arrived in forum, got ' + G.Game.map);
 assert(G.Game.party.length === 1, 'still solo before Herschel');
 ok('time machine -> traveled to Rome (forum)');
 
+// (player would grind the wild grass first; simulate that so route trainers are fair)
+G.Game.party[0] = G.makeFighter('samuel', 4);
+
 // scripted Gerald battle on Market Road proves encounters/XP
 walkTo(h, 15, 5); advanceUntil(h, isWorld, 3000); // forum -> marketroad
 assert(G.Game.map === 'marketroad', 'on market road');

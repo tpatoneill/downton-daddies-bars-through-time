@@ -55,6 +55,9 @@ registerMap('dustytrail', {
   objs: [
     { x: 9, y: 4, solid: true, spr: 'gerald', dir: 'down', flag: 'dodge_gerald1',
       onInteract: function (o) { dodgeGeraldBattle(o); } },
+    mkTrainer(5, 3, { spr: 'cowboy', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_dodge_a', enemy: 'tumbleweed', level: 7, reward: 26, bg: 'west', tname: 'TUMBLEWEED POET', hail: 'STOP. LISTEN TO MY... FEELINGS.', beaten: 'THAT WAS BEAUTIFUL. I LOST.' }),
+    mkTrainer(12, 3, { spr: 'cowboy', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_dodge_b', enemy: 'auctioneer', level: 7, reward: 26, bg: 'west', tname: 'CATTLE AUCTIONEER', hail: 'DO-I-HEAR-A-BATTLE-BATTLE-HEY?', beaten: 'SOLD! TO THE DADDY IN THE HAT.' }),
+    mkTrainer(14, 6, { spr: 'salesman', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_dodge_c', enemy: 'salesman', level: 7, reward: 30, bg: 'west', tname: 'SNAKE-OIL SALESMAN', hail: 'STEP RIGHT UP AND GET BEAT!', beaten: 'THE TONIC WAS JUST GRAVY. DANG.' }),
     { x: 15, y: 1, mustache: true, flag: 'stache_dodge2', onInteract: function (o) { collectMustache(o, 'stache_dodge2'); } }
   ]
 });
@@ -196,7 +199,7 @@ function dodgeVictory() {
     { say: ['JAKE', 'FEELINGS TO WRANGLE.'] },
     { narr: 'CHRONO COIL GET! ( 2 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH NEW YORK.'] },
-    { do: function () { healParty(); saveGame(false); } }
+    { do: function () { saveGame(false); } }
   ], { onDone: function () { travelChoose('west'); } });
 }
 

@@ -3,6 +3,22 @@
 
 /* ERAS + registerEra live in 40-map.js so era modules can self-register at load. */
 
+/* missing battle-sprite alias (auctioneer used 'cowboy' which had no SPR) */
+if (!SPR.cowboy) SPR.cowboy = SPR.jake;
+/* dialogue portraits for the era-local mini-boss "characters" */
+SPEAKERS['STREET ORATOR'] = { spr: SPR.orator, f: 210 };
+SPEAKERS['GOSSIPING SENATOR'] = { spr: SPR.senator, f: 220 };
+SPEAKERS['LEGIONARY'] = { spr: SPR.legionary, f: 190 };
+SPEAKERS['TUMBLEWEED POET'] = { spr: SPR.poet, f: 230 };
+SPEAKERS['CATTLE AUCTIONEER'] = { spr: SPR.cowboy, f: 175 };
+SPEAKERS['SNAKE-OIL SALESMAN'] = { spr: SPR.salesman, f: 250 };
+SPEAKERS['DISCO REGULAR'] = { spr: SPR.dancer, f: 262 };
+SPEAKERS['THE HYPE-MAN'] = { spr: SPR.deejay, f: 240 };
+SPEAKERS['ROLLER SKATER'] = { spr: SPR.skater, f: 300 };
+SPEAKERS['CACKLING GOBLIN'] = { spr: SPR.goblin, f: 330 };
+SPEAKERS['HEXING GOBLIN'] = { spr: SPR.goblinhex, f: 340 };
+SPEAKERS['BRUTE GOBLIN'] = { spr: SPR.goblinbrute, f: 150 };
+
 /* ---- party growth helpers ---- */
 function addToParty(id, level) {
   for (var i = 0; i < Game.party.length; i++) if (Game.party[i].id === id) return Game.party[i];

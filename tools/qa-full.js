@@ -97,11 +97,14 @@ assert(isBattle(G) && G.getScene().enemies[0].bossId === 'snob1', 'Snobbington p
 autoBattle(h, { onBeat: true });
 advanceUntil(h, isBattle, 8000, 'snob2');                   // snobEscalate bridge -> FINAL DRAFT
 assert(G.getScene().enemies[0].bossId === 'snob2' && G.getScene().crowd >= 100, 'phase 2 + crowd 100');
-autoBattle(h, { onBeat: true });
-let guard = 0; while (!(G.getScene() && G.getScene().phase === 'credits') && guard++ < 400) { h.tap('a'); h.step(3, 25); }
-assert(G.hasFlag('finale_done') && G.hasFlag('game_complete'), 'finale complete');
+autoBattle(h, { onBeat: true });                          // snob2 (FINAL DRAFT)
+advanceUntil(h, isWorld, 10000, 'p diddy unmask -> HQ');  // -> control returns near HQ
+assert(G.Game.map === 'bakersrow' && G.hasFlag('finale_done') && !G.hasFlag('game_complete'), 'unmask done -> must walk home to HQ');
+walkTo(h, 9, 1);                                          // into the manor (HQ) -> surprise party + 50 Cent
+let guard = 0; while (!(G.getScene() && G.getScene().phase === 'credits') && guard++ < 500) { h.tap('a'); h.step(3, 25); }
+assert(G.hasFlag('game_complete'), 'game_complete after the surprise party');
 assert(G.getScene() && (G.getScene().phase === 'credits' || G.getScene().phase === 'bow'), 'birthday sequence');
-ok('FINALE: editors, Snobbington 2-phase, P Diddy unmask + 50 Cent hook, birthday');
+ok('FINALE: Snobbington solo, P Diddy unmask, walk home -> surprise party + 50 Cent, birthday');
 // the new finale beats are present verbatim
 const dist = require('fs').readFileSync(require('path').join(__dirname, '..', 'dist', 'index.html'), 'utf8');
 assert(dist.indexOf('MEDDLING DADDIES') >= 0, 'P Diddy Scooby-Doo line present');

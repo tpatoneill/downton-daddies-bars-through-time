@@ -74,7 +74,7 @@ var World = {
   menu: null,       /* pause menu state */
   locked: false,    /* input lock during cutscenes */
   enter: function () {
-    this.moving = false; this.menu = null; this.locked = false;
+    this.moving = false; this.menu = null; this.locked = false; this.spot = null;
     var m = curMap();
     if (m && m.music) musicStart(m.music);
     this.updateCam(true);
@@ -126,11 +126,13 @@ var World = {
     if (m.onStep) m.onStep(Game.px, Game.py);
   },
   interact: function () {
-    if (this.locked) return;
+    if (this.locked || this.spot) return;
     var m = curMap(), d = DIRV[Game.dir];
     var o = objAt(m, Game.px + d[0], Game.py + d[1]);
     if (!o) { /* also allow interacting with tile you stand on for some pickups */ o = objAt(m, Game.px, Game.py); if (!o || !o.standOn) o = null; }
-    if (o && o.onInteract) { sfx('select'); o.onInteract(o); }
+    if (!o) return;
+    if (o.trainer) { sfx('select'); if (hasFlag(o.defeat)) say([[o.tname || 'THEM', o.beaten || 'GOOD BOUT.']]); else startTrainerBattle(o); return; }
+    if (o.onInteract) { sfx('select'); o.onInteract(o); }
   },
   openMenu: function () {
     this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'CLOSE'] };
@@ -138,8 +140,11 @@ var World = {
   },
   update: function (dt) {
     Game.playtime += dt;
+    if (this.spot) { this.updateSpot(dt); this.updateCam(false); return; } /* a trainer is charging us */
     if (this.locked) { this.updateCam(false); return; }
     if (this.menu) { this.updateCam(false); return; }
+    this.updateTrainers(dt);                              /* patrols + line-of-sight */
+    if (this.spot || this.locked) { this.updateCam(false); return; }
     if (this.moving) {
       this.moveT += dt;
       this.stepAcc += dt;
@@ -147,7 +152,7 @@ var World = {
       if (this.moveT >= this.moveDur) {
         this.moving = false;
         this.arrive();
-        if (this.moving || this.menu || this.locked || scene !== World) { this.updateCam(false); return; }
+        if (this.moving || this.menu || this.locked || this.spot || scene !== World) { this.updateCam(false); return; }
       }
     }
     if (!this.moving) {
@@ -157,10 +162,71 @@ var World = {
     this.updateCam(false);
   },
   onPress: function (k) {
-    if (this.locked) return;
+    if (this.spot || this.locked) return;
     if (this.menu) { this.menuPress(k); return; }
     if (k === 'a') this.interact();
     else if (k === 'start') this.openMenu();
+  },
+  /* ---------- Pokemon-style trainers: patrol, line-of-sight, forced battle ---------- */
+  initTrainer: function (o) {
+    if (o._init) return; o._init = true;
+    o._anchorx = o.x; o._anchory = o.y; o._moving = false; o._mt = 0;
+    o._wait = Math.random() * 0.6; o._frame = 0; if (!o.dir) o.dir = 'down';
+  },
+  updateTrainers: function (dt) {
+    var m = curMap(); if (!m.objs) return;
+    for (var i = 0; i < m.objs.length; i++) {
+      var o = m.objs[i];
+      if (!o.trainer || objGone(o)) continue;
+      this.initTrainer(o);
+      if (hasFlag(o.defeat)) continue;                   /* beaten: stands still */
+      if (o._moving) { o._mt += dt; if (o._mt >= 0.16) { o._moving = false; o._wait = 0.3 + Math.random() * 0.4; } }
+      else if (o._wait > 0) { o._wait -= dt; }
+      else { this.trainerStep(o); }
+      if (this.trainerSees(o)) { this.spotTrainer(o); return; }
+    }
+  },
+  trainerStep: function (o) {
+    var p = o.patrol || { type: 'watch' };
+    if (p.type === 'watch') { o.dir = (o.dir === (p.b || 'right')) ? (p.a || 'left') : (p.b || 'right'); o._wait = 0.5 + Math.random() * 0.5; o._frame ^= 1; return; }
+    var ax = p.ax || 'h', span = p.span || 2;
+    if (ax === 'h' && o.dir !== 'left' && o.dir !== 'right') o.dir = 'right';
+    if (ax === 'v' && o.dir !== 'up' && o.dir !== 'down') o.dir = 'down';
+    var dx = ax === 'h' ? (o.dir === 'left' ? -1 : 1) : 0, dy = ax === 'v' ? (o.dir === 'up' ? -1 : 1) : 0;
+    var nx = o.x + dx, ny = o.y + dy;
+    var within = ax === 'h' ? (nx >= o._anchorx - span && nx <= o._anchorx + span) : (ny >= o._anchory - span && ny <= o._anchory + span);
+    if (within && !trainerBlocked(nx, ny)) { o._fx = o.x; o._fy = o.y; o.x = nx; o.y = ny; o._moving = true; o._mt = 0; o._frame ^= 1; }
+    else { o.dir = (ax === 'h') ? (o.dir === 'left' ? 'right' : 'left') : (o.dir === 'up' ? 'down' : 'up'); o._wait = 0.2; }
+  },
+  trainerSees: function (o) {
+    var d = DIRV[o.dir]; if (!d) return 0;
+    var s = o.sight || 3, m = curMap();
+    for (var k = 1; k <= s; k++) {
+      var tx = o.x + d[0] * k, ty = o.y + d[1] * k;
+      if (tx < 0 || ty < 0 || tx >= m.w || ty >= m.h) return 0;
+      if (tx === Game.px && ty === Game.py) return k;
+      if (tileAt(m, tx, ty).solid) return 0;
+      var oo = objAt(m, tx, ty); if (oo && oo !== o && oo.solid) return 0;
+    }
+    return 0;
+  },
+  spotTrainer: function (o) { this.spot = { o: o, phase: 'alert', t: 0 }; o._moving = false; this.moving = false; sfx('bump'); sfx('cursor'); },
+  updateSpot: function (dt) {
+    var s = this.spot, o = s.o; s.t += dt;
+    if (s.phase === 'alert') { if (s.t > 0.6) { s.phase = 'march'; s.t = 0; } return; }
+    /* march toward the player, one tile at a time */
+    if (o._moving) { o._mt += dt; if (o._mt >= 0.14) o._moving = false; return; }
+    if (Math.abs(o.x - Game.px) + Math.abs(o.y - Game.py) <= 1) {
+      o.dir = (Game.px > o.x) ? 'right' : (Game.px < o.x) ? 'left' : (Game.py > o.y) ? 'down' : 'up';
+      this.spot = null; startTrainerBattle(o); return;
+    }
+    var dx = Game.px - o.x, dy = Game.py - o.y, sx = 0, sy = 0;
+    if (Math.abs(dx) >= Math.abs(dy)) sx = dx > 0 ? 1 : -1; else sy = dy > 0 ? 1 : -1;
+    var nx = o.x + sx, ny = o.y + sy;
+    if (trainerBlocked(nx, ny)) { if (sx) { sx = 0; sy = dy > 0 ? 1 : dy < 0 ? -1 : 0; } else { sy = 0; sx = dx > 0 ? 1 : dx < 0 ? -1 : 0; } nx = o.x + sx; ny = o.y + sy; }
+    o.dir = sx > 0 ? 'right' : sx < 0 ? 'left' : sy > 0 ? 'down' : 'up';
+    if (!trainerBlocked(nx, ny)) { o._fx = o.x; o._fy = o.y; o.x = nx; o.y = ny; o._moving = true; o._mt = 0; o._frame ^= 1; }
+    else { this.spot = null; startTrainerBattle(o); }
   },
   menuPress: function (k) {
     var mn = this.menu;
@@ -196,9 +262,15 @@ var World = {
     }
     /* draw objects with y <= player first (background), then player, then y>player */
     function drawObj(o) {
-      var ox = o.x * TS - cx, oy = o.y * TS - cy;
+      var pxo = o.x * TS, pyo = o.y * TS;
+      if (o.trainer && o._moving) { var t = o._mt / 0.16; pxo = (o._fx + (o.x - o._fx) * t) * TS; pyo = (o._fy + (o.y - o._fy) * t) * TS; }
+      var ox = pxo - cx, oy = pyo - cy;
       if (o.draw) { o.draw(ox, oy); return; }
-      if (o.spr && WALK[o.spr]) { drawWalker(o.spr, o.dir || 'down', 0, ox, oy); return; }
+      if (o.spr && WALK[o.spr]) {
+        drawWalker(o.spr, o.dir || 'down', (o.trainer && o._moving) ? o._frame : 0, ox, oy);
+        if (World.spot && World.spot.o === o && World.spot.phase === 'alert') drawAlert(ox, oy);
+        return;
+      }
       if (o.tile && TILES[o.tile]) { TILES[o.tile].draw(ox, oy, f & 1); return; }
       if (o.mustache) { drawMustache(ox, oy); return; }
       /* default: little marker */
@@ -270,3 +342,32 @@ function warpTo(w) {
   sfx('door');
 }
 function gotoWorld() { setScene(World); }
+
+/* ---------------- trainer helpers ---------------- */
+function trainerBlocked(x, y) {
+  var m = curMap();
+  if (solidAt(m, x, y)) return true;
+  if (x === Game.px && y === Game.py) return true;   /* don't stand on the player */
+  return false;
+}
+function drawAlert(x, y) {
+  px(x + 4, y - 12, 8, 9, COL.white); px(x + 4, y - 13, 8, 1, COL.black);
+  px(x + 4, y - 3, 8, 1, COL.black); px(x + 5, y - 4, 2, 3, COL.black); /* speech tail */
+  px(x + 7, y - 11, 2, 4, COL.red); px(x + 7, y - 6, 2, 2, COL.red);    /* the ! */
+}
+/* place a patrolling forced-battle trainer */
+function mkTrainer(x, y, cfg) {
+  cfg = cfg || {}; cfg.x = x; cfg.y = y; cfg.solid = true; cfg.trainer = true;
+  if (cfg.sight === undefined) cfg.sight = 3;
+  return cfg;
+}
+function startTrainerBattle(o) {
+  World.locked = true; World.spot = null;
+  var nm = o.tname || 'CHALLENGER';
+  Cutscene.play([
+    { say: [nm, o.hail || "YOU THERE! WE DUEL, HERE, NOW!"] },
+    { battle: function () { return { enemies: [{ enemy: o.enemy, level: o.level || 5 }], music: 'battle', canFlee: false, bg: o.bg }; },
+      onResult: function (r) { if (r.win) { setFlag(o.defeat); Game.money += (o.reward || 0); } } },
+    { say: [nm, o.beaten || 'A WORTHY BOUT. WELL BATTLED.'] }
+  ], { onDone: function () { gotoWorld(); } });
+}

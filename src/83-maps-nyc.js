@@ -105,6 +105,9 @@ registerMap('boilerroom', {
     { x: 7, y: 9, solid: true, draw: drawPlaylist, flag: 'nyc_playlist',
       onInteract: function (o) { playlistBattle(o); } },
     { x: 10, y: 2, solid: true, spr: 'gerald', dir: 'right', onInteract: function () { say([['GERALD', "REX IS ON THE ROOF. HE WON'T"], ['GERALD', 'SIGN THE PLAYLIST CONTRACT.'], ['GERALD', 'HE SAID, QUOTE, "NEVER."'], ['GERALD', 'IT WAS HONESTLY VERY COOL.']]); } },
+    mkTrainer(5, 5, { spr: 'discoer', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_nyc_a', enemy: 'discofan', level: 10, reward: 34, bg: 'disco', tname: 'DISCO REGULAR', hail: 'YOU WANNA BATTLE? ON THE FLOOR?', beaten: 'OKAY OKAY, YOU GOT THE MOVES.' }),
+    mkTrainer(13, 4, { spr: 'deejay', dir: 'up', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_nyc_b', enemy: 'deejay', level: 10, reward: 40, bg: 'disco', tname: 'THE HYPE-MAN', hail: 'MAKE SOME NOISE FOR YOUR DEFEAT!', beaten: 'AIGHT, AIGHT, YOU GOT BARS.' }),
+    mkTrainer(6, 9, { spr: 'skater', dir: 'right', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_nyc_c', enemy: 'skater', level: 10, reward: 40, bg: 'disco', tname: 'ROLLER SKATER', hail: "CAN'T STOP, WON'T STOP — LET'S GO!", beaten: 'WIPEOUT. RESPECT, THOUGH.' }),
     { x: 13, y: 9, mustache: true, flag: 'stache_nyc2', onInteract: function (o) { collectMustache(o, 'stache_nyc2'); } }
   ]
 });
@@ -254,7 +257,7 @@ function nycVictory() {
     { narr: 'TIME CRYSTAL GET! ( 3 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH HOME.'] },
     { say: ['BABBAGE', 'PLOTTING A COURSE FOR LONDON...'] }
-  ], { onDone: function () { healParty(); saveGame(false); goblinMalfunction(); } });
+  ], { onDone: function () { saveGame(false); goblinMalfunction(); } });
 }
 
 /* ---------------- register NYC as a travel destination ---------------- */

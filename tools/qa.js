@@ -70,9 +70,9 @@ function walkStep(h, dir) {
   guard = 0;
   while (G.World.moving && guard++ < 40) h.step(1, 16);
   h.step(1, 16);
-  // pump through any warp transition (World.locked) so the map actually changes
+  // pump through any warp transition (World.locked) or trainer spot/charge (World.spot)
   guard = 0;
-  while (isWorld(G) && G.World.locked && guard++ < 60) h.step(1, 16);
+  while (isWorld(G) && (G.World.locked || G.World.spot) && guard++ < 120) h.step(1, 16);
   return G.Game.map !== beforeMap || G.Game.px !== bx || G.Game.py !== by || !isWorld(G);
 }
 
@@ -106,8 +106,15 @@ function walkTo(h, tx, ty, onBattle) {
     for (const d of path) {
       const mapBefore = G.Game.map;
       walkStep(h, d);
-      if (isBattle(G)) { autoBattle(h, onBattle); h.step(3, 20); }
-      if (!isWorld(G) && !isBattle(G)) { advanceUntil(h, isWorld, 3000, 'post-walk'); }
+      /* resolve interruptions: encounters + trainer spots (hail cutscene -> forced battle).
+         Leave BOSS battles for the caller to drive (don't auto-consume a boss + its hub). */
+      let g2 = 0;
+      while (!isWorld(G) && g2++ < 80) {
+        if (isBattle(G)) {
+          if (G.getScene().enemies[0].isBoss) return true; // boss reached — hand back to caller
+          autoBattle(h, onBattle || {});
+        } else { h.tap('a'); h.step(2, 20); }
+      }
       if (G.Game.map !== mapBefore) return true; /* warped */
       if (G.Game.px === tx && G.Game.py === ty) return true;
     }
@@ -119,7 +126,7 @@ function walkTo(h, tx, ty, onBattle) {
 function autoBattle(h, opts) {
   const { G } = h;
   opts = opts || {};
-  let guard = 0;
+  let guard = 0, losses = 0;
   while (guard++ < 8000) {
     // a scripted mid-battle reveal pauses the fight into a cutscene, then resumes it —
     // advance any such interrupt and keep fighting
@@ -159,6 +166,7 @@ function autoBattle(h, opts) {
       h.tap('a'); h.step(3, 20);
       // loss on a boss/story fight retries the same battle; keep playing until we leave battle
       if (!isBattle(G)) return { win: won, fled: fled, lost: b.result.lost };
+      if (!won && ++losses > 8) return { win: false, lost: true, stuck: true }; // avoid infinite retry on an unwinnable fight
       continue;
     }
     h.step(1, 20);

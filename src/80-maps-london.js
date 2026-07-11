@@ -69,7 +69,10 @@ registerMap('manor', {
     { x: 11, y: 2, solid: true, spr: 'babbage', dir: 'down', flag: 'babbage_moved',
       onInteract: function () { manorBabbage(); } }
   ],
-  onEnter: function () { if (!hasFlag('act0_intro')) { openingCutscene(); } }
+  onEnter: function () {
+    if (!hasFlag('act0_intro')) { openingCutscene(); }
+    else if (hasFlag('await_party') && !hasFlag('party_done')) { surprisePartyScene(); }
+  }
 });
 
 /* ================= BAKER'S ROW ================= */

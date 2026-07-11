@@ -62,6 +62,9 @@ registerMap('marketroad', {
   objs: [
     { x: 9, y: 4, solid: true, spr: 'gerald', dir: 'down', flag: 'rome_gerald1',
       onInteract: function (o) { romeGeraldBattle(o); } },
+    mkTrainer(5, 3, { spr: 'roman', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_rome_a', enemy: 'orator', level: 2, reward: 20, bg: 'rome', tname: 'STREET ORATOR', hail: 'HALT, PLEBEIAN! DEFEND YOUR VERSE!', beaten: 'IMPRESSIVE... FOR A TOURIST.' }),
+    mkTrainer(12, 3, { spr: 'legionary', dir: 'down', patrol: { ax: 'v', span: 2 }, sight: 3, defeat: 'tr_rome_b', enemy: 'legionary', level: 2, reward: 20, bg: 'rome', tname: 'LEGIONARY', hail: 'NONE PASS WITHOUT A BATTLE.', beaten: 'YOU FIGHT LIKE A CONSUL.' }),
+    mkTrainer(14, 6, { spr: 'roman', dir: 'left', patrol: { ax: 'h', span: 3 }, sight: 3, defeat: 'tr_rome_c', enemy: 'senator', level: 2, reward: 22, bg: 'rome', tname: 'GOSSIPING SENATOR', hail: 'I HEARD YOUR BARS ARE... AVERAGE.', beaten: 'I SHALL GOSSIP OF YOUR GENIUS.' }),
     { x: 15, y: 1, mustache: true, flag: 'stache_rome2', onInteract: function (o) { collectMustache(o, 'stache_rome2'); } }
   ]
 });
@@ -194,7 +197,7 @@ function romeVictory() {
     { narr: 'HERSCHEL LEARNED BOTH HIPS!' },
     { narr: 'FLUX GEAR GET! ( 1 OF 4 )' },
     { say: ['BABBAGE', 'THE ENGINE CAN NOW REACH DODGE CITY.'] },
-    { do: function () { healParty(); saveGame(false); } }
+    { do: function () { saveGame(false); } }
   ], { onDone: function () { travelChoose('rome'); } });
 }
 

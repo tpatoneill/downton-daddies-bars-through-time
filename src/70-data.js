@@ -164,7 +164,14 @@ var ENEMIES = {
   discofan:  { name: 'DISCO REGULAR', spr: 'dancer', type: 'HEART', moves: ['weakheart', 'weakflex'], base: { HYPE: 32, FLOW: 14, POISE: 11, TEMPO: 12, gH: 3.8, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 22, money: 14 },
   gerald:    { name: 'GERALD', spr: 'gerald', type: 'CLASSIC', moves: ['scriptread', 'weakword', 'heckle'], base: { HYPE: 30, FLOW: 12, POISE: 12, TEMPO: 9, gH: 3.6, gF: 1.9, gP: 1.9, gT: 1.4 }, xp: 20, money: 15 },
   editor:    { name: 'ORDER EDITOR', spr: 'editor', type: 'WORDPLAY', moves: ['redpen', 'approved', 'scriptread'], base: { HYPE: 40, FLOW: 15, POISE: 14, TEMPO: 11, gH: 4.2, gF: 2.4, gP: 2.2, gT: 1.8 }, xp: 40, money: 30 },
-  goblin:    { name: 'CACKLING GOBLIN', spr: 'goblin', type: 'ROAST', moves: ['heckle', 'weakroast'], base: { HYPE: 30, FLOW: 15, POISE: 10, TEMPO: 14, gH: 3.6, gF: 2.3, gP: 1.6, gT: 2.0 }, xp: 24, money: 13 }
+  goblin:    { name: 'CACKLING GOBLIN', spr: 'goblin', type: 'ROAST', moves: ['heckle', 'weakroast'], base: { HYPE: 30, FLOW: 15, POISE: 10, TEMPO: 14, gH: 3.6, gF: 2.3, gP: 1.6, gT: 2.0 }, xp: 24, money: 13 },
+  /* --- era-local mini-boss "characters" (forced-battle trainers), varied types --- */
+  legionary: { name: 'LEGIONARY', spr: 'legionary', type: 'ROAST', moves: ['weakroast', 'heckle'], base: { HYPE: 40, FLOW: 13, POISE: 13, TEMPO: 9, gH: 4.0, gF: 1.9, gP: 1.9, gT: 1.4 }, xp: 22, money: 18 },
+  salesman:  { name: 'SNAKE-OIL SALESMAN', spr: 'salesman', type: 'FLEX', moves: ['weakflex', 'scriptread'], base: { HYPE: 38, FLOW: 15, POISE: 11, TEMPO: 12, gH: 3.8, gF: 2.1, gP: 1.6, gT: 1.7 }, xp: 26, money: 22 },
+  deejay:    { name: 'THE HYPE-MAN', spr: 'deejay', type: 'FLEX', moves: ['weakflex', 'heckle'], base: { HYPE: 42, FLOW: 16, POISE: 12, TEMPO: 13, gH: 4.0, gF: 2.2, gP: 1.7, gT: 1.9 }, xp: 30, money: 26 },
+  skater:    { name: 'ROLLER SKATER', spr: 'skater', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 40, FLOW: 16, POISE: 11, TEMPO: 15, gH: 3.9, gF: 2.2, gP: 1.6, gT: 2.1 }, xp: 30, money: 26 },
+  goblinhex: { name: 'HEXING GOBLIN', spr: 'goblinhex', type: 'WORDPLAY', moves: ['weakword', 'heckle'], base: { HYPE: 34, FLOW: 17, POISE: 10, TEMPO: 14, gH: 3.7, gF: 2.4, gP: 1.6, gT: 2.0 }, xp: 30, money: 24 },
+  goblinbrute:{ name: 'BRUTE GOBLIN', spr: 'goblinbrute', type: 'FLEX', moves: ['weakflex', 'weakroast'], base: { HYPE: 52, FLOW: 16, POISE: 14, TEMPO: 8, gH: 4.6, gF: 2.2, gP: 2.0, gT: 1.3 }, xp: 32, money: 26 }
 };
 
 /* era encounter pools: mapId enc uses one of these */

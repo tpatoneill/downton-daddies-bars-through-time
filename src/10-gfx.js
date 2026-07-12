@@ -163,3 +163,39 @@ var Transition = {
     }
   }
 };
+
+
+/* ---- embedded AI-image registry renderer (IMG populated by 25-images.js) ----
+   Browser: decode once into an offscreen canvas, then drawImage per frame.
+   Headless QA (fillRect-only ctx, no document.createElement): draw RLE runs
+   directly — one fillRect per horizontal run. */
+var _B62IDX = {};
+(function () { var s = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  for (var i = 0; i < s.length; i++) _B62IDX[s.charAt(i)] = i; })();
+function imgRuns(im, cb) {
+  var d = im.d, x = 0, y = 0;
+  for (var i = 0; i < d.length; i += 2) {
+    var ci = _B62IDX[d.charAt(i)], len = _B62IDX[d.charAt(i + 1)] + 1;
+    if (ci > 0) cb(x, y, len, im.pal[ci - 1]);
+    x += len;
+    if (x >= im.w) { x = 0; y++; }
+  }
+}
+var _IMGCACHE = {};
+function drawImg(name, x, y) {
+  var im = (typeof IMG !== 'undefined') && IMG[name];
+  if (!im) return;
+  var canCache = (typeof document !== 'undefined') && document.createElement && ctx.drawImage;
+  if (canCache) {
+    var c = _IMGCACHE[name];
+    if (!c) {
+      c = document.createElement('canvas'); c.width = im.w; c.height = im.h;
+      var g = c.getContext('2d');
+      imgRuns(im, function (rx, ry, len, col) { g.fillStyle = col; g.fillRect(rx, ry, len, 1); });
+      _IMGCACHE[name] = c;
+    }
+    ctx.drawImage(c, x | 0, y | 0);
+    return;
+  }
+  imgRuns(im, function (rx, ry, len, col) { px(x + rx, y + ry, len, 1, col); });
+}

@@ -36,6 +36,104 @@ function computeDamage(atk, def, move, onBeat, favored) {
 }
 function dripBonus(f, stat) { return (f.drip && DRIP[f.drip] && DRIP[f.drip].bonus && DRIP[f.drip].bonus[stat]) || 0; }
 
+/* ================= Emerald-style battle presentation ================= */
+/* pale dotted platform ellipses (the "circle of land"), era-tinted rim */
+var PLAT = {
+  stage: { top: '#e6d8c6', dot: '#cdbca4', rim: '#a8907a' },
+  disco: { top: '#d8cfe8', dot: '#b8aad0', rim: '#8a78ac' },
+  west:  { top: '#ecd9b0', dot: '#d0b988', rim: '#b09660' },
+  rome:  { top: '#e8dfc8', dot: '#ccc0a0', rim: '#a89a78' },
+  xmas:  { top: '#eef2f8', dot: '#ccd6e4', rim: '#a4b2c6' }
+};
+function bPlatform(bg, x0, y0, x1, y1) {
+  var c = PLAT[bg] || { top: '#e0dcd0', dot: '#c4beac', rim: '#9a9484' };
+  fillEll(x0, y0, x1, y1, c.top);
+  strokeEll(x0, y0, x1, y1, c.rim);
+  var w = x1 - x0, h = y1 - y0;
+  for (var i = 0; i < 14; i++) {
+    var a = i * 2.399, r = 0.15 + (i % 5) * 0.16;
+    var dx = (x0 + x1) / 2 + Math.cos(a) * (w / 2) * r * 0.9;
+    var dy = (y0 + y1) / 2 + Math.sin(a) * (h / 2) * r * 0.9;
+    px(dx, dy, 2, 1, c.dot);
+  }
+}
+function bPlatforms(bg, exOfs, pxOfs) {
+  exOfs = exOfs || 0; pxOfs = pxOfs || 0;
+  bPlatform(bg, 130 + exOfs, 62, 238 + exOfs, 86);
+  bPlatform(bg, -10 + pxOfs, 104, 112 + pxOfs, 136);
+}
+/* Emerald textbox: teal fill, dark red frame, white text with shadow */
+function bTealBox(x, y, w, h) {
+  px(x, y, w, h, '#8a2c34');
+  px(x + 2, y + 2, w - 4, h - 4, '#b8404a');
+  px(x + 4, y + 4, w - 8, h - 8, '#3e7d84');
+  px(x + 4, y + 4, w - 8, 1, '#5a9aa0');
+}
+function bShadowText(t, x, y, c) { drawText(t, x + 1, y + 1, '#1e3d42'); drawText(t, x, y, c || '#f8f8f8'); }
+function bShadowCenter(t, y, c) { bShadowText(t, (240 - textW(t)) >> 1, y, c); }
+/* white command/move panel (GBA menu paper) */
+function bWhitePanel(x, y, w, h) {
+  px(x, y, w, h, '#5a5244'); px(x + 2, y + 2, w - 4, h - 4, '#f8f8f4');
+  px(x + 2, y + 2, w - 4, 1, '#ffffff'); px(x + 2, y + h - 4, w - 4, 1, '#d0ccc0');
+}
+/* parchment panel with drop shadow (HP boxes, result/switch/bag) */
+function bParchPanel(x, y, w, h) {
+  px(x + 2, y + 2, w, h, 'rgba(0,0,0,0.25)');
+  px(x, y, w, h, '#5a5244');
+  px(x + 1, y + 1, w - 2, h - 2, '#f4ecd4');
+  px(x + 1, y + 1, w - 2, 1, '#fdf8ea'); px(x + 1, y + h - 2, w - 2, 1, '#d8ccac');
+}
+var STATUS_PILL = { FLUSTERED: '#8b5cf6', BORED: '#9aa0b0', SHOOK: '#349c8e', CHARMED: '#e05f8f', MICFEEDBACK: '#c63a46' };
+function bHpBar(bx, by, bw, frac) {
+  frac = Math.max(0, Math.min(1, frac));
+  px(bx, by, 16, 7, '#4a5568'); drawText('HP', bx + 2, by + 1, '#f8d048');
+  px(bx + 16, by, bw - 16, 7, '#4a5568');
+  px(bx + 17, by + 1, bw - 18, 5, '#2e333e');
+  var c = frac > 0.5 ? '#48c848' : frac > 0.2 ? '#f8d048' : '#e84848';
+  if (frac > 0) px(bx + 17, by + 1, Math.max(1, Math.round((bw - 18) * frac)), 5, c);
+}
+function bHpBoxEnemy(f, x, y) {
+  bParchPanel(x, y, 102, 28);
+  drawText(('' + f.name).substr(0, 11), x + 5, y + 4, '#4a4438');
+  drawText('LV' + f.level, x + 78, y + 4, '#4a4438');
+  var st = f.status;
+  if (st) { px(x + 4, y + 14, 26, 9, STATUS_PILL[st] || '#c8a020'); px(x + 4, y + 14, 26, 1, 'rgba(0,0,0,0.3)'); drawText(st.substr(0, 3), x + 6, y + 15, COL.white); }
+  bHpBar(st ? x + 32 : x + 5, y + 15, st ? 66 : 93, f.hp / maxHPd(f));
+}
+function bHpBoxPlayer(f, x, y) {
+  bParchPanel(x, y, 110, 34);
+  drawText(('' + f.name).substr(0, 11), x + 5, y + 4, '#4a4438');
+  drawText('LV' + f.level, x + 86, y + 4, '#4a4438');
+  bHpBar(x + 5, y + 14, 100, f.hp / maxHPd(f));
+  var st = f.status;
+  if (st) { px(x + 5, y + 23, 26, 9, STATUS_PILL[st] || '#c8a020'); px(x + 5, y + 23, 26, 1, 'rgba(0,0,0,0.3)'); drawText(st.substr(0, 3), x + 7, y + 24, COL.white); }
+  drawText(f.hp + '/' + maxHPd(f), x + 52, y + 24, '#4a4438');
+}
+/* crowd meter as a live audience strip along the top (Battle Frontier style) */
+function bAudienceStrip(v, maxed) {
+  px(0, 0, 240, 12, '#2a2a36');
+  var heads = 18, lit = Math.round(((v + 100) / 200) * heads);
+  var skins = ['#f4c898', '#ce9c6a', '#8a5a34'], hats = ['#c63a46', '#349c8e', '#e2b23e', '#8b5cf6'];
+  for (var i = 0; i < heads; i++) {
+    var hx = 4 + i * 12, on = i < lit;
+    px(hx, 3, 7, 6, on ? skins[i % 3] : '#3e3e4c');
+    px(hx, 1, 7, 3, on ? hats[i % 4] : '#34343e');
+    if (on && i % 4 === 2) px(hx + 2, 0, 3, 2, '#f8d048'); /* a fan waving */
+  }
+  if (maxed) drawTextO('MAX!', 221, 3, '#e2b23e', COL.black);
+  px(0, 12, 240, 1, '#15121c');
+}
+/* slim move-name banner shown during attack animations */
+function bBanner(txt, col) { px(30, 16, 180, 12, 'rgba(21,18,28,0.85)'); centerText(txt, 18, col || '#f8f4e4'); }
+/* attack projectile glyph per type + idle-tic lookup tables */
+var FX_GLYPH = { ROAST: 'fx-ember', HEART: 'fx-heart', WORDPLAY: 'fx-glyph', FLEX: 'fx-star', CLASSIC: 'fx-burst' };
+var TIC_BY_ID = { samuel: 'note', herschel: 'zzz', william: 'sparkle', rosalind: 'spark', rex: 'point',
+  goblin: 'note', goblinhex: 'note', goblinbrute: 'note', gerald: 'sweat', editor: 'sweat' };
+var TIC_BY_TYPE = { ROAST: 'ember', FLEX: 'star', WORDPLAY: 'glyph', HEART: 'heart', CLASSIC: 'sweat' };
+function ticKindFor(f) { return TIC_BY_ID[f.id] || TIC_BY_ID[f.spr] || TIC_BY_TYPE[f.type] || 'sweat'; }
+var SPR_IMG_ALIAS = { dancer: 'discofan', cowboy: 'auctioneer' };
+function battleImg(name) { return (typeof IMG !== 'undefined' && IMG[name]) ? IMG[name] : null; }
+
 function makeBattle(spec, onEnd) {
   var enemies = [];
   for (var i = 0; i < spec.enemies.length; i++) {
@@ -54,7 +152,7 @@ function makeBattle(spec, onEnd) {
     queue: [], qi: 0, msg: '', msgT: 0, autoMsgT: 0,
     aimT: 0, aimHit: false, pendingMove: null,
     flash: 0, shake: 0, participants: {},
-    result: null, introT: 0, animT: 0, hitFlash: 0,
+    result: null, introT: 0, animT: 0, hitFlash: 0, anim: null,
     xpMsgs: [],
     enter: function () { musicStart(spec.music || 'battle'); this.introT = 0;
       this.participants[this.activeIdx] = true; },
@@ -65,6 +163,7 @@ function makeBattle(spec, onEnd) {
     onPress: function (k) {
       if (this.phase === 'transition') { if (k === 'a' || k === 'start') { this.transT = this.transDur; this.phase = 'intro'; this.introT = 0; } return; }
       if (this.phase === 'intro') { if (k === 'a' || k === 'b' || k === 'start') this.toMenu(); return; }
+      if (this.phase === 'anim') { if ((k === 'a' || k === 'b' || k === 'start') && this.anim) this.anim.t = this.anim.dur; return; }
       if (this.phase === 'menu') return this.menuInput(k);
       if (this.phase === 'move') return this.moveInput(k);
       if (this.phase === 'target') return this.targetInput(k);
@@ -200,6 +299,10 @@ function makeBattle(spec, onEnd) {
     },
     buildActorEvents: function (a) {
       var self = this, f = a.f, act = a.act;
+      /* attack animation beat: plays before the action resolves */
+      if (act && act.kind === 'move' && act.move) {
+        this.queue.push({ fn: function () { return self.makeAnim(f, act, a.isPlayer); } });
+      }
       /* status gate */
       this.queue.push({ fn: function () {
         if (f.fainted || f.hp <= 0) return null;
@@ -208,6 +311,24 @@ function makeBattle(spec, onEnd) {
         if (f.status === 'FLUSTERED' && Math.random() < 0.33) { var d = Math.max(1, Math.round(maxHPd(f) * 0.06)); f.hp = Math.max(0, f.hp - d); self.hitFlash = 0.2; return f.name + ' IS FLUSTERED AND FUMBLES!'; }
         return self.doAction(f, act, a.isPlayer);
       } });
+    },
+    /* build the {anim:...} descriptor for a queued action, or null to skip it */
+    makeAnim: function (f, act, isPlayer) {
+      if (f.fainted || f.hp <= 0 || f.status === 'BORED') return null;
+      var move = act.move; if (!move) return null;
+      var e = move.eff || {}, cat;
+      if (move.pow) cat = 'hit';
+      else if (e.healFrac || e.hot || e.cure) cat = 'heal';
+      else if (e.status || e.debuffStat) cat = 'status';
+      else cat = 'buff';
+      var tIdx = 0;
+      if (move.tgt === 'enemy' && isPlayer) {
+        tIdx = (this.enemies[act.target] && !this.enemies[act.target].fainted) ? act.target : this.firstEnemyIdx();
+        if (tIdx < 0) return null;
+      }
+      var eIdx = isPlayer ? 0 : this.enemies.indexOf(f);
+      return { anim: { actorIsEnemy: !isPlayer, eIdx: eIdx < 0 ? 0 : eIdx, tIdx: tIdx,
+        type: move.type, cat: cat, name: move.name, atEnemy: move.tgt === 'enemy', t: 0, dur: 0.55 } };
     },
     doAction: function (f, act, isPlayer) {
       if (act.kind !== 'move') return null;
@@ -329,6 +450,7 @@ function makeBattle(spec, onEnd) {
       var ev = this.queue[this.qi];
       var out = ev.fn();
       if (out === null || out === undefined) { this.qi++; this.runEvent(); return; }
+      if (out.anim) { this.anim = out.anim; this.phase = 'anim'; this.qi++; return; }
       this.msgLines = (typeof out === 'string') ? [out] : out;
       this.msgSub = 0; this.msg = this.msgLines[0]; this.autoMsgT = 0;
       this.qi++;
@@ -466,45 +588,125 @@ function makeBattle(spec, onEnd) {
       if (this.phase === 'transition') { this.transT += dt; if (this.transT >= this.transDur) { this.phase = 'intro'; this.introT = 0; sfx('super'); } }
       if (this.phase === 'intro') { this.introT += dt; if (this.introT > (this.taunt ? 2.6 : 1.0)) this.toMenu(); }
       if (this.phase === 'aim') { this.aimT += dt; if (this.aimT >= this.aimDur) { this.commitPlayer(this.pendingMove, false); } }
+      if (this.phase === 'anim') { /* self-advancing: QA gives no input here */
+        if (this.anim) { this.anim.t += dt; if (this.anim.t >= this.anim.dur) { this.anim = null; this.phase = 'resolve'; this.runEvent(); } }
+        else { this.phase = 'resolve'; this.runEvent(); }
+      }
       if (this.phase === 'resolve') { this.autoMsgT += dt; if (this.autoMsgT > 2.4) this.advance(); }
       if (this.phase === 'result') { this.resultT += dt; }
+      /* idle mannerism timers (only tick while waiting on player input) */
+      var idling = this.phase === 'menu' || this.phase === 'move' || this.phase === 'aim' || this.phase === 'target';
+      var cast = [this.active()].concat(this.livingEnemies());
+      for (var ci = 0; ci < cast.length; ci++) {
+        var cf = cast[ci]; if (!cf || cf.fainted) continue;
+        if (cf._tic) { cf._tic.t += dt; if (cf._tic.t >= cf._tic.dur) cf._tic = null; }
+        else if (idling) {
+          if (cf._ticNext === undefined) cf._ticNext = 3 + Math.random() * 4;
+          cf._ticNext -= dt;
+          if (cf._ticNext <= 0) { cf._ticNext = 3 + Math.random() * 4; cf._tic = { kind: ticKindFor(cf), t: 0, dur: 1.2 }; }
+        }
+      }
       /* animate crowd bar smoothing */
       this._crowdShown = (this._crowdShown === undefined) ? this.crowd : this._crowdShown + (this.crowd - this._crowdShown) * 0.2;
+    },
+    /* on-screen rect for enemy i (AI art bottom-aligned to the platform) */
+    enemyRect: function (i) {
+      var e = this.enemies[i];
+      var key = e ? e.spr : null;
+      if (key === 'snob' && e.sprOpt && e.sprOpt.finalDraft) key = 'snob2';
+      if (SPR_IMG_ALIAS[key]) key = SPR_IMG_ALIAS[key];
+      var im = battleImg(key);
+      var w = im ? im.w : 40, h = im ? im.h : 60;
+      var x = im ? (178 + i * 28 - (w >> 1)) : 158 + i * 28;
+      var y = im ? 84 - h : 20;
+      return { x: x, y: y, w: w, h: h, cx: x + (w >> 1), cy: y + (h >> 1) };
+    },
+    /* on-screen rect for the active player's back sprite (or SPR fallback) */
+    playerRect: function () {
+      var a = this.active();
+      var key = (a && a.id) ? a.id + '-back' : null;
+      var im = key ? battleImg(key) : null;
+      if (im) { var x = 6 + ((63 - im.w) >> 1); return { img: key, x: x, y: 58, w: im.w, h: im.h, cx: x + (im.w >> 1), cy: 58 + (im.h >> 1) }; }
+      return { img: null, x: 26, y: 78, w: 36, h: 48, cx: 44, cy: 102 };
+    },
+    drawPlayerSprite: function (r, dx, dy) {
+      var a = this.active(); if (!a) return;
+      if (r.img) { drawImg(r.img, r.x + dx, r.y + dy); return; }
+      if (SPR[a.spr]) SPR[a.spr](r.x + dx, r.y + dy, a.spr === 'samuel' ? { trueForm: hasFlag('trueform') } : undefined);
     },
     draw: function () {
       if (this.phase === 'transition') { this.drawTransition(); return; }
       var sh = this.shake > 0 ? ((Math.random() - 0.5) * 5) | 0 : 0;
       ctx.save(); ctx.translate(sh, 0);
-      /* backdrop */
+      /* backdrop + era platforms */
       var bgn = this.spec.bg || 'stage';
       if (BGS[bgn]) BGS[bgn](); else cls(COL.night);
-      px(0, 96, 240, 64, 'rgba(0,0,0,0.18)');
-      /* enemy sprite(s) top-right */
+      bPlatforms(bgn);
+      var anim = (this.phase === 'anim') ? this.anim : null;
+      var pr = anim ? anim.t / anim.dur : 0;
+      var lunge = (anim && anim.cat === 'hit') ? (pr < 0.5 ? pr * 2 : (1 - pr) * 2) * 8 : 0;
+      var impact = anim && anim.cat === 'hit' && anim.t > anim.dur * 0.7;
+      var blinkOff = impact && ((anim.t * 20 | 0) % 2 === 1);
+      var jit = impact ? ((((anim.t * 30) | 0) % 2) ? 1 : -1) : 0;
+      var prr = this.playerRect();
+      var showTics = this.phase === 'menu' || this.phase === 'move' || this.phase === 'aim' || this.phase === 'target';
+      /* enemy sprite(s) on the upper-right platform */
       for (var i = 0; i < this.enemies.length; i++) {
         var e = this.enemies[i]; if (e.fainted) continue;
-        var ex = 150 + i * 30, ey = 22;
-        if (SPR[e.spr]) SPR[e.spr](ex, ey, e.sprOpt);
+        var r = this.enemyRect(i);
+        var dx = 0, dy = 0, skipE = false;
+        if (anim && anim.actorIsEnemy && anim.eIdx === i) {
+          if (anim.atEnemy && lunge > 0) { /* lunge toward the player */
+            var vx = prr.cx - r.cx, vy = prr.cy - r.cy, vl = Math.sqrt(vx * vx + vy * vy) || 1;
+            dx += vx / vl * lunge; dy += vy / vl * lunge;
+          }
+        } else {
+          if (anim && !anim.actorIsEnemy && anim.atEnemy && anim.tIdx === i) {
+            if (blinkOff) skipE = true; dx += jit;
+          }
+          dy += Math.sin(this.animT * 2 + i + 1) > 0 ? 1 : 0; /* breathing bob */
+        }
+        if (!skipE && SPR[e.spr]) SPR[e.spr]((r.x + dx) | 0, (r.y + dy) | 0, e.sprOpt);
+        if (showTics && e._tic) this.drawTic(e._tic, r.cx, r.y);
       }
-      /* active player sprite bottom-left */
+      /* active player's back sprite on the lower-left platform */
       var a = this.active();
-      if (a && SPR[a.spr]) SPR[a.spr](26, 78, a.spr === 'samuel' ? { trueForm: hasFlag('trueform') } : undefined);
+      if (a) {
+        var pdx = 0, pdy = 0, skipP = false;
+        if (anim && !anim.actorIsEnemy) {
+          if (anim.atEnemy && lunge > 0) {
+            var tr = this.enemyRect(anim.tIdx);
+            var pvx = tr.cx - prr.cx, pvy = tr.cy - prr.cy, pvl = Math.sqrt(pvx * pvx + pvy * pvy) || 1;
+            pdx += pvx / pvl * lunge; pdy += pvy / pvl * lunge;
+          }
+        } else {
+          if (anim && anim.actorIsEnemy && anim.atEnemy) {
+            if (blinkOff) skipP = true; pdx += jit;
+          }
+          pdy += Math.sin(this.animT * 2) > 0 ? 1 : 0; /* breathing bob */
+        }
+        if (!skipP) this.drawPlayerSprite(prr, pdx | 0, pdy | 0);
+        if (showTics && a._tic) this.drawTic(a._tic, prr.cx, prr.y);
+      }
+      if (anim) this.drawAnimFX(anim, prr);
       if (this.hitFlash > 0) { ctx.globalAlpha = 0.35; cls(COL.white); ctx.globalAlpha = 1; }
       if (this.flash > 0 && (this.animT * 20 | 0) % 2) { ctx.globalAlpha = 0.4; cls(COL.gold); ctx.globalAlpha = 1; }
-      /* enemy HP box top-left */
-      this.drawHPBox(this.enemies[Math.max(0, this.firstEnemyIdx())], 8, 18, false);
-      /* player HP box bottom-right */
-      if (a) this.drawHPBox(a, 128, 84, true);
-      /* crowd meter */
-      this.drawCrowd();
+      /* parchment HP boxes */
+      var fe = this.enemies[Math.max(0, this.firstEnemyIdx())];
+      if (fe) bHpBoxEnemy(fe, 8, 14);
+      if (a) bHpBoxPlayer(a, 124, 74);
+      /* live audience strip (crowd meter) — swapped for a move banner mid-anim */
+      if (anim) bBanner(anim.name, TYPECOL[anim.type] || '#f8f4e4');
+      else bAudienceStrip(this._crowdShown || 0, this.crowd >= 100);
       ctx.restore();
       /* UI panels */
       if (this.phase === 'intro') {
         var en = this.enemies[Math.max(0, this.firstEnemyIdx())] || this.enemies[0];
-        panel(6, 116, 228, 40, COL.cream, COL.black);
-        drawText((en ? en.name : 'A FOE'), 12, 121, COL.red);
-        if (this.taunt) { var tl = wrap(this.taunt, 210); for (var ti = 0; ti < tl.length && ti < 2; ti++) drawText(tl[ti], 12, 133 + ti * 10, COL.black); }
-        else centerText('WANTS TO BATTLE!', 137, COL.black);
-        if (Math.floor(performance.now() / 400) % 2) drawText('>', 224, 148, COL.red);
+        bTealBox(4, 112, 232, 46);
+        bShadowText((en ? en.name : 'A FOE'), 12, 120, COL.gold);
+        if (this.taunt) { var tl = wrap(this.taunt, 214); for (var ti = 0; ti < tl.length && ti < 2; ti++) bShadowText(tl[ti], 12, 132 + ti * 12); }
+        else bShadowText('WANTS TO BATTLE!', 12, 134);
+        if (Math.floor(performance.now() / 400) % 2) bShadowText('>', 224, 148);
       }
       else if (this.phase === 'menu') this.drawMenu();
       else if (this.phase === 'move') this.drawMoves();
@@ -516,6 +718,49 @@ function makeBattle(spec, onEnd) {
       else if (this.phase === 'result') this.drawResult();
       /* boss SUPER animation overlays everything */
       if (this.superFX) this.drawSuperFX();
+    },
+    /* per-type attack/heal/buff/status overlays during the 'anim' phase */
+    drawAnimFX: function (anim, prr) {
+      var p = anim.t / anim.dur, k;
+      var atk, tgt;
+      if (anim.actorIsEnemy) { atk = this.enemyRect(anim.eIdx); tgt = anim.atEnemy ? prr : atk; }
+      else { atk = prr; tgt = anim.atEnemy ? this.enemyRect(anim.tIdx) : atk; }
+      if (anim.cat === 'hit') {
+        var glyph = FX_GLYPH[anim.type] || 'fx-burst';
+        for (k = 0; k < 3; k++) { /* projectile glyphs arc along the path */
+          var f = p / 0.7 - k * 0.14;
+          if (f <= 0 || f >= 1) continue;
+          var gx = atk.cx + (tgt.cx - atk.cx) * f, gy = atk.cy + (tgt.cy - atk.cy) * f - Math.sin(f * 3.14) * 12;
+          drawImg(glyph, (gx - 7) | 0, (gy - 8) | 0);
+        }
+        if (p >= 0.7) drawImg('fx-burst', (tgt.cx - 12) | 0, (tgt.cy - 14) | 0);
+      } else if (anim.cat === 'buff') {
+        for (k = 0; k < 3; k++) { /* rising chevrons over the user */
+          var by = atk.y + atk.h - 14 - p * 26 - k * 9;
+          if (by > atk.y - 14) drawImg('fx-chevron', (atk.cx - 20 + k * 14) | 0, by | 0);
+        }
+      } else if (anim.cat === 'heal') {
+        ctx.globalAlpha = 0.3 * (1 - p);
+        px(atk.x, atk.y, atk.w, atk.h, '#48c848');
+        ctx.globalAlpha = 1;
+        drawImg('fx-note', (atk.cx - 7 + Math.sin(p * 8) * 4) | 0, (atk.y - 10 - p * 10) | 0);
+      } else { /* status: sweat drop over the target */
+        drawImg('fx-sweat', (tgt.cx + 8) | 0, (tgt.y - 6 + Math.sin(p * 9) * 2) | 0);
+      }
+    },
+    /* idle mannerism overlay anchored to a battler's head */
+    drawTic: function (tic, hx, hy) {
+      var t = tic.t / tic.dur, k = tic.kind, i;
+      if (k === 'note') drawImg('fx-note', hx + 6, hy - 8 - t * 8);
+      else if (k === 'zzz') { for (i = 0; i < 3; i++) if (t > i * 0.25) drawImg('fx-zzz', hx + 8 + i * 8, hy - 4 - i * 9 - t * 4); }
+      else if (k === 'sparkle') drawImg('fx-star', hx - 16 + t * 32, hy + 2 + Math.sin(t * 6.3) * 3);
+      else if (k === 'spark') { drawImg('fx-glyph', hx + 8, hy - 8 - t * 6); drawImg('fx-sweat', hx - 12, hy + 2); }
+      else if (k === 'point') { drawImg('fx-note', hx + 4, hy - 8 - t * 6); drawImg('fx-star', hx + 14, hy - 16); }
+      else if (k === 'sweat') drawImg('fx-sweat', hx + 8, hy - 2 + t * 4);
+      else if (k === 'ember') drawImg('fx-ember', hx + 6, hy - 10 - t * 8);
+      else if (k === 'star') drawImg('fx-star', hx + 6, hy - 10 - t * 6);
+      else if (k === 'glyph') drawImg('fx-glyph', hx + 6, hy - 10 - t * 6);
+      else if (k === 'heart') drawImg('fx-heart', hx + 6, hy - 10 - t * 6);
     },
     drawSuperFX: function () {
       var s = this.superFX, p = s.t / s.dur; /* 0..1 */
@@ -556,107 +801,103 @@ function makeBattle(spec, onEnd) {
         var q = (p - 0.32) / 0.40;
         for (var b = 0; b < 12; b++) { var c = [COL.pink, COL.gold, COL.teal, COL.purple][b % 4]; var w = (240 * q) | 0; px((b % 2) ? 0 : 240 - w, b * 14, w, 14, c); }
         centerTextO('VS!', 62, COL.white, COL.black, 3);
-      } else {                                         /* hold the VS, foe slides in, then a wipe */
+      } else {                                         /* battlers slide onto their platforms */
         var q2 = (p - 0.72) / 0.28;
-        cls('#1a1030');
-        for (var b2 = 0; b2 < 12; b2++) { var c2 = [COL.pink, COL.gold, COL.teal, COL.purple][b2 % 4]; px(0, b2 * 14, 240, 14, c2); }
-        var en = this.enemies[0];
-        if (en && SPR[en.spr]) { SPR[en.spr]((150 - (1 - q2) * 100) | 0, 44, en.sprOpt); }
-        centerTextO('VS!', 20, COL.white, COL.black, 2);
-        px(0, 0, (240 * q2) | 0, 160, 'rgba(26,16,48,0.0)'); /* (reserved) */
+        var bgn = this.spec.bg || 'stage';
+        if (BGS[bgn]) BGS[bgn](); else cls(COL.night);
+        var slide = ((1 - Math.min(1, q2 * 1.25)) * 130) | 0;
+        bPlatforms(bgn, slide, -slide);
+        for (var ei = 0; ei < this.enemies.length; ei++) {
+          var er = this.enemyRect(ei), ene = this.enemies[ei];
+          if (SPR[ene.spr]) SPR[ene.spr](er.x + slide, er.y, ene.sprOpt);
+        }
+        this.drawPlayerSprite(this.playerRect(), -slide, 0);
+        if (slide <= 0) {                              /* HP boxes pop at the end */
+          var fe2 = this.enemies[Math.max(0, this.firstEnemyIdx())];
+          if (fe2) bHpBoxEnemy(fe2, 8, 14);
+          var a2 = this.active(); if (a2) bHpBoxPlayer(a2, 124, 74);
+        } else centerTextO('VS!', 20, COL.white, COL.black, 2);
       }
     },
-    drawHPBox: function (f, x, y, isPlayer) {
-      if (!f) return;
-      panel(x, y, 104, 30, COL.cream, COL.black);
-      drawText(f.name, x + 5, y + 4, COL.black);
-      drawText('L' + f.level, x + 84, y + 4, COL.black);
-      bar(x + 5, y + 15, 94, 6, f.hp / maxHPd(f), f.hp / maxHPd(f) > 0.5 ? COL.grass : f.hp / maxHPd(f) > 0.2 ? COL.gold : COL.red);
-      if (isPlayer) drawText(f.hp + '/' + maxHPd(f), x + 5, y + 23, COL.black);
-      if (f.status) { var sc = { FLUSTERED: COL.purple, BORED: COL.stone, SHOOK: COL.teal, CHARMED: COL.pink, MICFEEDBACK: COL.red }[f.status] || COL.red;
-        panel(x + 60, y + 22, 40, 8, sc, COL.black); drawText(f.status.substr(0, 4), x + 62, y + 23, COL.white); }
-    },
-    drawCrowd: function () {
-      var cm = this._crowdShown || 0;
-      var bx = 52, by = 3, bw = 150;
-      drawTextO('CROWD', 8, by + 1, COL.white, COL.black);
-      panel(bx - 2, by - 1, bw + 4, 11, COL.night, COL.black);
-      var mid = bx + bw / 2;
-      px(bx, by + 2, bw, 6, '#2a2a34');
-      var half = (cm / 100) * (bw / 2);
-      if (cm >= 0) px(mid, by + 2, half, 6, cm >= 40 ? COL.gold : COL.grass);
-      else px(mid + half, by + 2, -half, 6, cm <= -40 ? COL.red : COL.pink);
-      px(mid, by + 1, 1, 8, COL.white);
-      if (cm >= 100) drawTextO('MAX!', mid + 4, by, COL.gold, COL.black);
-    },
     drawMenu: function () {
-      panel(6, 116, 150, 40);
-      var labels = ['FIGHT', 'SWAG', 'SWITCH', 'FLEE'];
-      for (var i = 0; i < 4; i++) { var cxp = 16 + (i % 2) * 74, cyp = 122 + ((i / 2) | 0) * 16;
-        drawText(labels[i], cxp, cyp, COL.black); if (i === this.menuIdx) drawText('>', cxp - 8, cyp, COL.red); }
-      panel(160, 116, 74, 40, COL.night);
       var a = this.active();
-      drawText(a.name, 166, 122, COL.gold);
-      drawText('LV ' + a.level, 166, 132, COL.white);
-      drawText('HP ' + a.hp, 166, 142, COL.white);
-      if (this.showReady) { centerTextO('SHOWSTOPPER READY!', 108, COL.gold, COL.black); }
+      bTealBox(4, 112, 130, 46);
+      bShadowText('WHAT WILL', 12, 122);
+      bShadowText(a.name + ' DO?', 12, 136);
+      bWhitePanel(134, 112, 102, 46);
+      var labels = ['FIGHT', 'SWAG', 'SWITCH', 'FLEE'];
+      for (var i = 0; i < 4; i++) {
+        var cxp = 152 + (i % 2) * 46, cyp = 122 + ((i / 2) | 0) * 16;
+        drawText(labels[i], cxp, cyp, '#3a3a44');
+        if (i === this.menuIdx) drawText('>', cxp - 8, cyp, '#e84848');
+      }
+      if (this.showReady) { centerTextO('SHOWSTOPPER READY!', 102, COL.gold, COL.black); }
     },
     drawMoves: function () {
       var mv = this.active().moves;
-      panel(6, 112, 228, 44);
+      bWhitePanel(4, 112, 148, 46);
       for (var i = 0; i < mv.length; i++) { var m = MOVES[mv[i]];
-        var xx = 14 + (i % 2) * 112, yy = 117 + ((i / 2) | 0) * 12;
-        drawText(m.name, xx, yy, COL.black); if (i === this.moveIdx) drawText('>', xx - 8, yy, COL.red); }
+        var xx = 22 + (i % 2) * 66, yy = 122 + ((i / 2) | 0) * 16;
+        drawText(m.name.substr(0, 10), xx, yy, '#3a3a44');
+        if (i === this.moveIdx) drawText('>', xx - 8, yy, '#e84848'); }
       var sel = MOVES[mv[this.moveIdx]];
-      panel(6, 141, 228, 15, TYPECOL[sel.type], COL.black);
-      drawText(sel.type + (sel.pow ? '  PWR ' + sel.pow : '  STATUS'), 12, 145, COL.white);
-      drawText(sel.desc, 96, 145, COL.white);
+      bWhitePanel(152, 112, 84, 46);
+      drawText('CROWD ' + ((sel.crowd || 0) >= 0 ? '+' : '') + (sel.crowd || 0), 158, 119, '#3a3a44');
+      drawText(sel.pow ? 'PWR ' + sel.pow : 'STATUS', 158, 129, '#3a3a44');
+      drawText('TYPE/', 158, 141, '#3a3a44');
+      px(188, 138, 44, 11, TYPECOL[sel.type] || COL.stone);
+      drawText(sel.type.substr(0, 4), 192, 140, COL.white);
     },
-    drawTargetPrompt: function () { panel(6, 120, 228, 34); centerText('CHOOSE A TARGET (A)', 133, COL.black);
-      var t = this.enemies[this.targetIdx]; if (t) { var ex = 150 + this.targetIdx * 30; drawTextO('v', ex + 20, 14, COL.red, COL.black); } },
+    drawTargetPrompt: function () {
+      bTealBox(4, 112, 232, 46);
+      bShadowText('CHOOSE A TARGET (A)', 12, 128);
+      var t = this.enemies[this.targetIdx];
+      if (t) { var r = this.enemyRect(this.targetIdx); drawTextO('v', r.cx - 2, 14, COL.red, COL.black); }
+    },
     drawSwitch: function () {
-      panel(6, 96, 228, 60);
-      centerText(this.phase === 'faintswitch' ? 'CHOOSE WHO STEPS UP' : 'SWITCH TO WHO?', 100, COL.black);
+      bParchPanel(6, 96, 228, 60);
+      centerText(this.phase === 'faintswitch' ? 'CHOOSE WHO STEPS UP' : 'SWITCH TO WHO?', 100, '#4a4438');
       for (var i = 0; i < this.party.length; i++) { var f = this.party[i];
         var yy = 112 + i * 11;
-        var col = f.fainted ? COL.stone : COL.black;
+        var col = f.fainted ? COL.stone : '#4a4438';
         drawText(f.name + '  LV' + f.level + '  HP ' + f.hp + '/' + maxHPd(f) + (i === this.activeIdx ? ' *' : ''), 20, yy, col);
-        if (i === this.switchIdx) drawText('>', 10, yy, COL.red); }
+        if (i === this.switchIdx) drawText('>', 10, yy, '#e84848'); }
     },
     drawBag: function () {
-      panel(6, 96, 228, 60);
-      centerText('SWAG POUCH', 100, COL.black);
+      bParchPanel(6, 96, 228, 60);
+      centerText('SWAG POUCH', 100, '#4a4438');
       if (this.bagList.length === 0) { centerText('EMPTY.', 124, COL.stone); return; }
       for (var i = 0; i < this.bagList.length && i < 4; i++) { var id = this.bagList[i];
-        var yy = 112 + i * 11; drawText(ITEMS[id].name + ' x' + Game.items[id], 20, yy, COL.black);
-        if (i === this.itemIdx) drawText('>', 10, yy, COL.red); }
-      drawText(ITEMS[this.bagList[this.itemIdx]].desc, 12, 146, COL.stone);
+        var yy = 112 + i * 11; drawText(ITEMS[id].name + ' x' + Game.items[id], 20, yy, '#4a4438');
+        if (i === this.itemIdx) drawText('>', 10, yy, '#e84848'); }
+      drawText(ITEMS[this.bagList[this.itemIdx]].desc, 12, 146, '#8a7f68');
     },
     drawAim: function () {
-      panel(6, 116, 228, 40, COL.night);
-      centerText('PRESS A ON THE BEAT!', 121, COL.white);
-      var bx = 30, bw = 180, by = 138;
-      px(bx, by, bw, 8, '#2a2a34');
+      bTealBox(4, 112, 232, 46);
+      bShadowCenter('PRESS A ON THE BEAT!', 118);
+      var bx = 30, bw = 180, by = 134;
+      px(bx - 1, by - 1, bw + 2, 10, '#1e3d42');
+      px(bx, by, bw, 8, '#2e333e');
       var zone = bx + bw * 0.7;
       px(zone - 8, by, 16, 8, COL.gold);
       var p = this.aimT / this.aimDur;
       px(bx + bw * p - 1, by - 2, 3, 12, COL.pink);
-      drawText('(OPTIONAL)', 100, 149, COL.stone);
+      bShadowCenter('(OPTIONAL)', 147, '#9fc2c6');
     },
     drawMsg: function () {
-      panel(6, 120, 228, 36);
-      var lines = wrap(this.msg || '', 210);
-      for (var i = 0; i < lines.length && i < 2; i++) drawText(lines[i], 12, 128 + i * 10, COL.black);
-      if (Math.floor(performance.now() / 400) % 2) drawText('>', 224, 148, COL.red);
+      bTealBox(4, 112, 232, 46);
+      var lines = wrap(this.msg || '', 214);
+      for (var i = 0; i < lines.length && i < 2; i++) bShadowText(lines[i], 12, 122 + i * 14);
+      if (Math.floor(performance.now() / 400) % 2) bShadowText('>', 224, 148);
     },
     drawResult: function () {
-      panel(20, 40, 200, 80, COL.cream, COL.gold);
+      bParchPanel(20, 40, 200, 80);
       if (this.result.win) {
-        centerText('VICTORY!', 50, COL.red, 2);
-        for (var i = 0; i < this.xpMsgs.length && i < 5; i++) centerText(this.xpMsgs[i], 68 + i * 9, COL.black);
-      } else if (this.result.fled) { centerText('GOT AWAY SAFELY!', 74, COL.black); }
-      else { centerText('THE CROWD BOOS...', 60, COL.black); centerText('BUT THE SHOW GOES ON.', 74, COL.black); centerText('(FULL HEAL — TRY AGAIN)', 90, COL.stone); }
-      if (Math.floor(performance.now() / 400) % 2) centerText('PRESS A', 106, COL.red);
+        centerText('VICTORY!', 50, '#c63a46', 2);
+        for (var i = 0; i < this.xpMsgs.length && i < 5; i++) centerText(this.xpMsgs[i], 68 + i * 9, '#4a4438');
+      } else if (this.result.fled) { centerText('GOT AWAY SAFELY!', 74, '#4a4438'); }
+      else { centerText('THE CROWD BOOS...', 60, '#4a4438'); centerText('BUT THE SHOW GOES ON.', 74, '#4a4438'); centerText('(FULL HEAL — TRY AGAIN)', 90, COL.stone); }
+      if (Math.floor(performance.now() / 400) % 2) centerText('PRESS A', 106, '#c63a46');
     }
   };
   B.phase = 'transition';

@@ -23,8 +23,8 @@ SPEAKERS['GRANNY'] = { spr: SPR.granny, f: 320 };
 SPEAKERS['CARD SHARP'] = { spr: SPR.cardsharp, f: 250 };
 
 /* ---------------- Old West tile set ---------------- */
-/* R = rails (solid) */
-TILES['R'] = { solid: true, draw: function (x, y) { px(x, y, TS, TS, COL.sand);
+/* 1 = rails (solid) */
+TILES['1'] = { solid: true, draw: function (x, y) { px(x, y, TS, TS, COL.sand);
   for (var i = 0; i < 4; i++) px(x + i * 4 + 1, y + 2, 2, 12, '#5a452a');
   px(x, y + 4, TS, 2, '#3a3230'); px(x, y + 10, TS, 2, '#3a3230');
   px(x + 3, y + 4, 1, 2, '#565058'); px(x + 11, y + 10, 1, 2, '#565058'); } };
@@ -69,8 +69,8 @@ TILES['z'] = { solid: false, enc: true, draw: function (x, y, f) { px(x, y, TS, 
 TILES['F'] = { solid: true, draw: function (x, y) { px(x, y, TS, TS, '#c8a878');
   px(x, y, TS, 3, '#e0c898'); px(x, y + 3, TS, 1, '#8a6a44');
   for (var i = 0; i < 4; i++) px(x + i * 4 + 3, y + 4, 1, 12, '#a08050'); } };
-/* W = facade window (solid) */
-TILES['W'] = { solid: true, draw: function (x, y) { px(x, y, TS, TS, '#c8a878');
+/* 2 = facade window (solid) */
+TILES['2'] = { solid: true, draw: function (x, y) { px(x, y, TS, TS, '#c8a878');
   px(x, y, TS, 3, '#e0c898'); px(x, y + 3, TS, 1, '#8a6a44');
   px(x + 3, y + 6, 10, 8, '#26314f'); px(x + 3, y + 6, 10, 1, '#181820'); px(x + 3, y + 13, 10, 1, '#181820');
   px(x + 3, y + 6, 1, 8, '#181820'); px(x + 12, y + 6, 1, 8, '#181820');
@@ -267,7 +267,7 @@ registerMap('drygulch', {
   grid: [
     '#################',
     '#sssssssssssssss#',
-    '#sFFWFsssssFFWFs#',
+    '#sFF2FsssssFF2Fs#',
     '#sssssssssssssss#',
     '#ssss|sssss|ssss#',
     'sddddddddddddddds',
@@ -305,8 +305,8 @@ registerMap('station', {
   banner: 'DRY GULCH STATION', music: 'west', safe: true,
   grid: [
     '###############',
-    'RRRRRRRRRRRRRRR',
-    'RRRRRRRPRRRRRRR',
+    '111111111111111',
+    '1111111P1111111',
     'PPPPPPPPPPPPPPP',
     '#ddddddddddddd#',
     'sddddddddddddd#',
@@ -396,15 +396,15 @@ registerMap('mainstreet', {
   banner: 'FRONT STREET - DODGE CITY', music: 'west', riftBg: 'west', safe: true,
   grid: [
     '#####################',
-    'RRRRRRRRRRRRRRRRRRRRR',
+    '111111111111111111111',
     'PPPPPPPPPPPPPPPPPPPPP',
-    '#FFWFFWFFFdFWFFFWFFF#',
+    '#FF2FF2FFFdF2FFF2FFF#',
     '#FFFFFdFFFdFFFdFFFFF#',
     '#ddddddddddddddddddd#',
     '#dddddddddddddddddddd',
     '#ddddddddddddddddddd#',
-    '#FWFFFWFFFFFWFFFFWFF#',
-    '#FFWFFFFFWFFFFFWFFFF#',
+    '#F2FFF2FFFFF2FFFF2FF#',
+    '#FF2FFFFF2FFFFF2FFFF#',
     '#d|dddddddddddd|dddd#',
     '#ddddddddddddddddddd#',
     '#####################'

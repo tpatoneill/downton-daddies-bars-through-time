@@ -57,7 +57,7 @@ Each era is a compact region — roughly one town map, one route, one small dung
 
 ## 4. The Party: Four Daddies, Four Classes
 
-Party building is the strategy core: by the finale you field all four, choose who's active (one on stage, three benched, free switching like Pokémon), and manage four distinct kits.
+Party building is the strategy core: by the finale you field all four, choose who's active (one on stage, the rest benched, free switching like Pokémon), and manage four distinct kits. The party order matters and is player-controlled (START > PARTY > LEAD/MOVE): the first slot is the LEAD — they walk the overworld, start battles, and set wild-encounter levels. **Double battles:** whenever a fight has 2+ opponents and the party has 2+ standing daddies, the first two fielded members fight side by side — each picks a move and a target per round, every combatant's HP stays on screen (compact boxes), foes split their attacks between the two, and a fallen daddy is replaced from the bench (or the fight continues solo).
 
 Stats: **HYPE** (HP), **FLOW** (attack), **POISE** (defense), **TEMPO** (speed, turn order). Levels 1–15, moves learned on a fixed schedule, four move slots each (choosing which four to equip is a real decision by midgame).
 

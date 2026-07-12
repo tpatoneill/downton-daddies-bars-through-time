@@ -3,11 +3,22 @@
    Fully null-safe: if AudioContext is unavailable (headless), every call is a no-op. */
 
 var ac = null, master = null, noiseBuf = null;
+/* SOUND ON/OFF — a device preference (not per-save): everything routes through
+   the master gain, so one value silences music, sfx, and jingles together */
+var SND_KEY = 'dd_bars_sound_off';
+var soundOff = false;
+try { soundOff = localStorage.getItem(SND_KEY) === '1'; } catch (e) {}
+function soundToggle() {
+  soundOff = !soundOff;
+  if (master) master.gain.value = soundOff ? 0 : 0.32;
+  try { localStorage.setItem(SND_KEY, soundOff ? '1' : '0'); } catch (e) {}
+}
+function soundLabel() { return soundOff ? 'SOUND: OFF' : 'SOUND: ON'; }
 function ensureAudio() {
   if (ac) return;
   try {
     ac = new (window.AudioContext || window.webkitAudioContext)();
-    master = ac.createGain(); master.gain.value = 0.32; master.connect(ac.destination);
+    master = ac.createGain(); master.gain.value = soundOff ? 0 : 0.32; master.connect(ac.destination);
     var len = (ac.sampleRate * 0.3) | 0;
     noiseBuf = ac.createBuffer(1, len, ac.sampleRate);
     var d = noiseBuf.getChannelData(0);

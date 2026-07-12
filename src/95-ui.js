@@ -81,15 +81,41 @@ function deleteSave(slot) {
 
 /* ---------- party field screen ---------- */
 function makePartyScreen(back) {
+  var ACTIONS = ['LEAD', 'MOVE', 'DRIP'];
   return {
-    idx: 0, mode: 'list', dripIdx: 0,
+    idx: 0, mode: 'list', dripIdx: 0, actIdx: 0, msg: '', msgT: 0,
     enter: function () {},
     onPress: function (k) {
       if (this.mode === 'drip') return this.dripInput(k);
+      if (this.mode === 'action') return this.actionInput(k);
+      if (this.mode === 'move') return this.moveInput(k);
       if (k === 'up') { this.idx = (this.idx + Game.party.length - 1) % Game.party.length; sfx('cursor'); }
       else if (k === 'down') { this.idx = (this.idx + 1) % Game.party.length; sfx('cursor'); }
       else if (k === 'b' || k === 'start') { sfx('cancel'); setScene(back); }
-      else if (k === 'a') { sfx('select'); this.mode = 'drip'; this.dripIdx = 0; this.dripList = this.buildDrip(); }
+      else if (k === 'a') { sfx('select'); this.mode = 'action'; this.actIdx = 0; }
+    },
+    actionInput: function (k) {
+      if (k === 'up') { this.actIdx = (this.actIdx + ACTIONS.length - 1) % ACTIONS.length; sfx('cursor'); }
+      else if (k === 'down') { this.actIdx = (this.actIdx + 1) % ACTIONS.length; sfx('cursor'); }
+      else if (k === 'b') { this.mode = 'list'; sfx('cancel'); }
+      else if (k === 'a') {
+        var act = ACTIONS[this.actIdx];
+        if (act === 'LEAD') {
+          var f = Game.party.splice(this.idx, 1)[0];
+          Game.party.unshift(f); this.idx = 0; this.mode = 'list';
+          this.msg = f.name + ' TAKES THE LEAD!'; this.msgT = 1.4; sfx('item');
+        } else if (act === 'MOVE') { this.mode = 'move'; sfx('select'); }
+        else { this.mode = 'drip'; this.dripIdx = 0; this.dripList = this.buildDrip(); sfx('select'); }
+      }
+    },
+    moveInput: function (k) { /* grab-and-carry: up/down swaps with the neighbor */
+      if (k === 'up' && this.idx > 0) {
+        var a = Game.party[this.idx]; Game.party[this.idx] = Game.party[this.idx - 1]; Game.party[this.idx - 1] = a;
+        this.idx--; sfx('cursor');
+      } else if (k === 'down' && this.idx < Game.party.length - 1) {
+        var b = Game.party[this.idx]; Game.party[this.idx] = Game.party[this.idx + 1]; Game.party[this.idx + 1] = b;
+        this.idx++; sfx('cursor');
+      } else if (k === 'a' || k === 'b') { this.mode = 'list'; sfx('select'); }
     },
     buildDrip: function () { /* owned drip tracked in Game.items with key drip:<id> */
       var owned = ['(NONE)']; for (var k in Game.items) { if (k.indexOf('drip:') === 0 && Game.items[k] > 0) owned.push(k.slice(5)); }
@@ -101,15 +127,17 @@ function makePartyScreen(back) {
       else if (k === 'a') { var sel = this.dripList[this.dripIdx]; var f = Game.party[this.idx];
         f.drip = (sel === '(NONE)') ? null : sel; sfx('item'); this.mode = 'list'; }
     },
-    update: function () {},
+    update: function (dt) { if (this.msgT > 0) this.msgT -= dt; },
     draw: function () {
       cls(COL.night);
       centerText('THE DADDIES', 8, COL.gold);
       for (var i = 0; i < Game.party.length; i++) { var f = Game.party[i];
         var yy = 24 + i * 30;
-        panel(10, yy, 220, 28, i === this.idx ? COL.cream : '#d8d0c0', COL.black);
+        var border = (this.mode === 'move' && i === this.idx) ? COL.gold : COL.black;
+        panel(10, yy, 220, 28, i === this.idx ? COL.cream : '#d8d0c0', border);
         drawMiniPortrait(SPR[f.spr], f.spr === 'samuel' ? { trueForm: hasFlag('trueform') } : undefined, 12, yy - 20, 0.5);
         drawText(f.name, 44, yy + 3, COL.black);
+        if (i === 0) drawText('LEAD', 108, yy + 3, COL.red);
         drawText('LV ' + f.level, 150, yy + 3, COL.black);
         bar(44, yy + 13, 100, 6, f.hp / maxHPd(f), COL.grass);
         drawText('HP ' + f.hp + '/' + maxHPd(f), 44, yy + 20, COL.black);
@@ -121,7 +149,17 @@ function makePartyScreen(back) {
         for (var d = 0; d < this.dripList.length && d < 6; d++) { var id = this.dripList[d];
           var nm = id === '(NONE)' ? id : (DRIP[id] ? DRIP[id].name : id);
           drawText(nm, 74, 58 + d * 10, COL.black); if (d === this.dripIdx) drawText('>', 64, 58 + d * 10, COL.red); }
-      } else centerText('A: DRIP   B: BACK', 150, COL.stone);
+      } else if (this.mode === 'action') {
+        var ay = Math.min(24 + this.idx * 30, 96);
+        panel(160, ay, 64, 42, COL.cream, COL.gold);
+        for (var a2 = 0; a2 < 3; a2++) {
+          drawText(['LEAD', 'MOVE', 'DRIP'][a2], 178, ay + 5 + a2 * 11, COL.black);
+          if (a2 === this.actIdx) drawText('>', 168, ay + 5 + a2 * 11, COL.red);
+        }
+      } else if (this.mode === 'move') {
+        centerText('UP/DOWN: REORDER   A: DROP', 150, COL.gold);
+      } else centerText('A: OPTIONS   B: BACK', 150, COL.stone);
+      if (this.msgT > 0) { panel(40, 132, 160, 14, COL.night, COL.gold); centerText(this.msg, 136, COL.cream); }
     }
   };
 }

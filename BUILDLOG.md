@@ -238,3 +238,29 @@ Screenshots: screenshots/rome2-*.png.
   (Jake 2% at lv10) — winnable with beat-timing + tea per qa-full, but flagged for tuning.
 All suites green: p1 10 - p2 10 - p4 7 - loss 2 - swag 5 - dist 7 - full 9.
 Screenshots: screenshots/p3-*.png, west-enemy-*.png, map-*.png.
+
+## Update — Double battles, party lead, sound toggle, QoL (owner requests)
+- **DOUBLE BATTLES:** any fight with 2+ opponents and 2+ standing daddies now fields TWO allies
+  (the first two in party order). Each round you pick a move + target for both (B backs up to
+  re-choose the first daddy's command); foes pick which of your two they attack; all combatants'
+  HP is on screen via compact boxes (foes stacked top-left, allies right); a fallen daddy is
+  replaced from the bench mid-fight, or the battle continues solo if nobody's left. 1v1 battles
+  are untouched (all changes gated behind the double flag). The train robbery and the finale
+  lobby sim are now true 2v2s. New suite tools/qa-doubles.js (8 checks: activation matrix,
+  command loop + B-back, AI target spread, forced-switch auto-snap, bench compaction,
+  retarget-on-kill, walker termination, 3v2).
+- **PARTY lead + reorder:** START > PARTY > A opens LEAD / MOVE / DRIP. LEAD puts that daddy at
+  the front: they walk the overworld (AI walkers exist for all four), open every battle, and set
+  wild-encounter scaling. MOVE is grab-and-carry reordering (decides who pairs up in doubles).
+  Party order was already persisted, so saves carry it for free.
+- **SOUND: ON/OFF** in the pause menu (index 3, before EXIT) — one master-gain gate silences
+  music, sfx, and jingles together; persists across sessions in its own localStorage key
+  (device preference, not per-save).
+- **Beaten trainers keep wandering** (never re-aggro) so they can't freeze in a doorway and
+  wall you in.
+- **Bug fix: zero-power status moves did nothing.** applyStatus was only called on the damage
+  path, so Herschel's WAR STORY (BORED) and William's ROYAL DECREE (SHOOK + FLOW debuff)
+  announced themselves and fizzled. Both now land their effects (accuracy still applies).
+Balance sweep with doubles: robbery 100% naive (mandatory story gate, friendly by design); SNOB1 boss+2-geralds sim 0% -> 83% (two actors/round put it in the OK band); solo bosses unchanged.
+All suites green: doubles 8 - slots 6 - p1 10 - p2 10 - p4 7 - loss 2 - swag 5 - dist 7 - full 9.
+Screenshots: screenshots/double-*.png.

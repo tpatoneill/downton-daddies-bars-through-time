@@ -149,7 +149,7 @@ var World = {
     if (o.onInteract) { sfx('select'); o.onInteract(o); }
   },
   openMenu: function () {
-    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'EXIT', 'CLOSE'] };
+    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', soundLabel(), 'EXIT', 'CLOSE'] };
     sfx('select');
   },
   update: function (dt) {
@@ -193,11 +193,11 @@ var World = {
       var o = m.objs[i];
       if (!o.trainer || objGone(o)) continue;
       this.initTrainer(o);
-      if (hasFlag(o.defeat)) continue;                   /* beaten: stands still */
+      /* beaten trainers keep wandering (so they never wall you in) but never re-aggro */
       if (o._moving) { o._mt += dt; if (o._mt >= 0.16) { o._moving = false; o._wait = 0.3 + Math.random() * 0.4; } }
       else if (o._wait > 0) { o._wait -= dt; }
       else { this.trainerStep(o); }
-      if (this.trainerSees(o)) { this.spotTrainer(o); return; }
+      if (!hasFlag(o.defeat) && this.trainerSees(o)) { this.spotTrainer(o); return; }
     }
   },
   trainerStep: function (o) {
@@ -254,6 +254,7 @@ var World = {
       else if (sel === 'SAVE') { saveGame(true); mn.msg = 'GAME SAVED.'; mn.msgT = 1.2; sfx('save'); }
       else if (sel === 'PARTY') { setScene(makePartyScreen(World)); }
       else if (sel === 'SWAG') { setScene(makeBagScreen(World)); }
+      else if (sel.indexOf('SOUND') === 0) { soundToggle(); mn.items[mn.idx] = soundLabel(); sfx('cursor'); }
       else if (sel === 'EXIT') {
         if (mn.exitArmed) { this.menu = null; musicStop(); sfx('cancel'); setScene(Title); }
         else { mn.exitArmed = true; mn.msg = 'UNSAVED PROGRESS IS LOST. A: QUIT'; mn.msgT = 2.4; sfx('cursor'); }
@@ -317,7 +318,8 @@ var World = {
     var sx = pxp - cx, sy = pyp - cy;
     /* shadow */
     px(sx + 3, sy + 14, 10, 2, 'rgba(0,0,0,0.25)');
-    drawWalker('samuel', Game.dir, this.moving ? this.frame : 0, sx, sy);
+    var leadId = (Game.party && Game.party[0]) ? Game.party[0].id : 'samuel';
+    drawWalker(leadId, Game.dir, this.moving ? this.frame : 0, sx, sy);
   },
   drawMenu: function () {
     var mn = this.menu;

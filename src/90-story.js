@@ -305,7 +305,7 @@ function debugVisit(era) {
        'william_joined', 'nyc_arrived_seen', 'nyc_done', 'rosalind_joined', 'sc_password', 'sc_inside', 'sc_briefed', 'sc_elevator_key', 'goblin_arrived', 'goblin_done',
        'pedro_beaten', 'london_unlocked', 'trueform']);
     Game.parts = 4;
-    Game.party[0].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];
+    for (var si = 0; si < Game.party.length; si++) if (Game.party[si].id === 'samuel') Game.party[si].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];
     Game.map = 'theatredistrict'; Game.px = 9; Game.py = 5; Game.dir = 'up';
   }
   gotoWorld();

@@ -399,11 +399,22 @@ function drawImgFlipH(name, x, y) {
    Fully null-safe: if AudioContext is unavailable (headless), every call is a no-op. */
 
 var ac = null, master = null, noiseBuf = null;
+/* SOUND ON/OFF — a device preference (not per-save): everything routes through
+   the master gain, so one value silences music, sfx, and jingles together */
+var SND_KEY = 'dd_bars_sound_off';
+var soundOff = false;
+try { soundOff = localStorage.getItem(SND_KEY) === '1'; } catch (e) {}
+function soundToggle() {
+  soundOff = !soundOff;
+  if (master) master.gain.value = soundOff ? 0 : 0.32;
+  try { localStorage.setItem(SND_KEY, soundOff ? '1' : '0'); } catch (e) {}
+}
+function soundLabel() { return soundOff ? 'SOUND: OFF' : 'SOUND: ON'; }
 function ensureAudio() {
   if (ac) return;
   try {
     ac = new (window.AudioContext || window.webkitAudioContext)();
-    master = ac.createGain(); master.gain.value = 0.32; master.connect(ac.destination);
+    master = ac.createGain(); master.gain.value = soundOff ? 0 : 0.32; master.connect(ac.destination);
     var len = (ac.sampleRate * 0.3) | 0;
     noiseBuf = ac.createBuffer(1, len, ac.sampleRate);
     var d = noiseBuf.getChannelData(0);
@@ -2693,7 +2704,7 @@ var World = {
     if (o.onInteract) { sfx('select'); o.onInteract(o); }
   },
   openMenu: function () {
-    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', 'EXIT', 'CLOSE'] };
+    this.menu = { idx: 0, items: ['PARTY', 'SWAG', 'SAVE', soundLabel(), 'EXIT', 'CLOSE'] };
     sfx('select');
   },
   update: function (dt) {
@@ -2737,11 +2748,11 @@ var World = {
       var o = m.objs[i];
       if (!o.trainer || objGone(o)) continue;
       this.initTrainer(o);
-      if (hasFlag(o.defeat)) continue;                   /* beaten: stands still */
+      /* beaten trainers keep wandering (so they never wall you in) but never re-aggro */
       if (o._moving) { o._mt += dt; if (o._mt >= 0.16) { o._moving = false; o._wait = 0.3 + Math.random() * 0.4; } }
       else if (o._wait > 0) { o._wait -= dt; }
       else { this.trainerStep(o); }
-      if (this.trainerSees(o)) { this.spotTrainer(o); return; }
+      if (!hasFlag(o.defeat) && this.trainerSees(o)) { this.spotTrainer(o); return; }
     }
   },
   trainerStep: function (o) {
@@ -2798,6 +2809,7 @@ var World = {
       else if (sel === 'SAVE') { saveGame(true); mn.msg = 'GAME SAVED.'; mn.msgT = 1.2; sfx('save'); }
       else if (sel === 'PARTY') { setScene(makePartyScreen(World)); }
       else if (sel === 'SWAG') { setScene(makeBagScreen(World)); }
+      else if (sel.indexOf('SOUND') === 0) { soundToggle(); mn.items[mn.idx] = soundLabel(); sfx('cursor'); }
       else if (sel === 'EXIT') {
         if (mn.exitArmed) { this.menu = null; musicStop(); sfx('cancel'); setScene(Title); }
         else { mn.exitArmed = true; mn.msg = 'UNSAVED PROGRESS IS LOST. A: QUIT'; mn.msgT = 2.4; sfx('cursor'); }
@@ -2861,7 +2873,8 @@ var World = {
     var sx = pxp - cx, sy = pyp - cy;
     /* shadow */
     px(sx + 3, sy + 14, 10, 2, 'rgba(0,0,0,0.25)');
-    drawWalker('samuel', Game.dir, this.moving ? this.frame : 0, sx, sy);
+    var leadId = (Game.party && Game.party[0]) ? Game.party[0].id : 'samuel';
+    drawWalker(leadId, Game.dir, this.moving ? this.frame : 0, sx, sy);
   },
   drawMenu: function () {
     var mn = this.menu;
@@ -3379,6 +3392,25 @@ function bHpBoxPlayer(f, x, y) {
   if (st) { px(x + 5, y + 23, 26, 9, STATUS_PILL[st] || '#c8a020'); px(x + 5, y + 23, 26, 1, 'rgba(0,0,0,0.3)'); drawText(st.substr(0, 3), x + 7, y + 24, COL.white); }
   drawText(f.hp + '/' + maxHPd(f), x + 52, y + 24, '#4a4438');
 }
+/* compact boxes for double battles: every combatant's stats stay on screen */
+function bHpBoxEnemyMini(f, x, y) {
+  bParchPanel(x, y, 94, 20);
+  drawText(('' + f.name).substr(0, 9), x + 4, y + 3, '#4a4438');
+  var st = f.status;
+  if (st) { px(x + 70, y + 2, 20, 9, STATUS_PILL[st] || '#c8a020'); drawText(st.substr(0, 3), x + 72, y + 3, COL.white); }
+  else drawText('L' + f.level, x + 74, y + 3, '#4a4438');
+  bHpBar(x + 4, y + 11, 86, f.hp / maxHPd(f));
+}
+function bHpBoxAllyMini(f, x, y, isCmd) {
+  bParchPanel(x, y, 102, 21);
+  if (isCmd) { px(x + 1, y + 1, 100, 1, COL.gold); drawText('>', x - 7, y + 6, '#e84848'); }
+  drawText(('' + f.name).substr(0, 9), x + 4, y + 3, '#4a4438');
+  var st = f.status;
+  if (st) { px(x + 76, y + 2, 22, 9, STATUS_PILL[st] || '#c8a020'); drawText(st.substr(0, 3), x + 78, y + 3, COL.white); }
+  else drawText('L' + f.level, x + 80, y + 3, '#4a4438');
+  bHpBar(x + 4, y + 12, 56, f.hp / maxHPd(f));
+  drawText(f.hp + '/' + maxHPd(f), x + 62, y + 13, '#4a4438');
+}
 /* crowd meter as a live audience strip along the top (Battle Frontier style) */
 function bAudienceStrip(v, maxed) {
   px(0, 0, 240, 12, '#2a2a36');
@@ -3410,11 +3442,16 @@ function makeBattle(spec, onEnd) {
     var e = spec.enemies[i];
     enemies.push(e.boss ? makeBoss(e.boss) : makeEnemy(e.enemy, e.level));
   }
+  var livingP = 0;
+  for (var lp = 0; lp < Game.party.length; lp++) if (!Game.party[lp].fainted && Game.party[lp].hp > 0) livingP++;
   var B = {
     spec: spec, onEnd: onEnd, enemies: enemies,
     party: Game.party,
     activeIdx: Math.max(0, firstLivingIdx(Game.party)),
     targetIdx: 0,
+    /* DOUBLE BATTLE: 2+ foes and 2+ living daddies -> two allies fight at once */
+    double: (enemies.length >= 2 && livingP >= 2),
+    field: null, cmdSlot: 0, slotActions: [null, null], faintSlot: -1, roundMsgs: [],
     crowd: spec.crowdStart || 0, usedShow: false,
     revealPending: false, revealDone: false, superFX: null,
     phase: 'transition', transT: 0, transDur: 1.7, taunt: spec.taunt || null,
@@ -3425,10 +3462,39 @@ function makeBattle(spec, onEnd) {
     result: null, introT: 0, animT: 0, hitFlash: 0, anim: null,
     xpMsgs: [],
     enter: function () { musicStart(spec.music || 'battle'); this.introT = 0;
-      this.participants[this.activeIdx] = true; },
+      this.participants[this.activeIdx] = true;
+      if (this.double) for (var s = 0; s < this.field.length; s++) this.participants[this.field[s]] = true; },
     active: function () { return this.party[this.activeIdx]; },
     livingEnemies: function () { var a = []; for (var i = 0; i < this.enemies.length; i++) if (!this.enemies[i].fainted) a.push(this.enemies[i]); return a; },
     firstEnemyIdx: function () { for (var i = 0; i < this.enemies.length; i++) if (!this.enemies[i].fainted) return i; return -1; },
+    /* ---------- double-battle helpers ---------- */
+    fieldFighter: function (s) { return this.party[this.field[s]]; },
+    setSlot: function (s) { this.cmdSlot = s; this.activeIdx = this.field[s]; this.menuIdx = 0; this.moveIdx = 0; },
+    nextSlotOrRun: function () {
+      for (var s = this.cmdSlot + 1; s < this.field.length; s++) {
+        var f = this.fieldFighter(s);
+        if (f && !f.fainted && f.hp > 0 && !this.slotActions[s]) { this.setSlot(s); this.phase = 'menu'; return; }
+      }
+      this.runRound();
+    },
+    benchLiving: function () {
+      var a = [];
+      for (var i = 0; i < this.party.length; i++) { var f = this.party[i];
+        if (!f.fainted && f.hp > 0 && this.field.indexOf(i) < 0) a.push(i); }
+      return a;
+    },
+    pickAllyTargetP: function () {
+      var opts = [];
+      for (var s = 0; s < this.field.length; s++) { var f = this.fieldFighter(s); if (f && !f.fainted && f.hp > 0) opts.push(this.field[s]); }
+      if (!opts.length) return this.activeIdx;
+      return opts[(Math.random() * opts.length) | 0];
+    },
+    resolveAllyTarget: function (pIdx) {
+      var f = this.party[pIdx];
+      if (f && !f.fainted && f.hp > 0 && this.field.indexOf(pIdx) >= 0) return f;
+      for (var s = 0; s < this.field.length; s++) { var g = this.fieldFighter(s); if (g && !g.fainted && g.hp > 0) return g; }
+      return null;
+    },
     /* ---------- input ---------- */
     onPress: function (k) {
       if (this.phase === 'transition') { if (k === 'a' || k === 'start') { this.transT = this.transDur; this.phase = 'intro'; this.introT = 0; } return; }
@@ -3445,6 +3511,15 @@ function makeBattle(spec, onEnd) {
       if (this.phase === 'faintswitch') return this.switchInput(k);
     },
     toMenu: function () {
+      if (this.double) {
+        var s0 = -1;
+        for (var s = 0; s < this.field.length; s++) { var ff = this.fieldFighter(s); if (ff && !ff.fainted && ff.hp > 0) { s0 = s; break; } }
+        if (s0 < 0) { if (firstLivingIdx(this.party) < 0) { this.lose(); return; } s0 = 0; }
+        this.slotActions = [null, null]; this.roundMsgs = [];
+        this.setSlot(s0); this.phase = 'menu';
+        if (this.crowd >= 100 && !this.usedShow) { this.showBanner = true; }
+        return;
+      }
       if (!this.active() || this.active().fainted) { var idx = firstLivingIdx(this.party); if (idx < 0) { this.lose(); return; } this.activeIdx = idx; }
       this.phase = 'menu'; this.menuIdx = 0;
       if (this.crowd >= 100 && !this.usedShow) { this.showBanner = true; }
@@ -3455,6 +3530,10 @@ function makeBattle(spec, onEnd) {
       else if (k === 'down') { this.menuIdx = (this.menuIdx + 2) % 4; sfx('cursor'); }
       else if (k === 'left') { this.menuIdx = (this.menuIdx + 3) % 4; sfx('cursor'); }
       else if (k === 'right') { this.menuIdx = (this.menuIdx + 1) % 4; sfx('cursor'); }
+      else if (k === 'b' && this.double && this.cmdSlot > 0 && this.slotActions[this.cmdSlot - 1] && this.slotActions[this.cmdSlot - 1].kind === 'move') {
+        /* back up to re-choose the first daddy's move (switch/item already applied, can't undo) */
+        this.slotActions[this.cmdSlot - 1] = null; this.setSlot(this.cmdSlot - 1); this.phase = 'menu'; sfx('cancel');
+      }
       else if (k === 'a') {
         sfx('select');
         if (this.menuIdx === 0) { this.phase = 'move'; this.moveIdx = 0; }
@@ -3489,6 +3568,24 @@ function makeBattle(spec, onEnd) {
       else if (k === 'b' && !forced) { this.phase = 'menu'; sfx('cancel'); }
       else if (k === 'a') {
         var t = this.party[this.switchIdx];
+        if (this.double) {
+          if (forced) {
+            /* auto-snap an invalid pick (fainted or already fielded) to the next valid bench daddy */
+            var pick = this.switchIdx, guard = 0;
+            while (guard++ < this.party.length && (this.party[pick].fainted || this.party[pick].hp <= 0 || this.field.indexOf(pick) >= 0))
+              pick = (pick + 1) % this.party.length;
+            if (this.party[pick].fainted || this.party[pick].hp <= 0 || this.field.indexOf(pick) >= 0) { sfx('cancel'); return; }
+            sfx('select');
+            this.field[this.faintSlot] = pick; this.activeIdx = pick; this.participants[pick] = true; this.faintSlot = -1;
+            this.afterFaintCheck(); return;
+          }
+          if (t.fainted || t.hp <= 0 || this.field.indexOf(this.switchIdx) >= 0) { sfx('cancel'); return; }
+          sfx('select');
+          this.field[this.cmdSlot] = this.switchIdx; this.activeIdx = this.switchIdx; this.participants[this.switchIdx] = true;
+          this.slotActions[this.cmdSlot] = { kind: 'switch' };
+          this.roundMsgs.push(this.party[this.switchIdx].name + ' STEPS UP!');
+          this.nextSlotOrRun(); return;
+        }
         if (t.fainted || t.hp <= 0) { sfx('cancel'); return; }
         if (this.switchIdx === this.activeIdx && !forced) { sfx('cancel'); return; }
         sfx('select'); this.activeIdx = this.switchIdx; this.participants[this.activeIdx] = true;
@@ -3516,6 +3613,10 @@ function makeBattle(spec, onEnd) {
       this.commitPlayer(this.pendingMove, this.aimHit);
     },
     commitPlayer: function (move, onBeat) {
+      if (this.double) {
+        this.slotActions[this.cmdSlot] = { kind: 'move', move: move, onBeat: onBeat, target: this.targetIdx };
+        this.nextSlotOrRun(); return;
+      }
       this.playerAction = { kind: 'move', move: move, onBeat: onBeat, target: this.targetIdx };
       this.runRound();
     },
@@ -3524,20 +3625,29 @@ function makeBattle(spec, onEnd) {
       var self = this;
       this.queue = []; this.qi = 0;
       /* build actor action list */
-      var actors = [];
-      var ply = this.active();
-      var pAct = this.playerAction;
-      if (pAct.kind === 'move') actors.push({ f: ply, isPlayer: true, act: pAct });
-      else if (pAct.kind === 'switch') { /* switch already applied; enemies still act */ }
+      var actors = [], i;
+      if (this.double) {
+        for (i = 0; i < this.roundMsgs.length; i++) this.pushMsg(this.roundMsgs[i]);
+        this.roundMsgs = [];
+        for (var s = 0; s < this.field.length; s++) {
+          var sAct = this.slotActions[s], ff = this.fieldFighter(s);
+          if (sAct && sAct.kind === 'move' && ff && !ff.fainted) actors.push({ f: ff, isPlayer: true, slot: s, act: sAct });
+        }
+      } else {
+        var ply = this.active();
+        var pAct = this.playerAction;
+        if (pAct.kind === 'move') actors.push({ f: ply, isPlayer: true, slot: 0, act: pAct });
+        else if (pAct.kind === 'switch') { /* switch already applied; enemies still act */ }
+      }
       /* enemies choose */
-      for (var i = 0; i < this.enemies.length; i++) {
+      for (i = 0; i < this.enemies.length; i++) {
         var e = this.enemies[i]; if (e.fainted) continue;
         actors.push({ f: e, isPlayer: false, act: this.enemyChoose(e) });
       }
       /* order by TEMPO (switch = player already moved; enemies act after) */
       actors.sort(function (a, b) { return eff(b.f, 'TEMPO') - eff(a.f, 'TEMPO') + (Math.random() - 0.5); });
       /* build event queue */
-      if (pAct.kind === 'switch') this.pushMsg(ply.name + ' STEPS UP!');
+      if (!this.double && this.playerAction.kind === 'switch') this.pushMsg(this.active().name + ' STEPS UP!');
       for (i = 0; i < actors.length; i++) this.buildActorEvents(actors[i]);
       /* end of round: status ticks */
       this.queue.push({ fn: function () { return self.endRoundTick(); } });
@@ -3546,10 +3656,13 @@ function makeBattle(spec, onEnd) {
     enemyChoose: function (e) {
       var ai = e.ai || 'basic';
       e.turnCount = (e.turnCount || 0) + 1;
-      var pick = function (id) { return { kind: 'move', move: MOVES[id], onBeat: false, target: 0, actor: e }; };
+      /* in doubles each foe picks which fielded daddy it goes after */
+      var tgtP = this.double ? this.pickAllyTargetP() : this.activeIdx;
+      var tgtF = this.party[tgtP] || this.active();
+      var pick = function (id) { return { kind: 'move', move: MOVES[id], onBeat: false, target: 0, targetP: tgtP, actor: e }; };
       var atkMove = function () {
-        /* choose a damaging move, prefer type advantage on active player */
-        var best = null, bestScore = -1, tgt = Battle.active();
+        /* choose a damaging move, prefer type advantage on the chosen target */
+        var best = null, bestScore = -1, tgt = tgtF;
         for (var i = 0; i < e.moves.length; i++) { var m = MOVES[e.moves[i]]; if (!m.pow) continue;
           var sc = m.pow * typeMult(m.type, tgt.type) + Math.random() * 5; if (sc > bestScore) { bestScore = sc; best = e.moves[i]; } }
         return pick(best || e.moves[0]);
@@ -3571,7 +3684,7 @@ function makeBattle(spec, onEnd) {
       var self = this, f = a.f, act = a.act;
       /* attack animation beat: plays before the action resolves */
       if (act && act.kind === 'move' && act.move) {
-        this.queue.push({ fn: function () { return self.makeAnim(f, act, a.isPlayer); } });
+        this.queue.push({ fn: function () { return self.makeAnim(f, act, a.isPlayer, a.slot); } });
       }
       /* status gate */
       this.queue.push({ fn: function () {
@@ -3583,7 +3696,7 @@ function makeBattle(spec, onEnd) {
       } });
     },
     /* build the {anim:...} descriptor for a queued action, or null to skip it */
-    makeAnim: function (f, act, isPlayer) {
+    makeAnim: function (f, act, isPlayer, slot) {
       if (f.fainted || f.hp <= 0 || f.status === 'BORED') return null;
       var move = act.move; if (!move) return null;
       var e = move.eff || {}, cat;
@@ -3597,7 +3710,13 @@ function makeBattle(spec, onEnd) {
         if (tIdx < 0) return null;
       }
       var eIdx = isPlayer ? 0 : this.enemies.indexOf(f);
-      return { anim: { actorIsEnemy: !isPlayer, eIdx: eIdx < 0 ? 0 : eIdx, tIdx: tIdx,
+      /* doubles: which ally slot lunges / gets hit */
+      var pSlot = isPlayer ? (slot || 0) : 0, tSlot = 0;
+      if (!isPlayer && this.double && move.tgt === 'enemy') {
+        var rt = this.resolveAllyTarget(act.targetP);
+        if (rt) { var fsIdx = this.field.indexOf(this.party.indexOf(rt)); if (fsIdx >= 0) tSlot = fsIdx; }
+      }
+      return { anim: { actorIsEnemy: !isPlayer, eIdx: eIdx < 0 ? 0 : eIdx, tIdx: tIdx, pSlot: pSlot, tSlot: tSlot,
         type: move.type, cat: cat, name: move.name, atEnemy: move.tgt === 'enemy', t: 0, dur: 0.55 } };
     },
     doAction: function (f, act, isPlayer) {
@@ -3605,7 +3724,7 @@ function makeBattle(spec, onEnd) {
       var move = act.move;
       /* accuracy incl. evasion */
       var tgt;
-      if (move.tgt === 'enemy') tgt = isPlayer ? (this.enemies[act.target] && !this.enemies[act.target].fainted ? this.enemies[act.target] : this.livingEnemies()[0]) : this.active();
+      if (move.tgt === 'enemy') tgt = isPlayer ? (this.enemies[act.target] && !this.enemies[act.target].fainted ? this.enemies[act.target] : this.livingEnemies()[0]) : (this.double ? this.resolveAllyTarget(act.targetP) : this.active());
       else tgt = f;
       if (!tgt) return null;
       var accRoll = Math.random();
@@ -3648,6 +3767,7 @@ function makeBattle(spec, onEnd) {
         if (tgt.hp <= 0) lines.push(this.faint(tgt));
       } else {
         this.applyUtility(f, move, lines, isPlayer);
+        this.applyStatus(f, tgt, move, lines); /* zero-pow status moves (WAR STORY, ROYAL DECREE) land their effect */
       }
       return lines;
     },
@@ -3735,20 +3855,37 @@ function makeBattle(spec, onEnd) {
       /* showstopper */
       if (this.showReady && !this.usedShow) {
         this.usedShow = true; this.showReady = false; this.flash = 0.6; sfx('showstopper');
+        if (this.double) { /* the free encore goes to the first standing fielded daddy */
+          for (var ss = 0; ss < this.field.length; ss++) { var sf = this.fieldFighter(ss); if (sf && !sf.fainted && sf.hp > 0) { this.setSlot(ss); break; } }
+        }
         this.playerAction = { kind: 'move', move: this.bestPlayerMove(), onBeat: true, target: this.firstEnemyIdx() };
         this.queue = []; this.qi = 0;
         this.pushMsg('SHOWSTOPPER!! ' + this.active().name + ' GETS A FREE ENCORE!');
-        this.buildActorEvents({ f: this.active(), isPlayer: true, act: this.playerAction });
+        this.buildActorEvents({ f: this.active(), isPlayer: true, slot: this.cmdSlot, act: this.playerAction });
         var self = this; this.queue.push({ fn: function () { return self.endRoundTick(); } });
         this.phase = 'resolve'; this.runEvent(); return;
       }
       if (this.checkEnd()) return;
+      if (this.double) { this.afterFaintCheck(); return; }
       /* forced faint switch */
       if (this.active().fainted) {
         var idx = firstLivingIdx(this.party);
         if (idx < 0) { this.lose(); return; }
         this.phase = 'faintswitch'; this.switchIdx = idx; return;
       }
+      this.toMenu();
+    },
+    /* doubles: refill or compact empty field slots after a round */
+    afterFaintCheck: function () {
+      for (var s = 0; s < this.field.length; s++) {
+        var f = this.fieldFighter(s);
+        if (!f || f.fainted || f.hp <= 0) {
+          var bench = this.benchLiving();
+          if (bench.length) { this.phase = 'faintswitch'; this.faintSlot = s; this.switchIdx = bench[0]; return; }
+          this.field.splice(s, 1); s--;
+        }
+      }
+      if (this.field.length === 0) { this.lose(); return; }
       this.toMenu();
     },
     bestPlayerMove: function () {
@@ -3764,19 +3901,23 @@ function makeBattle(spec, onEnd) {
     },
     /* ---------- items / flee ---------- */
     useItemFromBag: function (id) {
-      var it = ITEMS[id];
+      var it = ITEMS[id], msg;
       if (it.kind === 'heal' || it.kind === 'cure') {
         var t = this.active();
         if (it.kind === 'heal') { if (t.hp >= maxHPd(t)) { sfx('cancel'); return; } t.hp = Math.min(maxHPd(t), t.hp + it.amt); }
         else { if (!t.status) { sfx('cancel'); return; } t.status = null; }
         takeItem(id); sfx('item');
+        msg = t.name + (it.kind === 'heal' ? ' DRINKS ' + it.name + '!' : ' IS CURED!');
+        if (this.double) { this.slotActions[this.cmdSlot] = { kind: 'item', id: id }; this.roundMsgs.push(msg); this.nextSlotOrRun(); return; }
         this.playerAction = { kind: 'item', id: id };
-        this.pushAndRun(t.name + (it.kind === 'heal' ? ' DRINKS ' + it.name + '!' : ' IS CURED!'));
+        this.pushAndRun(msg);
       } else if (it.kind === 'revive') {
         var fell = null; for (var i = 0; i < this.party.length; i++) if (this.party[i].fainted) { fell = this.party[i]; break; }
         if (!fell) { sfx('cancel'); return; }
         fell.fainted = false; fell.hp = Math.round(maxHPd(fell) * 0.5); takeItem(id); sfx('heal');
-        this.pushAndRun(fell.name + ' IS BACK IN THE SPOTLIGHT!');
+        msg = fell.name + ' IS BACK IN THE SPOTLIGHT!';
+        if (this.double) { this.slotActions[this.cmdSlot] = { kind: 'item', id: id }; this.roundMsgs.push(msg); this.nextSlotOrRun(); return; }
+        this.pushAndRun(msg);
       } else if (it.kind === 'flee') { takeItem(id); this.flee(); }
     },
     pushAndRun: function (msg) {
@@ -3787,6 +3928,8 @@ function makeBattle(spec, onEnd) {
       this.phase = 'resolve'; this.runEvent();
     },
     tryFlee: function () {
+      /* fleeing is a whole-team call: any committed slot actions are dropped */
+      if (this.double) { this.slotActions = [null, null]; this.roundMsgs = []; }
       if (this.spec.canFlee === false) { this.pushAndRun("THERE'S NO RUNNING FROM THIS ONE!"); return; }
       var pl = this.active(), en = this.livingEnemies()[0];
       var chance = 0.5 + (eff(pl, 'TEMPO') - eff(en, 'TEMPO')) * 0.03;
@@ -3866,7 +4009,10 @@ function makeBattle(spec, onEnd) {
       if (this.phase === 'result') { this.resultT += dt; }
       /* idle mannerism timers (only tick while waiting on player input) */
       var idling = this.phase === 'menu' || this.phase === 'move' || this.phase === 'aim' || this.phase === 'target';
-      var cast = [this.active()].concat(this.livingEnemies());
+      var cast = [];
+      if (this.double) { for (var fs = 0; fs < this.field.length; fs++) cast.push(this.fieldFighter(fs)); }
+      else cast.push(this.active());
+      cast = cast.concat(this.livingEnemies());
       for (var ci = 0; ci < cast.length; ci++) {
         var cf = cast[ci]; if (!cf || cf.fainted) continue;
         if (cf._tic) { cf._tic.t += dt; if (cf._tic.t >= cf._tic.dur) cf._tic = null; }
@@ -3891,16 +4037,18 @@ function makeBattle(spec, onEnd) {
       var y = im ? 84 - h : 20;
       return { x: x, y: y, w: w, h: h, cx: x + (w >> 1), cy: y + (h >> 1) };
     },
-    /* on-screen rect for the active player's back sprite (or SPR fallback) */
-    playerRect: function () {
-      var a = this.active();
+    /* on-screen rect for an ally back sprite (or SPR fallback); slot shifts the second daddy right */
+    playerRect: function (slot) {
+      slot = slot || 0;
+      var a = (this.double && this.field[slot] !== undefined) ? this.fieldFighter(slot) : this.active();
+      var ofs = slot * 52;
       var key = (a && a.id) ? a.id + '-back' : null;
       var im = key ? battleImg(key) : null;
-      if (im) { var x = 6 + ((63 - im.w) >> 1); return { img: key, x: x, y: 58, w: im.w, h: im.h, cx: x + (im.w >> 1), cy: 58 + (im.h >> 1) }; }
-      return { img: null, x: 26, y: 78, w: 36, h: 48, cx: 44, cy: 102 };
+      if (im) { var x = 6 + ofs + ((63 - im.w) >> 1); return { img: key, x: x, y: 58, w: im.w, h: im.h, cx: x + (im.w >> 1), cy: 58 + (im.h >> 1) }; }
+      return { img: null, x: 26 + ofs, y: 78, w: 36, h: 48, cx: 44 + ofs, cy: 102 };
     },
-    drawPlayerSprite: function (r, dx, dy) {
-      var a = this.active(); if (!a) return;
+    drawPlayerSprite: function (r, dx, dy, f) {
+      var a = f || this.active(); if (!a) return;
       if (r.img) { drawImg(r.img, r.x + dx, r.y + dy); return; }
       if (SPR[a.spr]) SPR[a.spr](r.x + dx, r.y + dy, a.spr === 'samuel' ? { trueForm: hasFlag('trueform') } : undefined);
     },
@@ -3918,7 +4066,8 @@ function makeBattle(spec, onEnd) {
       var impact = anim && anim.cat === 'hit' && anim.t > anim.dur * 0.7;
       var blinkOff = impact && ((anim.t * 20 | 0) % 2 === 1);
       var jit = impact ? ((((anim.t * 30) | 0) % 2) ? 1 : -1) : 0;
-      var prr = this.playerRect();
+      var prr = this.playerRect(0);
+      var lungeTgt = (anim && this.double) ? this.playerRect(anim.tSlot || 0) : prr;
       var showTics = this.phase === 'menu' || this.phase === 'move' || this.phase === 'aim' || this.phase === 'target';
       /* enemy sprite(s) on the upper-right platform */
       for (var i = 0; i < this.enemies.length; i++) {
@@ -3926,8 +4075,8 @@ function makeBattle(spec, onEnd) {
         var r = this.enemyRect(i);
         var dx = 0, dy = 0, skipE = false;
         if (anim && anim.actorIsEnemy && anim.eIdx === i) {
-          if (anim.atEnemy && lunge > 0) { /* lunge toward the player */
-            var vx = prr.cx - r.cx, vy = prr.cy - r.cy, vl = Math.sqrt(vx * vx + vy * vy) || 1;
+          if (anim.atEnemy && lunge > 0) { /* lunge toward the targeted daddy */
+            var vx = lungeTgt.cx - r.cx, vy = lungeTgt.cy - r.cy, vl = Math.sqrt(vx * vx + vy * vy) || 1;
             dx += vx / vl * lunge; dy += vy / vl * lunge;
           }
         } else {
@@ -3939,32 +4088,43 @@ function makeBattle(spec, onEnd) {
         if (!skipE && SPR[e.spr]) SPR[e.spr]((r.x + dx) | 0, (r.y + dy) | 0, e.sprOpt);
         if (showTics && e._tic) this.drawTic(e._tic, r.cx, r.y);
       }
-      /* active player's back sprite on the lower-left platform */
+      /* ally back sprite(s) on the lower-left platform */
+      var slots = this.double ? this.field.length : 1;
       var a = this.active();
-      if (a) {
+      for (var sl = 0; sl < slots; sl++) {
+        var af = this.double ? this.fieldFighter(sl) : a;
+        if (!af || (this.double && (af.fainted || af.hp <= 0))) continue;
+        var arr = this.playerRect(sl);
         var pdx = 0, pdy = 0, skipP = false;
-        if (anim && !anim.actorIsEnemy) {
+        if (anim && !anim.actorIsEnemy && (anim.pSlot || 0) === sl) {
           if (anim.atEnemy && lunge > 0) {
             var tr = this.enemyRect(anim.tIdx);
-            var pvx = tr.cx - prr.cx, pvy = tr.cy - prr.cy, pvl = Math.sqrt(pvx * pvx + pvy * pvy) || 1;
+            var pvx = tr.cx - arr.cx, pvy = tr.cy - arr.cy, pvl = Math.sqrt(pvx * pvx + pvy * pvy) || 1;
             pdx += pvx / pvl * lunge; pdy += pvy / pvl * lunge;
           }
         } else {
-          if (anim && anim.actorIsEnemy && anim.atEnemy) {
+          if (anim && anim.actorIsEnemy && anim.atEnemy && (anim.tSlot || 0) === sl) {
             if (blinkOff) skipP = true; pdx += jit;
           }
-          pdy += Math.sin(this.animT * 2) > 0 ? 1 : 0; /* breathing bob */
+          pdy += Math.sin(this.animT * 2 + sl) > 0 ? 1 : 0; /* breathing bob */
         }
-        if (!skipP) this.drawPlayerSprite(prr, pdx | 0, pdy | 0);
-        if (showTics && a._tic) this.drawTic(a._tic, prr.cx, prr.y);
+        if (!skipP) this.drawPlayerSprite(arr, pdx | 0, pdy | 0, af);
+        if (showTics && af._tic) this.drawTic(af._tic, arr.cx, arr.y);
       }
-      if (anim) this.drawAnimFX(anim, prr);
+      if (anim) this.drawAnimFX(anim, this.playerRect(anim.pSlot || 0));
       if (this.hitFlash > 0) { ctx.globalAlpha = 0.35; cls(COL.white); ctx.globalAlpha = 1; }
       if (this.flash > 0 && (this.animT * 20 | 0) % 2) { ctx.globalAlpha = 0.4; cls(COL.gold); ctx.globalAlpha = 1; }
-      /* parchment HP boxes */
-      var fe = this.enemies[Math.max(0, this.firstEnemyIdx())];
-      if (fe) bHpBoxEnemy(fe, 8, 14);
-      if (a) bHpBoxPlayer(a, 124, 74);
+      /* parchment HP boxes: everyone's stats stay visible in a double battle */
+      if (this.double) {
+        var eb = 0;
+        for (var ei2 = 0; ei2 < this.enemies.length; ei2++) { if (this.enemies[ei2].fainted) continue; bHpBoxEnemyMini(this.enemies[ei2], 4, 14 + eb * 21); eb++; }
+        var cmdPhase = this.phase === 'menu' || this.phase === 'move' || this.phase === 'target' || this.phase === 'aim' || this.phase === 'bag' || this.phase === 'switch';
+        for (var as2 = 0; as2 < this.field.length; as2++) { var afb = this.fieldFighter(as2); if (afb) bHpBoxAllyMini(afb, 134, 68 + as2 * 22, cmdPhase && as2 === this.cmdSlot); }
+      } else {
+        var fe = this.enemies[Math.max(0, this.firstEnemyIdx())];
+        if (fe) bHpBoxEnemy(fe, 8, 14);
+        if (a) bHpBoxPlayer(a, 124, 74);
+      }
       /* live audience strip (crowd meter) — swapped for a move banner mid-anim */
       if (anim) bBanner(anim.name, TYPECOL[anim.type] || '#f8f4e4');
       else bAudienceStrip(this._crowdShown || 0, this.crowd >= 100);
@@ -3993,7 +4153,7 @@ function makeBattle(spec, onEnd) {
     drawAnimFX: function (anim, prr) {
       var p = anim.t / anim.dur, k;
       var atk, tgt;
-      if (anim.actorIsEnemy) { atk = this.enemyRect(anim.eIdx); tgt = anim.atEnemy ? prr : atk; }
+      if (anim.actorIsEnemy) { atk = this.enemyRect(anim.eIdx); tgt = anim.atEnemy ? this.playerRect(anim.tSlot || 0) : atk; }
       else { atk = prr; tgt = anim.atEnemy ? this.enemyRect(anim.tIdx) : atk; }
       if (anim.cat === 'hit') {
         var glyph = FX_GLYPH[anim.type] || 'fx-burst';
@@ -4081,11 +4241,20 @@ function makeBattle(spec, onEnd) {
           var er = this.enemyRect(ei), ene = this.enemies[ei];
           if (SPR[ene.spr]) SPR[ene.spr](er.x + slide, er.y, ene.sprOpt);
         }
-        this.drawPlayerSprite(this.playerRect(), -slide, 0);
+        if (this.double) {
+          for (var ps = 0; ps < this.field.length; ps++) { var pf = this.fieldFighter(ps);
+            if (pf && !pf.fainted) this.drawPlayerSprite(this.playerRect(ps), -slide, 0, pf); }
+        } else this.drawPlayerSprite(this.playerRect(0), -slide, 0);
         if (slide <= 0) {                              /* HP boxes pop at the end */
-          var fe2 = this.enemies[Math.max(0, this.firstEnemyIdx())];
-          if (fe2) bHpBoxEnemy(fe2, 8, 14);
-          var a2 = this.active(); if (a2) bHpBoxPlayer(a2, 124, 74);
+          if (this.double) {
+            var teb = 0;
+            for (var te = 0; te < this.enemies.length; te++) { if (this.enemies[te].fainted) continue; bHpBoxEnemyMini(this.enemies[te], 4, 14 + teb * 21); teb++; }
+            for (var ta = 0; ta < this.field.length; ta++) { var taf = this.fieldFighter(ta); if (taf) bHpBoxAllyMini(taf, 134, 68 + ta * 22, false); }
+          } else {
+            var fe2 = this.enemies[Math.max(0, this.firstEnemyIdx())];
+            if (fe2) bHpBoxEnemy(fe2, 8, 14);
+            var a2 = this.active(); if (a2) bHpBoxPlayer(a2, 124, 74);
+          }
         } else centerTextO('VS!', 20, COL.white, COL.black, 2);
       }
     },
@@ -4130,7 +4299,8 @@ function makeBattle(spec, onEnd) {
       for (var i = 0; i < this.party.length; i++) { var f = this.party[i];
         var yy = 112 + i * 11;
         var col = f.fainted ? COL.stone : '#4a4438';
-        drawText(f.name + '  LV' + f.level + '  HP ' + f.hp + '/' + maxHPd(f) + (i === this.activeIdx ? ' *' : ''), 20, yy, col);
+        var fielded = this.double ? this.field.indexOf(i) >= 0 : i === this.activeIdx;
+        drawText(f.name + '  LV' + f.level + '  HP ' + f.hp + '/' + maxHPd(f) + (fielded ? ' *' : ''), 20, yy, col);
         if (i === this.switchIdx) drawText('>', 10, yy, '#e84848'); }
     },
     drawBag: function () {
@@ -4170,6 +4340,12 @@ function makeBattle(spec, onEnd) {
       if (Math.floor(performance.now() / 400) % 2) centerText('PRESS A', 106, '#c63a46');
     }
   };
+  if (B.double) {
+    B.field = [];
+    for (var fi = 0; fi < B.party.length && B.field.length < 2; fi++)
+      if (!B.party[fi].fainted && B.party[fi].hp > 0) B.field.push(fi);
+    B.activeIdx = B.field[0];
+  }
   B.phase = 'transition';
   return B;
 }
@@ -7669,7 +7845,7 @@ function debugVisit(era) {
        'william_joined', 'nyc_arrived_seen', 'nyc_done', 'rosalind_joined', 'sc_password', 'sc_inside', 'sc_briefed', 'sc_elevator_key', 'goblin_arrived', 'goblin_done',
        'pedro_beaten', 'london_unlocked', 'trueform']);
     Game.parts = 4;
-    Game.party[0].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];
+    for (var si = 0; si < Game.party.length; si++) if (Game.party[si].id === 'samuel') Game.party[si].moves = ['humblebrag', 'punchline', 'hattip', 'nomoredis'];
     Game.map = 'theatredistrict'; Game.px = 9; Game.py = 5; Game.dir = 'up';
   }
   gotoWorld();
@@ -7760,15 +7936,41 @@ function deleteSave(slot) {
 
 /* ---------- party field screen ---------- */
 function makePartyScreen(back) {
+  var ACTIONS = ['LEAD', 'MOVE', 'DRIP'];
   return {
-    idx: 0, mode: 'list', dripIdx: 0,
+    idx: 0, mode: 'list', dripIdx: 0, actIdx: 0, msg: '', msgT: 0,
     enter: function () {},
     onPress: function (k) {
       if (this.mode === 'drip') return this.dripInput(k);
+      if (this.mode === 'action') return this.actionInput(k);
+      if (this.mode === 'move') return this.moveInput(k);
       if (k === 'up') { this.idx = (this.idx + Game.party.length - 1) % Game.party.length; sfx('cursor'); }
       else if (k === 'down') { this.idx = (this.idx + 1) % Game.party.length; sfx('cursor'); }
       else if (k === 'b' || k === 'start') { sfx('cancel'); setScene(back); }
-      else if (k === 'a') { sfx('select'); this.mode = 'drip'; this.dripIdx = 0; this.dripList = this.buildDrip(); }
+      else if (k === 'a') { sfx('select'); this.mode = 'action'; this.actIdx = 0; }
+    },
+    actionInput: function (k) {
+      if (k === 'up') { this.actIdx = (this.actIdx + ACTIONS.length - 1) % ACTIONS.length; sfx('cursor'); }
+      else if (k === 'down') { this.actIdx = (this.actIdx + 1) % ACTIONS.length; sfx('cursor'); }
+      else if (k === 'b') { this.mode = 'list'; sfx('cancel'); }
+      else if (k === 'a') {
+        var act = ACTIONS[this.actIdx];
+        if (act === 'LEAD') {
+          var f = Game.party.splice(this.idx, 1)[0];
+          Game.party.unshift(f); this.idx = 0; this.mode = 'list';
+          this.msg = f.name + ' TAKES THE LEAD!'; this.msgT = 1.4; sfx('item');
+        } else if (act === 'MOVE') { this.mode = 'move'; sfx('select'); }
+        else { this.mode = 'drip'; this.dripIdx = 0; this.dripList = this.buildDrip(); sfx('select'); }
+      }
+    },
+    moveInput: function (k) { /* grab-and-carry: up/down swaps with the neighbor */
+      if (k === 'up' && this.idx > 0) {
+        var a = Game.party[this.idx]; Game.party[this.idx] = Game.party[this.idx - 1]; Game.party[this.idx - 1] = a;
+        this.idx--; sfx('cursor');
+      } else if (k === 'down' && this.idx < Game.party.length - 1) {
+        var b = Game.party[this.idx]; Game.party[this.idx] = Game.party[this.idx + 1]; Game.party[this.idx + 1] = b;
+        this.idx++; sfx('cursor');
+      } else if (k === 'a' || k === 'b') { this.mode = 'list'; sfx('select'); }
     },
     buildDrip: function () { /* owned drip tracked in Game.items with key drip:<id> */
       var owned = ['(NONE)']; for (var k in Game.items) { if (k.indexOf('drip:') === 0 && Game.items[k] > 0) owned.push(k.slice(5)); }
@@ -7780,15 +7982,17 @@ function makePartyScreen(back) {
       else if (k === 'a') { var sel = this.dripList[this.dripIdx]; var f = Game.party[this.idx];
         f.drip = (sel === '(NONE)') ? null : sel; sfx('item'); this.mode = 'list'; }
     },
-    update: function () {},
+    update: function (dt) { if (this.msgT > 0) this.msgT -= dt; },
     draw: function () {
       cls(COL.night);
       centerText('THE DADDIES', 8, COL.gold);
       for (var i = 0; i < Game.party.length; i++) { var f = Game.party[i];
         var yy = 24 + i * 30;
-        panel(10, yy, 220, 28, i === this.idx ? COL.cream : '#d8d0c0', COL.black);
+        var border = (this.mode === 'move' && i === this.idx) ? COL.gold : COL.black;
+        panel(10, yy, 220, 28, i === this.idx ? COL.cream : '#d8d0c0', border);
         drawMiniPortrait(SPR[f.spr], f.spr === 'samuel' ? { trueForm: hasFlag('trueform') } : undefined, 12, yy - 20, 0.5);
         drawText(f.name, 44, yy + 3, COL.black);
+        if (i === 0) drawText('LEAD', 108, yy + 3, COL.red);
         drawText('LV ' + f.level, 150, yy + 3, COL.black);
         bar(44, yy + 13, 100, 6, f.hp / maxHPd(f), COL.grass);
         drawText('HP ' + f.hp + '/' + maxHPd(f), 44, yy + 20, COL.black);
@@ -7800,7 +8004,17 @@ function makePartyScreen(back) {
         for (var d = 0; d < this.dripList.length && d < 6; d++) { var id = this.dripList[d];
           var nm = id === '(NONE)' ? id : (DRIP[id] ? DRIP[id].name : id);
           drawText(nm, 74, 58 + d * 10, COL.black); if (d === this.dripIdx) drawText('>', 64, 58 + d * 10, COL.red); }
-      } else centerText('A: DRIP   B: BACK', 150, COL.stone);
+      } else if (this.mode === 'action') {
+        var ay = Math.min(24 + this.idx * 30, 96);
+        panel(160, ay, 64, 42, COL.cream, COL.gold);
+        for (var a2 = 0; a2 < 3; a2++) {
+          drawText(['LEAD', 'MOVE', 'DRIP'][a2], 178, ay + 5 + a2 * 11, COL.black);
+          if (a2 === this.actIdx) drawText('>', 168, ay + 5 + a2 * 11, COL.red);
+        }
+      } else if (this.mode === 'move') {
+        centerText('UP/DOWN: REORDER   A: DROP', 150, COL.gold);
+      } else centerText('A: OPTIONS   B: BACK', 150, COL.stone);
+      if (this.msgT > 0) { panel(40, 132, 160, 14, COL.night, COL.gold); centerText(this.msg, 136, COL.cream); }
     }
   };
 }

@@ -76,8 +76,19 @@ registerMap('manor', {
 });
 
 /* ================= BAKER'S ROW ================= */
+/* period facade/prop helpers (draw-only; placed ON solid wall tiles) */
+/* terrace anchored a touch low (base 6px into the row below) so a window row
+   shows above street level; players there draw over it, reading as depth */
+function ldnTerrace(tx, ty) { return { x: tx, y: ty, draw: function (x, y) { drawImg('ldn-terrace', x, y - 30); } }; }
+function ldnFence(tx, ty) { return { x: tx, y: ty, draw: function (x, y) { drawImg('ldn-ironfence', x, y - 4); } }; }
+function ldnLamp(tx, ty) { return { x: tx, y: ty, solid: true, lamp: true, draw: function (x, y) { drawImg('ldn-gaslamp', x + 6, y - 4); } }; }
+function ldnPostbox(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('ldn-postbox', x + 4, y - 4); },
+  onInteract: function () { say([['NARRATOR', 'A ROYAL POSTBOX. SOMEONE HAS'], ['NARRATOR', 'POSTED A SINGLE CRUMPET.']]); } }; }
+
 registerMap('bakersrow', {
   banner: "BAKER'S ROW", music: 'town', encPool: 'london', safe: true,
+  tileArt: { p: 'ldn-cobble', '#': 'ldn-wallbrick' },
+  mood: 'londonNight',
   grid: [
     '###################',
     '#gggggggppgggggggg#',
@@ -96,6 +107,12 @@ registerMap('bakersrow', {
     { x: 1, y: 4, to: 'theatre', tx: 7, ty: 11, dir: 'up' }
   ],
   objs: [
+    /* terraced-house band along the top wall (draw-only; wall is already solid) */
+    ldnTerrace(1, 0), ldnTerrace(3, 0), ldnTerrace(5, 0),
+    ldnTerrace(11, 0), ldnTerrace(13, 0), ldnTerrace(15, 0),
+    ldnFence(6, 0), ldnFence(4, 10), ldnFence(12, 10),
+    ldnLamp(4, 3), ldnLamp(15, 5), ldnLamp(6, 7),
+    ldnPostbox(11, 2),
     { x: 9, y: 0, solid: true, draw: function (x, y) { px(x, y + 2, TS, 14, COL.wall); px(x, y + 2, TS, 2, COL.walld); px(x + 3, y + 6, 10, 10, '#2a1020'); px(x + 7, y + 10, 2, 3, COL.gold); }, onInteract: function () { say([['NARRATOR', 'DADDY MANOR. HOME SWEET HOME.']]); } },
     { x: 0, y: 4, solid: true, draw: drawTheatreDoor, onInteract: function () { say([['NARRATOR', 'THE DOWNTON THEATRE.']]); } },
     { x: 12, y: 8, solid: true, spr: 'babbage', dir: 'up', onInteract: function () { bakersShop(); } },

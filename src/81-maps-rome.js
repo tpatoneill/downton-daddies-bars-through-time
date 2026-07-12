@@ -88,9 +88,19 @@ BGS.stands = function () {
   px(0, 104, 240, 56, COL.sand);
 };
 
+/* period facade/prop helpers (AI art; draw-only ones sit ON solid wall tiles) */
+function romeInsula(tx, ty) { return { x: tx, y: ty, draw: function (x, y) { drawImg('rome-insula', x, y - 36); } }; }
+function romePortico(tx, ty) { return { x: tx, y: ty, draw: function (x, y) { drawImg('rome-portico', x, y - 24); } }; }
+function romeAwning(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('rome-awning', x - 6, y - 12); } }; }
+function romeAmphora(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('rome-amphora', x - 9, y - 2); },
+  onInteract: function () { say([['NARRATOR', 'FESTIVAL AMPHORAE. THE WINE IS'], ['NARRATOR', 'WATERED. THE GOSSIP IS NOT.']]); } }; }
+function romeLaurel(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('rome-laurel', x + 1, y - 2); } }; }
+
 /* ---------------- FORUM (festival day) ---------------- */
 registerMap('forum', {
   banner: 'THE FORUM - ROME', music: 'rome', riftBg: 'rome', safe: true,
+  tileArt: { m: 'rome-mosaic', p: 'rome-flagstone', '#': 'rome-wallfresco' },
+  mood: 'romeBright',
   grid: [
     '#################',
     '#mmmmmmmmmmmmmmm#',
@@ -107,6 +117,10 @@ registerMap('forum', {
   warps: [ { x: 15, y: 5, to: 'grounds', tx: 2, ty: 5, dir: 'right' },
            { x: 15, y: 6, to: 'grounds', tx: 2, ty: 6, dir: 'right' } ],
   objs: [
+    /* insula band + porticos along the top wall (draw-only; wall already solid) */
+    romeInsula(1, 0), romeInsula(12, 0),
+    romePortico(6, 0), romePortico(9, 0),
+    romeAwning(4, 2), romeAmphora(10, 8), romeLaurel(2, 5), romeLaurel(13, 8),
     { x: 8, y: 1, solid: true, draw: drawRift, onInteract: function () { openRift(); } },
     { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },
     { x: 4, y: 1, solid: true, draw: drawBannerObj, onInteract: function () { say([['NARRATOR', 'FESTIVAL BANNERS, EVERYWHERE.'], ['NARRATOR', 'TODAY IS THE DAY OF THE GAMES.']]); } },
@@ -126,6 +140,8 @@ registerMap('forum', {
 /* ---------------- COLOSSEUM GROUNDS (exterior) ---------------- */
 registerMap('grounds', {
   banner: 'COLOSSEUM GROUNDS', music: 'rome', encPool: 'rome', battleBg: 'rome',
+  tileArt: { p: 'rome-flagstone', '#': 'rome-wallfresco' },
+  mood: 'romeBright',
   grid: [
     '#AAAAAAAAAAAAAAAA#',
     '#gggggggggggggggg#',
@@ -143,6 +159,8 @@ registerMap('grounds', {
            { x: 0, y: 6, to: 'forum', tx: 14, ty: 6, dir: 'left' },
            { x: 16, y: 1, to: 'arcades', tx: 7, ty: 2, dir: 'up' } ],
   objs: [
+    /* a portico set into the arch row + festival laurel (facade stays visible) */
+    romePortico(2, 0), romeLaurel(14, 4),
     /* the great facade: statues + gates along the arch row */
     { x: 4, y: 0, solid: true, draw: drawStatue, onInteract: function () { say([['NARRATOR', 'A STATUE OF SOME EMPEROR.'], ['NARRATOR', 'THE PIGEONS ARE UNIMPRESSED.']]); } },
     { x: 12, y: 0, solid: true, draw: drawStatue, onInteract: function () { say([['NARRATOR', 'A STATUE OF MAXIMVS, MID-BAR.'], ['NARRATOR', 'IT IS BRAND NEW. IT IS ENORMOUS.']]); } },
@@ -164,6 +182,7 @@ registerMap('grounds', {
 /* ---------------- THE ARCADES (ring corridor) ---------------- */
 registerMap('arcades', {
   banner: 'THE ARCADES', music: 'rome', encPool: 'rome', battleBg: 'rome',
+  tileArt: { m: 'rome-mosaic', '#': 'rome-wallfresco' },
   grid: [
     '###############',
     '#mmmmmmmmmmmmm#',
@@ -237,6 +256,8 @@ registerMap('hypogeum', {
 /* ---------------- THE STANDS (cavea) ---------------- */
 registerMap('stands', {
   banner: 'THE STANDS', music: 'rome', battleBg: 'stands',
+  tileArt: { m: 'rome-mosaic', '#': 'rome-wallfresco' },
+  mood: 'romeBright',
   grid: [
     '#################',
     '#ccccccccccccccc#',
@@ -266,6 +287,8 @@ registerMap('stands', {
 /* ---------------- GATE OF LIFE (arena entrance) ---------------- */
 registerMap('gateoflife', {
   banner: 'PORTA SANAVIVARIA', music: 'rome', battleBg: 'rome',
+  tileArt: { '#': 'rome-wallfresco' },
+  mood: 'romeBright',
   grid: [
     '#########',
     '####.####',
@@ -291,6 +314,7 @@ registerMap('gateoflife', {
 /* ---------------- ARENA (boss) ---------------- */
 registerMap('arena', {
   banner: 'THE ARENA', music: 'rome',
+  tileArt: { '#': 'rome-wallfresco' },
   grid: [
     '#############',
     '#sssssssssss#',

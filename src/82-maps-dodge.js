@@ -233,8 +233,16 @@ function playTrainRide(kind, onDone) {
 }
 
 /* ---------------- THE HIGH DESERT (era spawn, wild scrub) ---------------- */
+/* period prop helpers (AI art) */
+function westHitch(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('west-hitch', x, y); } }; }
+function westTrough(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('west-trough', x - 4, y); },
+  onInteract: function () { say([['NARRATOR', 'A WATER TROUGH. THE HORSES'], ['NARRATOR', 'DRINK. THE FLIES SUPERVISE.']]); } }; }
+function westBarrel(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('west-barrel', x + 2, y); } }; }
+
 registerMap('desertspawn', {
   banner: 'THE HIGH DESERT', music: 'west', encPool: 'desert', battleBg: 'west', riftBg: 'west',
+  tileArt: { s: 'west-dust' },
+  mood: 'westDusk',
   grid: [
     '###################',
     '#ssszzsssxsszzssss#',
@@ -264,6 +272,8 @@ registerMap('desertspawn', {
 /* ---------------- DRY GULCH (frontier town) ---------------- */
 registerMap('drygulch', {
   banner: 'DRY GULCH', music: 'west', riftBg: 'west', safe: true,
+  tileArt: { s: 'west-dust', F: 'west-wallplank' },
+  mood: 'westDusk',
   grid: [
     '#################',
     '#sssssssssssssss#',
@@ -303,6 +313,8 @@ registerMap('drygulch', {
 /* ---------------- DRY GULCH STATION (platform, tickets, the parked 3:10) ---------------- */
 registerMap('station', {
   banner: 'DRY GULCH STATION', music: 'west', safe: true,
+  tileArt: { s: 'west-dust' },
+  mood: 'westDusk',
   grid: [
     '###############',
     '111111111111111',
@@ -394,6 +406,8 @@ registerMap('baggagecar', {
 /* ---------------- FRONT STREET, DODGE CITY (the real town) ---------------- */
 registerMap('mainstreet', {
   banner: 'FRONT STREET - DODGE CITY', music: 'west', riftBg: 'west', safe: true,
+  tileArt: { F: 'west-wallplank' },
+  mood: 'westDusk',
   grid: [
     '#####################',
     '111111111111111111111',
@@ -415,6 +429,12 @@ registerMap('mainstreet', {
     { x: 20, y: 6, to: 'dustytrail', tx: 2, ty: 4, dir: 'right' }
   ],
   objs: [
+    /* false-front facades on the top building band (draw-only on solid F tiles) */
+    { x: 2, y: 4, draw: function (x, y) { drawImg('west-saloon', x, y - 40); } },
+    { x: 15, y: 4, draw: function (x, y) { drawImg('west-store', x, y - 28); } },
+    { x: 8, y: 3, draw: function (x, y) { drawImg('west-poster', x + 2, y); } },
+    westHitch(2, 5), westHitch(13, 7), westTrough(5, 7),
+    westBarrel(1, 5), westBarrel(18, 5),
     { x: 12, y: 2, solid: true, spr: 'conductor', dir: 'down', onInteract: function () { returnConductor(); } },
     { x: 17, y: 10, solid: true, draw: drawRift, onInteract: function () { openRift(); } },
     { x: 2, y: 11, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },

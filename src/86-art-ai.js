@@ -67,6 +67,11 @@
   for (var k in TILEMAP) {
     if (TILES[k] && has(TILEMAP[k])) TILES[k].draw = mktile(TILEMAP[k]);
   }
+  /* tall grass sways: alternate the two AI frames on the map's 500ms tick
+     (flags untouched — 't' keeps enc:true) */
+  if (TILES['t'] && has('tile-tallgrass') && has('tile-tallgrass2')) {
+    TILES['t'].draw = function (x, y, f) { drawImg(f ? 'tile-tallgrass2' : 'tile-tallgrass', x, y); };
+  }
   /* props that sit on ground get a ground underlay where it matters */
   if (TILES['C'] && has('prop-cactus') && has('tile-grass')) TILES['C'].draw = mktile('prop-cactus', 'tile-grass');
   if (TILES['x'] && has('prop-cactus') && has('tile-sand')) TILES['x'].draw = mktile('prop-cactus', 'tile-sand');
@@ -76,4 +81,24 @@
   if (TILES['O'] && has('prop-stove') && has('tile-wood')) TILES['O'].draw = mktile('prop-stove', 'tile-wood');
   if (TILES['|'] && has('prop-fence') && has('tile-grass')) TILES['|'].draw = mktile('prop-fence', 'tile-grass');
   if (TILES['X'] && has('prop-column') && has('tile-grass')) TILES['X'].draw = mktile('prop-column', 'tile-grass');
+
+  /* ---- AI overworld walkers: IMG['walk-<name>-down|up|side'] (~16x22) ----
+     Same signature as the procedural drawWalker (name, dir, frame, x, y);
+     World.drawPlayer and object drawing keep calling it unchanged.
+     Sprites are ~22px tall, so draw at y-6 to plant the feet on the 16px
+     tile; a truthy frame lifts 1px for a cheap GBA step-bob. Left faces are
+     the mirrored side pose. Names without assets fall back to the old WALK. */
+  var _procWalker = drawWalker;
+  drawWalker = function (name, dir, frame, x, y) {
+    var base = 'walk-' + name + '-';
+    if (has(base + 'down')) {
+      var pose = (dir === 'up') ? 'up' : (dir === 'down') ? 'down' : 'side';
+      var yy = y - 6 - (frame ? 1 : 0);
+      if (frame && has(base + pose + '2')) { drawImg(base + pose + '2', x, y - 6); return; }
+      if (dir === 'left') drawImgFlipH(base + 'side', x, yy);
+      else drawImg(base + pose, x, yy);
+      return;
+    }
+    _procWalker(name, dir, frame, x, y);
+  };
 })();

@@ -199,3 +199,22 @@ function drawImg(name, x, y) {
   }
   imgRuns(im, function (rx, ry, len, col) { px(x + rx, y + ry, len, 1, col); });
 }
+/* like drawImg, but horizontally mirrored (for left-facing walk sprites) */
+function drawImgFlipH(name, x, y) {
+  var im = (typeof IMG !== 'undefined') && IMG[name];
+  if (!im) return;
+  var canCache = (typeof document !== 'undefined') && document.createElement && ctx.drawImage;
+  if (canCache) {
+    var key = name + '#flip';
+    var c = _IMGCACHE[key];
+    if (!c) {
+      c = document.createElement('canvas'); c.width = im.w; c.height = im.h;
+      var g = c.getContext('2d');
+      imgRuns(im, function (rx, ry, len, col) { g.fillStyle = col; g.fillRect(im.w - rx - len, ry, len, 1); });
+      _IMGCACHE[key] = c;
+    }
+    ctx.drawImage(c, x | 0, y | 0);
+    return;
+  }
+  imgRuns(im, function (rx, ry, len, col) { px(x + (im.w - rx - len), y + ry, len, 1, col); });
+}

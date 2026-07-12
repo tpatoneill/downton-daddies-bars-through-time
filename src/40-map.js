@@ -47,6 +47,16 @@ function tileKeyAt(map, x, y) {
 }
 function tileAt(map, x, y) { return TILES[tileKeyAt(map, x, y)] || TILES['#']; }
 
+/* draw one tile, honoring an optional per-map art override table (m.tileArt:
+   key -> IMG name). Overrides swap ART ONLY — solid/enc flags stay on TILES. */
+function drawTile(m, key, x, y, f) {
+  if (m && m.tileArt && m.tileArt[key] && (typeof IMG !== 'undefined') && IMG[m.tileArt[key]]) {
+    drawImg(m.tileArt[key], x, y);
+    return;
+  }
+  (TILES[key] || TILES['#']).draw(x, y, f);
+}
+
 function objGone(o) { return o.flag && hasFlag(o.flag); }
 function objAt(map, x, y) {
   for (var i = 0; i < map.objs.length; i++) {
@@ -259,8 +269,7 @@ var World = {
     var x1 = x0 + 16, y1 = y0 + 11;
     /* terrain */
     for (var ty = y0; ty <= y1; ty++) for (var tx = x0; tx <= x1; tx++) {
-      var tl = tileAt(m, tx, ty);
-      tl.draw(tx * TS - cx, ty * TS - cy, f & 1);
+      drawTile(m, tileKeyAt(m, tx, ty), tx * TS - cx, ty * TS - cy, f & 1);
       if (warpAt(m, tx, ty)) drawWarpEntrance(m, tx, ty, tx * TS - cx, ty * TS - cy);
     }
     /* objects (behind or in front of player by y) */
@@ -281,7 +290,7 @@ var World = {
         if (World.spot && World.spot.o === o && World.spot.phase === 'alert') drawAlert(ox, oy);
         return;
       }
-      if (o.tile && TILES[o.tile]) { TILES[o.tile].draw(ox, oy, f & 1); return; }
+      if (o.tile && TILES[o.tile]) { drawTile(m, o.tile, ox, oy, f & 1); return; }
       if (o.mustache) { drawMustache(ox, oy); return; }
       /* default: little marker */
       px(ox + 4, oy + 4, 8, 8, o.color || COL.gold);
@@ -290,6 +299,8 @@ var World = {
     /* player */
     this.drawPlayer(cx, cy);
     for (i = 0; i < drawn.length; i++) if (drawn[i].y > pyForSort) drawObj(drawn[i]);
+    /* era mood overlay (gentle tint + weather; UI drawn after stays clean) */
+    if (m.mood) drawMoodOverlay(m, cx, cy);
     /* location banner (brief) */
     if (m.banner && m.bannerT === undefined) { m.bannerT = 2.4; }
     if (m.bannerT > 0) { m.bannerT -= 1 / 60; drawLocationBanner(m.banner); }
@@ -319,6 +330,51 @@ var World = {
     if (mn.msgT > 0) { mn.msgT -= 1 / 60; panel(40, 130, 160, 20); centerText(mn.msg, 137, COL.black); }
   }
 };
+
+/* ---- era mood overlays: gentle full-screen tints + light weather/glow.
+   Kept deliberately faint so the map stays fully readable. ---- */
+function drawMoodOverlay(m, cx, cy) {
+  var t = performance.now(), i, o;
+  if (m.mood === 'londonNight') {
+    px(0, 0, 240, 160, 'rgba(30,40,90,0.16)');
+    /* warm gaslight glow around every {lamp:true} object (GBA-chunky halo) */
+    for (i = 0; i < m.objs.length; i++) {
+      o = m.objs[i];
+      if (!o.lamp || objGone(o)) continue;
+      var lx = o.x * TS - cx + 8, ly = o.y * TS - cy - 2;
+      if (lx < -40 || lx > 280) continue;
+      px(lx - 6, ly - 10, 12, 8, 'rgba(255,200,90,0.18)');
+      px(lx - 10, ly - 6, 20, 14, 'rgba(255,200,90,0.18)');
+      px(lx - 15, ly - 2, 30, 20, 'rgba(255,200,90,0.12)');
+    }
+    /* slow-drifting fog banks */
+    for (i = 0; i < 3; i++) {
+      var fx = (((t / 80 + i * 130) % 380) | 0) - 140;
+      px(fx, 24 + i * 46, 132, 9, 'rgba(214,220,232,0.12)');
+    }
+  } else if (m.mood === 'westDusk') {
+    px(0, 0, 240, 160, 'rgba(255,160,60,0.10)');
+    var dx = (((t / 60) % 360) | 0) - 120;
+    px(dx, 92, 150, 11, 'rgba(232,206,160,0.13)');
+  } else if (m.mood === 'nycSnow') {
+    px(0, 0, 240, 160, 'rgba(24,34,80,0.14)');
+    var st = (t / 260) | 0;
+    for (i = 0; i < 18; i++) px((i * 37 + st * 3) % 240, (i * 53 + st * 2) % 160, 1, 1, COL.white);
+  } else if (m.mood === 'romeBright') {
+    px(0, 0, 240, 160, 'rgba(255,230,150,0.07)');
+  } else if (m.mood === 'goblinGlow') {
+    px(0, 0, 240, 160, 'rgba(80,30,120,0.12)');
+    /* soft green glow near {lantern:true} objects */
+    for (i = 0; i < m.objs.length; i++) {
+      o = m.objs[i];
+      if (!o.lantern || objGone(o)) continue;
+      var gx = o.x * TS - cx + 8, gy = o.y * TS - cy + 2;
+      if (gx < -40 || gx > 280) continue;
+      px(gx - 8, gy - 6, 16, 12, 'rgba(120,255,140,0.14)');
+      px(gx - 13, gy - 2, 26, 16, 'rgba(120,255,140,0.10)');
+    }
+  }
+}
 
 function drawMustache(x, y) {
   var t = (performance.now() / 200) | 0;

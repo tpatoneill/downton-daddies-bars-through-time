@@ -170,8 +170,13 @@ BGS.xmas = function () {
 };
 
 /* ---------------- WELLS STREET IN EXILE (arrival town) ---------------- */
+/* brownstone facade helper (draw-only; placed ON solid W/V wall tiles) */
+function nycBrownstone(tx, ty) { return { x: tx, y: ty, draw: function (x, y) { drawImg('nyc-brownstone', x, y - 48); } }; }
+
 registerMap('wellsstreet', {
   banner: 'WELLS ST. IN EXILE - NYC', music: 'xmas', safe: true, riftBg: 'xmas',
+  tileArt: { S: 'nyc-sidewalk', R: 'nyc-slush', W: 'nyc-wallbrown' },
+  mood: 'nycSnow',
   grid: [
     'WWVWWWWVWWWWWWVWWWWWVWWW',
     'WWVWWWWVWWWWWWVWWWWWVWWW',
@@ -195,6 +200,13 @@ registerMap('wellsstreet', {
     { x: 11, y: 13, to: 'backalley', tx: 6, ty: 5, dir: 'up' }
   ],
   objs: [
+    /* brownstone row along the top band — drawn first so the marquee, signs,
+       and holiday lights all render in front of the facades */
+    nycBrownstone(0, 1), nycBrownstone(4, 1), nycBrownstone(8, 1),
+    nycBrownstone(12, 1), nycBrownstone(19, 1), nycBrownstone(22, 1),
+    { x: 5, y: 4, draw: function (x, y) { drawImg('nyc-steamgrate', x - 9, y - 2); } },
+    { x: 15, y: 7, solid: true, draw: function (x, y) { drawImg('nyc-hydrant', x + 3, y - 2); },
+      onInteract: function () { say([['NARRATOR', 'A FIRE HYDRANT IN A LITTLE'], ['NARRATOR', 'SNOW HAT. VERY DIGNIFIED.']]); } },
     { x: 0, y: 0, solid: false, draw: drawLightString },
     { x: 3, y: 0, solid: false, draw: function (x, y) { drawMarquee(x, y); } },
     { x: 5, y: 1, solid: true, draw: drawPadlock, onInteract: function () {
@@ -230,6 +242,8 @@ registerMap('wellsstreet', {
 /* ---------------- BACK ALLEY (the secret entrance) ---------------- */
 registerMap('backalley', {
   banner: 'BACK ALLEY - NEW YORK', music: 'xmas', safe: true,
+  tileArt: { S: 'nyc-sidewalk' },
+  mood: 'nycSnow',
   grid: [
     'bbbbbbbbbbbbb',
     '#SSSSSSSSSSS#',

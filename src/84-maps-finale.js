@@ -22,6 +22,8 @@ function drawMarquee(x, y) { px(x, y, TS, 12, '#5a2038'); px(x + 1, y + 1, TS - 
 /* ================= THEATRE DISTRICT (occupied) ================= */
 registerMap('theatredistrict', {
   banner: 'THEATRE DISTRICT', music: 'london', riftBg: 'london', safe: true,
+  tileArt: { p: 'ldn-cobble', '#': 'ldn-wallbrick' },
+  mood: 'londonNight',
   grid: [
     '###################',
     '#gggggggppgggggggg#',
@@ -38,6 +40,12 @@ registerMap('theatredistrict', {
   warps: [ { x: 9, y: 1, to: 'finalstage', tx: 7, ty: 11, dir: 'up', gate: 'lobby_clear',
              blocked: function () { say([['NARRATOR', 'ORDER ELITES GUARD THE STAGE DOOR.'], ['NARRATOR', 'CLEAR BOTH EDITORS FIRST.']]); } } ],
   objs: [
+    /* occupied terrace band along the top wall (draw-only; wall already solid) */
+    ldnTerrace(1, 0), ldnTerrace(3, 0), ldnTerrace(5, 0), ldnTerrace(7, 0),
+    ldnTerrace(11, 0), ldnTerrace(13, 0), ldnTerrace(15, 0),
+    ldnFence(4, 10), ldnFence(12, 10),
+    ldnLamp(4, 2), ldnLamp(13, 5), ldnLamp(6, 8),
+    ldnPostbox(12, 2),
     { x: 9, y: 0, solid: true, draw: drawMarquee, onInteract: function () { say([['NARRATOR', 'THE MARQUEE IS DARK. THE ORDER'], ['NARRATOR', "PAINTED OVER THE DADDIES' NAMES."]]); } },
     { x: 8, y: 3, solid: true, spr: 'editor', dir: 'down', flag: 'editor1_beaten',
       onInteract: function (o) { editorBattle(o, 'editor1_beaten'); } },

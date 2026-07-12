@@ -17,8 +17,15 @@ BGS.goblin = function () {
 };
 
 /* ================= GOBLIN REALM (single map) ================= */
+/* glowing-realm prop helpers (AI art) */
+function gobMushroom(tx, ty) { return { x: tx, y: ty, solid: true, draw: function (x, y) { drawImg('gob-mushroom', x - 4, y - 8); },
+  onInteract: function () { say([['NARRATOR', 'A MUSHROOM THE SIZE OF A DOG.'], ['NARRATOR', 'IT HUMS IN B FLAT.']]); } }; }
+function gobLantern(tx, ty) { return { x: tx, y: ty, solid: true, lantern: true, draw: function (x, y) { drawImg('gob-lantern', x + 4, y); } }; }
+
 registerMap('goblinrealm', {
   banner: 'THE GOBLIN REALM', music: 'west', encPool: 'goblin', safe: true,
+  tileArt: { g: 'tile-goblinground', '#': 'tile-goblinwall' },
+  mood: 'goblinGlow',
   grid: [
     '#################',
     '#ggggggggggggggg#',
@@ -34,6 +41,8 @@ registerMap('goblinrealm', {
   ],
   warps: [],
   objs: [
+    gobMushroom(3, 3), gobMushroom(13, 4), gobMushroom(6, 8),
+    gobLantern(1, 1), gobLantern(15, 8),
     { x: 8, y: 1, solid: true, spr: 'pedro', dir: 'down', flag: 'pedro_beaten',
       onInteract: function () { pedroFight(); } },
     { x: 2, y: 9, solid: true, draw: drawPhono, onInteract: function () { phonographInteract(); } },

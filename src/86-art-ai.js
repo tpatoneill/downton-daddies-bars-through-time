@@ -12,6 +12,7 @@
     'gerald', 'editor', 'legionary', 'salesman', 'deejay', 'skater',
     'goblin', 'goblinhex', 'goblinbrute', 'beasthandler', 'trainee',
     'bookmaker', 'superfan', 'critic', 'maximvs', 'jake', 'pedro',
+    'bandit', 'prospector', 'granny', 'cardsharp',
     'understudy', 'rex', 'herschel', 'william', 'rosalind'];
   for (var i = 0; i < CAST.length; i++) {
     if (has(CAST[i])) SPR[CAST[i]] = mk(CAST[i]);

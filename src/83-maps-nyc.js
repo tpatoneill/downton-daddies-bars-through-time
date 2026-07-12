@@ -56,6 +56,7 @@ TILES['Z'] = { solid: false, draw: function (x, y) { px(x, y, TS, TS, '#5a5a62')
 
 /* ---------------- object art ---------------- */
 function drawBall(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-mirrorball']) { var _i = IMG['obj-mirrorball']; drawImg('obj-mirrorball', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; }
   var t = (performance.now() / 150) | 0;
   px(x + 3, y + 9, 10, 6, COL.woodd); fillEll(x + 3, y, x + 12, y + 9, '#b8c8d8');
   px(x + 4 + (t % 3) * 2, y + 2, 2, 2, COL.white); px(x + 8, y + 5, 2, 2, COL.white);
@@ -66,7 +67,8 @@ function drawPlaylist(x, y) {
   px(x + 4, y + 2, 8, 4, (t % 2) ? COL.neon : COL.pink);
   px(x + 4, y + 8, 8, 1, COL.white); px(x + 4, y + 10, 6, 1, COL.white);
 }
-function drawDumpster(x, y) { px(x + 1, y + 6, 14, 8, '#3a5a4a'); px(x + 1, y + 5, 14, 2, '#2a4a3a'); px(x + 3, y + 14, 2, 2, '#22222a'); px(x + 11, y + 14, 2, 2, '#22222a');
+function drawDumpster(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-dumpster']) { var _i = IMG['obj-dumpster']; drawImg('obj-dumpster', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 1, y + 6, 14, 8, '#3a5a4a'); px(x + 1, y + 5, 14, 2, '#2a4a3a'); px(x + 3, y + 14, 2, 2, '#22222a'); px(x + 11, y + 14, 2, 2, '#22222a');
   px(x + 2, y + 3, 12, 2, '#e6eaf2'); } /* snow on the lid */
 function drawMarquee(x, y) { /* spans ~4 tiles: the dark Second City marquee */
   px(x - 4, y + 2, 72, 12, '#2a2430'); px(x - 4, y + 2, 72, 1, '#1a161e'); px(x - 4, y + 13, 72, 1, '#1a161e');
@@ -76,7 +78,8 @@ function drawMarquee(x, y) { /* spans ~4 tiles: the dark Second City marquee */
 }
 function drawPadlock(x, y) { px(x + 2, y + 1, 12, 14, '#3a2a22'); px(x + 4, y + 3, 8, 10, '#241a14');
   px(x + 6, y + 6, 4, 4, sBZ); px(x + 7, y + 4, 2, 2, '#8a8a96'); }
-function drawXmasTree(x, y) { var t = (performance.now() / 300) | 0;
+function drawXmasTree(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-xmastree-street']) { var _i = IMG['obj-xmastree-street']; drawImg('obj-xmastree-street', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } var t = (performance.now() / 300) | 0;
   px(x + 6, y + 10, 4, 6, '#5e3c2a');
   fillEll(x + 1, y - 10, x + 14, y + 12, '#2e6e46');
   fillEll(x + 4, y - 16, x + 11, y - 4, '#2e6e46');
@@ -84,7 +87,8 @@ function drawXmasTree(x, y) { var t = (performance.now() / 300) | 0;
   for (var i = 0; i < L.length; i++) px(x + L[i][0], y + L[i][1], 2, 2, ((i + t) % 3 === 0) ? COL.gold : ((i + t) % 3 === 1) ? COL.red : COL.teal);
   px(x + 6, y - 19, 3, 3, COL.gold);
 }
-function drawSnowman(x, y) { fillEll(x + 3, y + 6, x + 12, y + 15, '#f4f6fa'); fillEll(x + 5, y, x + 10, y + 7, '#f4f6fa');
+function drawSnowman(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-snowman']) { var _i = IMG['obj-snowman']; drawImg('obj-snowman', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } fillEll(x + 3, y + 6, x + 12, y + 15, '#f4f6fa'); fillEll(x + 5, y, x + 10, y + 7, '#f4f6fa');
   px(x + 6, y + 2, 1, 1, sK); px(x + 9, y + 2, 1, 1, sK); px(x + 8, y + 4, 3, 1, '#e07830');
   px(x + 5, y - 3, 6, 3, sK); px(x + 4, y, 8, 1, sK); }
 function drawLampSnow(x, y) { px(x + 7, y - 8, 2, 22, '#2a2a34');
@@ -98,59 +102,75 @@ function drawLightString(x, y) { /* sagging holiday lights across the whole stre
     if (i % 2 === 0) px(lx, ly + 1, 2, 2, ((i + t) % 4 === 0) ? COL.gold : ((i + t) % 4 === 2) ? COL.red : COL.teal);
   }
 }
-function drawCocoaCart(x, y) { px(x + 1, y + 4, 14, 8, '#8a3c2c'); px(x + 1, y + 4, 14, 1, '#6a2c20');
+function drawCocoaCart(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-cocoacart']) { var _i = IMG['obj-cocoacart']; drawImg('obj-cocoacart', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 1, y + 4, 14, 8, '#8a3c2c'); px(x + 1, y + 4, 14, 1, '#6a2c20');
   px(x + 2, y + 12, 3, 3, '#22222a'); px(x + 11, y + 12, 3, 3, '#22222a');
   px(x + 4, y, 8, 4, '#d8d0c0'); px(x + 6, y - 3, 2, 3, '#b8b8c4');
   var t = (performance.now() / 500 | 0) % 2; px(x + 9 + t, y - 5, 1, 2, '#c8d0e0'); /* steam */ }
-function drawStageDoor(x, y) { px(x, y, TS, TS, '#3a2a22'); px(x + 3, y + 2, 10, 14, '#241a14');
+function drawStageDoor(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-stagedoor']) { var _i = IMG['obj-stagedoor']; drawImg('obj-stagedoor', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x, y, TS, TS, '#3a2a22'); px(x + 3, y + 2, 10, 14, '#241a14');
   px(x + 5, y + 5, 6, 2, '#141018'); px(x + 11, y + 9, 2, 2, sBZ); }
-function drawBoxOffice(x, y) { px(x, y + 4, TS, 12, '#6a4a34'); px(x, y + 4, TS, 2, '#523826');
+function drawBoxOffice(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-boxoffice']) { var _i = IMG['obj-boxoffice']; drawImg('obj-boxoffice', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x, y + 4, TS, 12, '#6a4a34'); px(x, y + 4, TS, 2, '#523826');
   px(x + 2, y - 4, 12, 8, '#d8d0c0'); px(x + 2, y - 4, 12, 1, '#8a8278');
   px(x + 4, y - 2, 8, 4, '#241a14'); }
-function drawPhoto(x, y) { px(x + 2, y + 2, 12, 12, sBZ); px(x + 4, y + 4, 8, 8, '#d8d0c0');
+function drawPhoto(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-photo']) { var _i = IMG['obj-photo']; drawImg('obj-photo', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 2, y + 2, 12, 12, sBZ); px(x + 4, y + 4, 8, 8, '#d8d0c0');
   px(x + 6, y + 6, 4, 3, '#4a3028'); px(x + 5, y + 9, 6, 2, '#3a3a4a'); }
-function drawCoatRack(x, y) { px(x + 7, y + 1, 2, 14, '#523826');
+function drawCoatRack(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-coatrack']) { var _i = IMG['obj-coatrack']; drawImg('obj-coatrack', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 7, y + 1, 2, 14, '#523826');
   px(x + 2, y + 3, 12, 1, '#523826');
   px(x + 2, y + 4, 4, 8, '#5a4a6a'); px(x + 10, y + 4, 4, 7, '#7a2a3a'); }
-function drawMicStand(x, y) { px(x + 7, y + 2, 2, 13, '#22222a'); px(x + 5, y + 14, 6, 2, '#22222a');
+function drawMicStand(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-micstand']) { var _i = IMG['obj-micstand']; drawImg('obj-micstand', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 7, y + 2, 2, 13, '#22222a'); px(x + 5, y + 14, 6, 2, '#22222a');
   px(x + 6, y - 1, 4, 4, '#3a3a44'); px(x + 7, y, 2, 2, '#6a6a76'); }
-function drawBulbMirror(x, y) { px(x + 1, y + 1, 14, 14, '#8a6a3c');
+function drawBulbMirror(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-bulbmirror']) { var _i = IMG['obj-bulbmirror']; drawImg('obj-bulbmirror', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 1, y + 1, 14, 14, '#8a6a3c');
   px(x + 3, y + 3, 10, 10, '#b8c8d8'); px(x + 5, y + 5, 3, 5, '#d8e4ee');
   var t = (performance.now() / 400 | 0) % 2;
   for (var i = 0; i < 4; i++) { px(x + 1 + i * 4, y, 2, 2, (i % 2 === t) ? COL.gold : '#8a6a3c'); px(x + 1 + i * 4, y + 14, 2, 2, (i % 2 !== t) ? COL.gold : '#8a6a3c'); } }
-function drawCouch(x, y) { px(x, y + 5, 32, 9, '#6a7a4a'); px(x, y + 5, 32, 2, '#7e9058');
+function drawCouch(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-couch']) { var _i = IMG['obj-couch']; drawImg('obj-couch', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x, y + 5, 32, 9, '#6a7a4a'); px(x, y + 5, 32, 2, '#7e9058');
   px(x, y + 3, 4, 11, '#586840'); px(x + 28, y + 3, 4, 11, '#586840'); px(x + 2, y + 14, 28, 2, '#38442a');
   px(x + 8, y + 6, 7, 4, '#8a5a4a'); /* mystery stain, historic */ }
-function drawFridge(x, y) { px(x + 2, y - 4, 12, 20, '#c8ccd4'); px(x + 2, y - 4, 12, 1, '#8a8e96');
+function drawFridge(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-fridge']) { var _i = IMG['obj-fridge']; drawImg('obj-fridge', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 2, y - 4, 12, 20, '#c8ccd4'); px(x + 2, y - 4, 12, 1, '#8a8e96');
   px(x + 2, y + 4, 12, 1, '#8a8e96'); px(x + 12, y - 1, 1, 3, '#3a3a44'); px(x + 12, y + 7, 1, 4, '#3a3a44');
   px(x + 3, y - 3, 6, 2, '#e0a848'); /* "BILL'S" tape label, ignored */ }
-function drawTypewriter(x, y) { px(x, y + 6, TS, 10, '#6a4a34'); px(x, y + 6, TS, 2, '#523826');
+function drawTypewriter(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-typewriter']) { var _i = IMG['obj-typewriter']; drawImg('obj-typewriter', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x, y + 6, TS, 10, '#6a4a34'); px(x, y + 6, TS, 2, '#523826');
   px(x + 3, y, 10, 6, '#3a3a44'); px(x + 4, y - 2, 8, 2, '#d8d0c0'); px(x + 4, y + 4, 8, 1, '#6a6a76'); }
 function drawTrunk(x, y) { var got = hasFlag('sc_elevator_key');
   px(x + 1, y + 4, 14, 10, '#6e4a2c'); px(x + 1, y + 4, 14, 2, '#523620');
   px(x + 1, y + 8, 14, 1, '#3a2616'); px(x + 6, y + 8, 4, 3, got ? '#3a2616' : sBZ);
   px(x + 2, y + 2, 12, 2, '#8a6a3c'); }
-function drawCorkboard(x, y) { px(x - 2, y + 1, 36, 13, '#8a6a3c'); px(x, y + 3, 32, 9, '#c8a86a');
+function drawCorkboard(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-corkboard']) { var _i = IMG['obj-corkboard']; drawImg('obj-corkboard', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x - 2, y + 1, 36, 13, '#8a6a3c'); px(x, y + 3, 32, 9, '#c8a86a');
   px(x + 2, y + 4, 6, 4, '#d8d0c0'); px(x + 12, y + 5, 6, 4, '#d8d0c0'); px(x + 22, y + 4, 6, 4, '#d8d0c0');
   px(x + 5, y + 6, 10, 1, sRD); px(x + 15, y + 7, 9, 1, sRD); /* red string */
   px(x + 9, y + 5, 1, 1, sRD); px(x + 19, y + 6, 1, 1, sRD); }
-function drawMimeo(x, y) { px(x + 2, y + 4, 12, 10, '#4a4a56'); px(x + 2, y + 4, 12, 2, '#3a3a44');
+function drawMimeo(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-mimeo']) { var _i = IMG['obj-mimeo']; drawImg('obj-mimeo', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 2, y + 4, 12, 10, '#4a4a56'); px(x + 2, y + 4, 12, 2, '#3a3a44');
   var t = (performance.now() / 320 | 0) % 3;
   px(x + 4, y - 2 + t, 8, 6, '#e8e4d8'); px(x + 5, y + t, 6, 1, '#8a8694'); px(x + 5, y + 2 + t, 4, 1, '#8a8694'); }
-function drawCrate(x, y) { px(x + 1, y + 3, 14, 12, '#6e4a2c'); px(x + 1, y + 3, 14, 1, '#523620');
+function drawCrate(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-crate']) { var _i = IMG['obj-crate']; drawImg('obj-crate', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 1, y + 3, 14, 12, '#6e4a2c'); px(x + 1, y + 3, 14, 1, '#523620');
   px(x + 1, y + 8, 14, 1, '#523620'); px(x + 3, y + 5, 8, 2, '#3a2616'); /* stencil */ }
 function drawElevator(x, y) { var open = hasFlag('sc_elevator_key');
   px(x - 2, y - 4, 20, 20, '#5a5a66'); px(x - 2, y - 4, 20, 2, '#3a3a44');
   px(x, y - 1, 16, 16, open ? '#241a14' : '#4a4a56');
   px(x + 7, y - 1, 2, 16, open ? '#241a14' : '#3a3a44');
   px(x + 18, y + 2, 2, 3, open ? COL.teal : sRD); }
-function drawSpeaker(x, y) { px(x + 2, y - 4, 12, 20, '#22222a'); px(x + 2, y - 4, 12, 1, '#3a3a44');
+function drawSpeaker(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-speaker']) { var _i = IMG['obj-speaker']; drawImg('obj-speaker', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 2, y - 4, 12, 20, '#22222a'); px(x + 2, y - 4, 12, 1, '#3a3a44');
   fillEll(x + 4, y - 2, x + 11, y + 5, '#3a3a44'); fillEll(x + 6, y, x + 9, y + 3, '#14141a');
   fillEll(x + 4, y + 7, x + 11, y + 14, '#3a3a44'); fillEll(x + 6, y + 9, x + 9, y + 12, '#14141a'); }
-function drawVelvetRope(x, y) { px(x + 2, y + 4, 2, 11, sBZ); px(x + 12, y + 4, 2, 11, sBZ);
+function drawVelvetRope(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-velvetrope']) { var _i = IMG['obj-velvetrope']; drawImg('obj-velvetrope', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 2, y + 4, 2, 11, sBZ); px(x + 12, y + 4, 2, 11, sBZ);
   px(x + 1, y + 15, 4, 1, sBZs); px(x + 11, y + 15, 4, 1, sBZs);
   for (var i = 0; i < 8; i++) px(x + 3 + i, y + 6 + Math.round(Math.sin(i / 2.2) * 2), 1, 2, '#8b2c3c'); }
-function drawBoothVIP(x, y) { px(x, y + 2, 32, 12, '#5e1e2a'); px(x, y + 2, 32, 2, '#7e2e3a');
+function drawBoothVIP(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-boothvip']) { var _i = IMG['obj-boothvip']; drawImg('obj-boothvip', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x, y + 2, 32, 12, '#5e1e2a'); px(x, y + 2, 32, 2, '#7e2e3a');
   px(x + 2, y + 10, 28, 4, '#3a141c'); px(x + 10, y + 5, 12, 4, '#8a6a3c'); }
 function drawBarNeon(x, y) { px(x, y + 6, TS, 10, '#2a2430'); px(x, y + 6, TS, 2, '#3a3444');
   var t = (performance.now() / 300 | 0) % 2;

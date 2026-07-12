@@ -10,15 +10,19 @@ function drawMachine(x, y) {
   px(x + 2, y + 10, 12, 4, sBZs); px(x + 4, y + 11, 2, 2, COL.red); px(x + 10, y + 11, 2, 2, COL.gold);
 }
 function drawPhono(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-phonograph']) { var _i = IMG['obj-phonograph']; drawImg('obj-phonograph', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; }
   px(x + 4, y + 8, 8, 6, COL.woodd); px(x + 7, y + 2, 2, 8, sBZs);
   fillEll(x + 2, y, x + 12, y + 6, sBZ); px(x + 6, y + 3, 3, 2, '#1a1018');
 }
 function drawCase(x, y) { px(x + 3, y + 5, 10, 8, COL.woodd); px(x + 4, y + 6, 8, 6, '#2a2030'); px(x + 6, y + 8, 4, 2, COL.gold); }
 function drawMirror(x, y) { px(x + 3, y + 1, 10, 14, sBZ); px(x + 4, y + 2, 8, 12, '#b8c8d8'); px(x + 5, y + 3, 3, 5, COL.white); }
 function drawTrunk(x, y) { px(x + 2, y + 5, 12, 9, COL.woodd); px(x + 2, y + 8, 12, 1, sBZs); px(x + 7, y + 9, 2, 2, sGD); }
-function drawSign(x, y) { px(x + 5, y + 8, 2, 8, COL.woodd); px(x + 1, y + 1, 14, 8, COL.wood); px(x + 1, y + 1, 14, 1, COL.woodd); px(x + 3, y + 3, 10, 1, COL.woodd); px(x + 3, y + 5, 8, 1, COL.woodd); }
-function drawCounter(x, y) { px(x, y + 6, TS, 10, COL.wood); px(x, y + 6, TS, 2, COL.woodd); px(x + 2, y + 10, 2, 4, COL.woodd); }
-function drawTheatreDoor(x, y) { px(x, y, TS, TS, '#5a2038'); px(x + 3, y + 2, 10, 14, '#2a1020'); px(x + 7, y + 8, 2, 2, COL.gold); }
+function drawSign(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-sign']) { var _i = IMG['obj-sign']; drawImg('obj-sign', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x + 5, y + 8, 2, 8, COL.woodd); px(x + 1, y + 1, 14, 8, COL.wood); px(x + 1, y + 1, 14, 1, COL.woodd); px(x + 3, y + 3, 10, 1, COL.woodd); px(x + 3, y + 5, 8, 1, COL.woodd); }
+function drawCounter(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-counter']) { var _i = IMG['obj-counter']; drawImg('obj-counter', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x, y + 6, TS, 10, COL.wood); px(x, y + 6, TS, 2, COL.woodd); px(x + 2, y + 10, 2, 4, COL.woodd); }
+function drawTheatreDoor(x, y) {
+  if (typeof IMG !== 'undefined' && IMG['obj-theatredoor']) { var _i = IMG['obj-theatredoor']; drawImg('obj-theatredoor', x + ((16 - _i.w) >> 1), y + 16 - _i.h); return; } px(x, y, TS, TS, '#5a2038'); px(x + 3, y + 2, 10, 14, '#2a1020'); px(x + 7, y + 8, 2, 2, COL.gold); }
 function drawSeat(x, y) { px(x + 2, y + 6, 12, 8, '#7a2038'); px(x + 2, y + 4, 12, 3, '#5a1828'); }
 function drawTrophy(x, y) { px(x + 5, y + 4, 6, 6, COL.gold); px(x + 6, y + 10, 4, 3, COL.gold); px(x + 4, y + 13, 8, 2, COL.woodd); }
 
